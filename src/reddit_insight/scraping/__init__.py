@@ -6,11 +6,13 @@ API 제한 시 백업으로 사용할 웹 스크래핑 기능을 제공합니다
 - RedditScraper: Reddit 페이지 파싱 (추후 구현 예정)
 """
 
-from reddit_insight.scraping.http_client import ScrapingClient
 from reddit_insight.scraping.rate_limiter import RateLimiter
 
+# ScrapingClient는 Task 3에서 구현 후 export
+# from reddit_insight.scraping.http_client import ScrapingClient
+
 __all__ = [
-    "ScrapingClient",
+    # "ScrapingClient",  # Task 3에서 추가
     "RateLimiter",
     # "RedditScraper",  # Phase 03-02에서 구현 예정
 ]
