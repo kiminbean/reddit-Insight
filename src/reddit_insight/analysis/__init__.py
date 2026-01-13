@@ -101,6 +101,21 @@ from reddit_insight.analysis.sentiment import (
     SentimentAnalyzerConfig,
     SentimentScore,
 )
+from reddit_insight.analysis.competitive import (
+    AlternativeComparison,
+    AlternativeExtractor,
+    ALTERNATIVE_PATTERNS,
+    Complaint,
+    ComplaintExtractor,
+    COMPLAINT_PATTERNS,
+    ComplaintType,
+    ComparisonType,
+    CompetitiveAnalyzer,
+    CompetitiveInsight,
+    CompetitiveReport,
+    to_markdown,
+    to_dict,
+)
 
 __all__ = [
     # Tokenizer
@@ -184,4 +199,18 @@ __all__ = [
     "DIMINISHERS",
     "POSITIVE_EMOTICONS",
     "NEGATIVE_EMOTICONS",
+    # Competitive Analysis
+    "ComplaintType",
+    "Complaint",
+    "ComplaintExtractor",
+    "COMPLAINT_PATTERNS",
+    "ComparisonType",
+    "AlternativeComparison",
+    "AlternativeExtractor",
+    "ALTERNATIVE_PATTERNS",
+    "CompetitiveInsight",
+    "CompetitiveReport",
+    "CompetitiveAnalyzer",
+    "to_markdown",
+    "to_dict",
 ]
