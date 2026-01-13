@@ -110,10 +110,13 @@
                     <!-- Mobile menu button -->
                     <div class="-mr-2 flex items-center sm:hidden">
                         <button type="button"
-                                onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500">
+                                id="mobile-menu-btn"
+                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+                                aria-expanded="false"
+                                aria-controls="mobile-menu">
                             <span class="sr-only">Open main menu</span>
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <title>Menu</title>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                             </svg>
                         </button>

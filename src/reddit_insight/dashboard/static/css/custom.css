@@ -81,7 +81,7 @@
     color: #1e40af;
 }
 
-/* Scrollbar Styling */
+/* Scrollbar Styling - Webkit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -99,6 +99,12 @@
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a1a1a1;
+}
+
+/* Scrollbar Styling - Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 /* Responsive Table */

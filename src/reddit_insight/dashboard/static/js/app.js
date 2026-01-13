@@ -14,7 +14,115 @@
     document.addEventListener('DOMContentLoaded', function() {
         initHTMXHandlers();
         initChartDefaults();
+        initMobileMenu();
+        initTabNavigation();
+        initRangeInputs();
+        initEventDelegation();
     });
+
+    /**
+     * Mobile menu toggle
+     */
+    function initMobileMenu() {
+        var menuBtn = document.getElementById('mobile-menu-btn');
+        var mobileMenu = document.getElementById('mobile-menu');
+
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    }
+
+    /**
+     * Tab navigation with keyboard support
+     */
+    function initTabNavigation() {
+        var tabContainers = document.querySelectorAll('[data-tab-container]');
+
+        tabContainers.forEach(function(container) {
+            var tabs = container.querySelectorAll('[data-tab]');
+            var panels = container.parentElement.querySelectorAll('[data-tab-panel]');
+
+            tabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    var targetTab = this.getAttribute('data-tab');
+                    activateTab(tabs, panels, targetTab);
+                });
+
+                // Keyboard navigation
+                tab.addEventListener('keydown', function(e) {
+                    var tabArray = Array.from(tabs);
+                    var currentIndex = tabArray.indexOf(this);
+
+                    if (e.key === 'ArrowRight') {
+                        var nextIndex = (currentIndex + 1) % tabArray.length;
+                        tabArray[nextIndex].focus();
+                        tabArray[nextIndex].click();
+                    } else if (e.key === 'ArrowLeft') {
+                        var prevIndex = (currentIndex - 1 + tabArray.length) % tabArray.length;
+                        tabArray[prevIndex].focus();
+                        tabArray[prevIndex].click();
+                    }
+                });
+            });
+        });
+    }
+
+    function activateTab(tabs, panels, targetTab) {
+        tabs.forEach(function(t) {
+            var isActive = t.getAttribute('data-tab') === targetTab;
+            t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            t.classList.toggle('text-blue-600', isActive);
+            t.classList.toggle('border-blue-600', isActive);
+            t.classList.toggle('text-gray-500', !isActive);
+            t.classList.toggle('border-transparent', !isActive);
+        });
+
+        panels.forEach(function(p) {
+            var isActive = p.getAttribute('data-tab-panel') === targetTab;
+            p.classList.toggle('hidden', !isActive);
+        });
+    }
+
+    /**
+     * Range input value display
+     */
+    function initRangeInputs() {
+        var rangeInputs = document.querySelectorAll('input[type="range"][data-value-display]');
+
+        rangeInputs.forEach(function(input) {
+            var displayId = input.getAttribute('data-value-display');
+            var display = document.getElementById(displayId);
+
+            if (display) {
+                input.addEventListener('input', function() {
+                    display.textContent = this.value;
+                });
+            }
+        });
+    }
+
+    /**
+     * Event delegation for dynamically loaded content
+     */
+    function initEventDelegation() {
+        // Handle suggestion clicks for search
+        document.addEventListener('click', function(e) {
+            var suggestionItem = e.target.closest('[data-suggestion]');
+            if (suggestionItem) {
+                var query = suggestionItem.getAttribute('data-suggestion');
+                var searchInput = document.getElementById('search-input');
+                if (searchInput && query) {
+                    searchInput.value = query;
+                    var suggestionsDropdown = document.getElementById('suggestions-dropdown');
+                    if (suggestionsDropdown) {
+                        suggestionsDropdown.innerHTML = '';
+                    }
+                }
+            }
+        });
+    }
 
     /**
      * HTMX Event Handlers
@@ -91,9 +199,69 @@
         }, 5000);
     }
 
+    /**
+     * Fetch chart data with error handling
+     * @param {string} url - API endpoint URL
+     * @returns {Promise<Object>} - Chart data or null on error
+     */
+    async function fetchChartData(url) {
+        try {
+            var response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Chart data fetch error:', error);
+            showNotification('Failed to load chart data. Please try again.', 'error');
+            return null;
+        }
+    }
+
+    /**
+     * Initialize a Chart.js chart with error handling
+     * @param {string} canvasId - Canvas element ID
+     * @param {string} dataUrl - API endpoint URL for chart data
+     * @param {string} chartType - Chart type (line, bar, pie, etc.)
+     * @param {Object} options - Additional chart options
+     * @returns {Promise<Chart|null>} - Chart instance or null on error
+     */
+    async function initChart(canvasId, dataUrl, chartType, options) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.warn('Canvas element not found:', canvasId);
+            return null;
+        }
+
+        var ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Could not get 2D context for canvas:', canvasId);
+            return null;
+        }
+
+        var data = await fetchChartData(dataUrl);
+        if (!data) {
+            return null;
+        }
+
+        try {
+            return new Chart(ctx, {
+                type: chartType || 'line',
+                data: data,
+                options: options || {}
+            });
+        } catch (error) {
+            console.error('Chart initialization error:', error);
+            showNotification('Failed to initialize chart.', 'error');
+            return null;
+        }
+    }
+
     // Expose utility functions globally for use in templates
     window.RedditInsight = {
-        showNotification: showNotification
+        showNotification: showNotification,
+        fetchChartData: fetchChartData,
+        initChart: initChart
     };
 
 })();
