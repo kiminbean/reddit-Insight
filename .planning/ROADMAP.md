@@ -33,7 +33,7 @@ None
 - [x] **Phase 12: Dashboard Data Integration** - DemandService, CompetitionService 실제 데이터 연동
 - [x] **Phase 13: Recent Analyses** - 대시보드 홈 분석 기록 표시
 - [x] **Phase 14: Trend Prediction UI** - 시계열 예측 차트 시각화
-- [ ] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
+- [x] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
 - [ ] **Phase 16: Topic Modeling UI** - 토픽 분석 결과 시각화
 - [ ] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
 - [ ] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
@@ -212,7 +212,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 15-01: Anomaly Detection UI
+- [x] 15-01: Anomaly Detection UI
 
 #### Phase 16: Topic Modeling UI
 **Goal**: 토픽 분석 결과 시각화 (토픽별 키워드, 문서 분포)
@@ -271,7 +271,7 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 12. Dashboard Data Integration | 1/1 | Complete | 2026-01-14 |
 | 13. Recent Analyses | 1/1 | Complete | 2026-01-14 |
 | 14. Trend Prediction UI | 1/1 | Complete | 2026-01-14 |
-| 15. Anomaly Detection UI | 0/1 | Not started | - |
+| 15. Anomaly Detection UI | 1/1 | Complete | 2026-01-14 |
 | 16. Topic Modeling UI | 0/1 | Not started | - |
 | 17. Text Clustering UI | 0/1 | Not started | - |
 | 18. Dashboard Polish | 0/1 | Not started | - |
