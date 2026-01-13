@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Demands{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <!-- Total Demands Card -->
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="truncate text-sm font-medium text-gray-500">Total Demands</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ total_demands }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Stats Cards -->
+        {% for category, count in category_stats.items() %}
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        {% if category == 'feature_request' %}
+                        <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        {% elif category == 'pain_point' %}
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        {% elif category == 'willingness_to_pay' %}
+                        <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {% else %}
+                        <svg class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="truncate text-sm font-medium text-gray-500">{{ category.replace('_', ' ').title() }}</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ count }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <div class="flex flex-wrap gap-4 items-center">
+            <div>
+                <label for="category-filter" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select id="category-filter"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                        hx-get="/dashboard/demands/list"
+                        hx-trigger="change"
+                        hx-target="#demands-list"
+                        hx-include="[name='min_priority']"
+                        name="category">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.value }}">{{ cat.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="priority-filter" class="block text-sm font-medium text-gray-700 mb-1">Min Priority: <span id="priority-value">0</span></label>
+                <input type="range"
+                       id="priority-filter"
+                       name="min_priority"
+                       min="0"
+                       max="100"
+                       value="0"
+                       class="w-48 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                       hx-get="/dashboard/demands/list"
+                       hx-trigger="change"
+                       hx-target="#demands-list"
+                       hx-include="[name='category']"
+                       oninput="document.getElementById('priority-value').textContent = this.value">
+            </div>
+        </div>
+    </div>
+
+    <!-- Demands List Section -->
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Discovered Demands</h2>
+        <div id="demands-list">
+            {% include "demands/partials/demand_list.html" %}
+        </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    {% if recommendations %}
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Recommendations</h2>
+        <ul class="space-y-3">
+            {% for rec in recommendations %}
+            <li class="flex items-start">
+                <svg class="h-5 w-5 text-primary-500 mt-0.5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                </svg>
+                <span class="text-gray-700">{{ rec }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

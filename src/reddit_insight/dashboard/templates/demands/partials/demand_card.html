@@ -1,0 +1,70 @@
+<div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+    <div class="px-4 py-5 sm:p-6">
+        <!-- Category Badge and Priority -->
+        <div class="flex items-center justify-between mb-3">
+            {% set badge_color = {
+                'feature_request': 'bg-blue-100 text-blue-800',
+                'pain_point': 'bg-red-100 text-red-800',
+                'search_query': 'bg-purple-100 text-purple-800',
+                'willingness_to_pay': 'bg-emerald-100 text-emerald-800',
+                'alternative_seeking': 'bg-amber-100 text-amber-800'
+            } %}
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ badge_color.get(demand.category, 'bg-gray-100 text-gray-800') }}">
+                {{ demand.category.replace('_', ' ').title() }}
+            </span>
+
+            <!-- Business Potential Badge -->
+            {% if demand.business_potential == 'high' %}
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800">
+                High Potential
+            </span>
+            {% elif demand.business_potential == 'medium' %}
+            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800">
+                Medium Potential
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Demand Text -->
+        <p class="text-sm text-gray-900 line-clamp-3 mb-3">
+            {{ demand.text }}
+        </p>
+
+        <!-- Priority Bar -->
+        <div class="mb-3">
+            <div class="flex justify-between text-xs text-gray-500 mb-1">
+                <span>Priority Score</span>
+                <span>{{ "%.1f"|format(demand.priority_score) }}/100</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                {% set bar_color = 'bg-green-500' if demand.priority_score >= 60 else ('bg-yellow-500' if demand.priority_score >= 40 else 'bg-gray-500') %}
+                <div class="{{ bar_color }} h-2 rounded-full transition-all" style="width: {{ demand.priority_score }}%"></div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="flex items-center justify-between text-xs text-gray-500">
+            <span class="flex items-center">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                </svg>
+                {{ demand.source_count }} mentions
+            </span>
+
+            <a href="/dashboard/demands/{{ demand.id }}" class="text-primary-600 hover:text-primary-800 font-medium">
+                View Details
+            </a>
+        </div>
+
+        <!-- Keywords -->
+        {% if demand.keywords %}
+        <div class="mt-3 flex flex-wrap gap-1">
+            {% for keyword in demand.keywords[:3] %}
+            <span class="inline-flex items-center rounded px-2 py-0.5 text-xs bg-gray-100 text-gray-600">
+                {{ keyword }}
+            </span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
