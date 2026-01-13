@@ -1,7 +1,7 @@
 """트렌드 시각화 라우터.
 
 키워드 트렌드와 Rising 키워드를 시각화하는 라우터.
-예측 기능을 포함하여 ML 기반 트렌드 예측 시각화를 제공한다.
+예측 기능과 이상 탐지 기능을 포함하여 ML 기반 트렌드 분석을 제공한다.
 """
 
 
@@ -9,6 +9,10 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
+from reddit_insight.dashboard.services.anomaly_service import (
+    AnomalyService,
+    get_anomaly_service,
+)
 from reddit_insight.dashboard.services.prediction_service import (
     PredictionService,
     get_prediction_service,
@@ -282,3 +286,77 @@ async def predict_partial(
     }
 
     return templates.TemplateResponse(request, "trends/partials/prediction_chart.html", context)
+
+
+# =============================================================================
+# ANOMALY DETECTION ENDPOINTS
+# =============================================================================
+
+
+@router.get("/anomalies/{keyword}", response_class=JSONResponse)
+async def detect_anomalies(
+    keyword: str,
+    days: int = Query(default=30, ge=7, le=90, description="분석 기간(일)"),
+    method: str = Query(default="auto", description="탐지 방법 (auto, zscore, iqr, isolation_forest)"),
+    threshold: float = Query(default=3.0, ge=1.0, le=5.0, description="이상 판정 임계값"),
+    service: AnomalyService = Depends(get_anomaly_service),
+) -> JSONResponse:
+    """키워드의 이상 포인트를 탐지하여 반환한다.
+
+    ML 기반 이상 탐지 알고리즘을 사용하여 키워드 트렌드에서 이상 포인트를 식별한다.
+
+    Args:
+        keyword: 분석할 키워드
+        days: 분석 기간 (7-90일)
+        method: 탐지 방법 ("auto", "zscore", "iqr", "isolation_forest")
+        threshold: 이상 판정 임계값 (1.0-5.0)
+        service: AnomalyService 인스턴스
+
+    Returns:
+        JSONResponse: Chart.js 형식의 이상 탐지 데이터 및 메타데이터
+    """
+    result = service.detect_anomalies(
+        keyword=keyword,
+        days=days,
+        method=method,
+        threshold=threshold,
+    )
+
+    return JSONResponse(content=result.to_chart_data())
+
+
+@router.get("/anomalies-partial/{keyword}", response_class=HTMLResponse)
+async def anomalies_partial(
+    request: Request,
+    keyword: str,
+    days: int = Query(default=30, ge=7, le=90, description="분석 기간(일)"),
+    service: AnomalyService = Depends(get_anomaly_service),
+) -> HTMLResponse:
+    """이상 탐지 차트 파셜 HTML을 반환한다.
+
+    HTMX로 동적 로딩할 수 있는 이상 탐지 차트 컴포넌트를 반환한다.
+
+    Args:
+        request: FastAPI Request 객체
+        keyword: 분석할 키워드
+        days: 분석 기간
+        service: AnomalyService 인스턴스
+
+    Returns:
+        HTMLResponse: 이상 탐지 차트 HTML 파셜
+    """
+    templates = get_templates(request)
+
+    anomaly_result = service.detect_anomalies(
+        keyword=keyword,
+        days=days,
+    )
+
+    context = {
+        "request": request,
+        "keyword": keyword,
+        "anomaly_result": anomaly_result,
+        "analysis_days": days,
+    }
+
+    return templates.TemplateResponse(request, "trends/partials/anomaly_chart.html", context)
