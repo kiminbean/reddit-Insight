@@ -835,3 +835,509 @@ class CompetitionRiskEvaluator:
             if major_players:
                 return f"High risk - competing with: {', '.join(major_players[:2])}"
             return "High competition risk - crowded market with strong players"
+
+
+# =============================================================================
+# ACTIONABLE RECOMMENDATION
+# =============================================================================
+
+
+@dataclass
+class ActionableRecommendation:
+    """
+    실행 가능한 추천.
+
+    인사이트, 비즈니스 점수, 실행 가능성을 종합한 최종 추천.
+
+    Attributes:
+        insight: 인사이트
+        business_score: 비즈니스 점수
+        feasibility_score: 실행 가능성 점수
+        final_rank: 최종 순위
+        action_items: 실행 항목 목록
+        next_steps: 다음 단계 목록
+
+    Example:
+        >>> recommendation = ActionableRecommendation(
+        ...     insight=insight,
+        ...     business_score=business_score,
+        ...     feasibility_score=feasibility_score,
+        ...     final_rank=1,
+        ...     action_items=["Build MVP", "User testing"],
+        ...     next_steps=["Market research", "Competitor analysis"]
+        ... )
+    """
+
+    insight: "Insight"
+    business_score: "BusinessScore"
+    feasibility_score: FeasibilityScore
+    final_rank: int
+    action_items: list[str] = field(default_factory=list)
+    next_steps: list[str] = field(default_factory=list)
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return (
+            f"ActionableRecommendation(rank={self.final_rank}, "
+            f"business={self.business_score.total_score:.1f}, "
+            f"feasibility={self.feasibility_score.total_score:.1f})"
+        )
+
+    @property
+    def combined_score(self) -> float:
+        """Calculate combined score (business * feasibility weight)."""
+        # Weight: 60% business value, 40% feasibility
+        return (
+            self.business_score.total_score * 0.6
+            + self.feasibility_score.total_score * 0.4
+        )
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary representation."""
+        return {
+            "final_rank": self.final_rank,
+            "combined_score": self.combined_score,
+            "insight": self.insight.to_dict(),
+            "business_score": self.business_score.to_dict(),
+            "feasibility_score": self.feasibility_score.to_dict(),
+            "action_items": self.action_items,
+            "next_steps": self.next_steps,
+        }
+
+
+# =============================================================================
+# FEASIBILITY ANALYZER
+# =============================================================================
+
+
+class FeasibilityAnalyzer:
+    """
+    실행 가능성 분석기.
+
+    비즈니스 기회의 실행 가능성을 평가하고 최종 추천을 생성한다.
+
+    Attributes:
+        _config: 실행 가능성 설정
+        _evaluators: 요소별 평가기 매핑
+
+    Example:
+        >>> analyzer = FeasibilityAnalyzer()
+        >>> score = analyzer.analyze(insight, business_score, context)
+        >>> print(f"Risk: {score.risk_level}, Score: {score.total_score:.1f}")
+
+        >>> # Generate recommendations
+        >>> recommendations = analyzer.generate_recommendations(
+        ...     opportunities, context, top_n=5
+        ... )
+        >>> for rec in recommendations:
+        ...     print(f"#{rec.final_rank}: {rec.insight.title}")
+    """
+
+    def __init__(self, config: FeasibilityConfig | None = None) -> None:
+        """
+        분석기 초기화.
+
+        Args:
+            config: 실행 가능성 설정 (None이면 기본값 사용)
+        """
+        self._config = config or FeasibilityConfig()
+        self._evaluators: dict[FeasibilityFactor, FactorEvaluator] = {
+            FeasibilityFactor.TECHNICAL_COMPLEXITY: TechnicalComplexityEvaluator(),
+            FeasibilityFactor.RESOURCE_REQUIREMENT: ResourceRequirementEvaluator(),
+            FeasibilityFactor.MARKET_BARRIER: MarketBarrierEvaluator(),
+            FeasibilityFactor.TIME_TO_VALUE: TimeToValueEvaluator(),
+            FeasibilityFactor.COMPETITION_RISK: CompetitionRiskEvaluator(),
+        }
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return f"FeasibilityAnalyzer(factors={len(self._evaluators)})"
+
+    @property
+    def config(self) -> FeasibilityConfig:
+        """Get feasibility configuration."""
+        return self._config
+
+    def analyze(
+        self,
+        insight: "Insight",
+        business_score: "BusinessScore",
+        context: "AnalysisContext",
+    ) -> FeasibilityScore:
+        """
+        단일 기회의 실행 가능성 분석.
+
+        모든 요소에 대해 평가를 수행하고 종합 점수를 산출한다.
+
+        Args:
+            insight: 평가할 인사이트
+            business_score: 비즈니스 점수
+            context: 분석 컨텍스트
+
+        Returns:
+            실행 가능성 점수
+        """
+        factor_assessments: list[FactorAssessment] = []
+
+        # Evaluate each factor
+        for factor, evaluator in self._evaluators.items():
+            assessment = evaluator.evaluate(insight, context)
+            factor_assessments.append(assessment)
+
+        # Calculate weighted total score
+        total_score = 0.0
+        for assessment in factor_assessments:
+            weight = self._config.get_weight(assessment.factor)
+            total_score += assessment.score * weight
+
+        # Calculate risk level
+        risk_level = self._calculate_risk_level(total_score)
+
+        # Generate recommendation
+        recommendation = self._generate_recommendation(
+            insight, factor_assessments, total_score, risk_level
+        )
+
+        return FeasibilityScore(
+            total_score=total_score,
+            factors=factor_assessments,
+            risk_level=risk_level,
+            recommendation=recommendation,
+        )
+
+    def analyze_opportunities(
+        self,
+        scored_opportunities: list["ScoredOpportunity"],
+        context: "AnalysisContext",
+    ) -> list[tuple["ScoredOpportunity", FeasibilityScore]]:
+        """
+        여러 기회의 실행 가능성 분석 및 정렬.
+
+        Args:
+            scored_opportunities: 스코어링된 기회 목록
+            context: 분석 컨텍스트
+
+        Returns:
+            (기회, 실행 가능성 점수) 튜플 목록 (combined score 내림차순)
+        """
+        results: list[tuple["ScoredOpportunity", FeasibilityScore]] = []
+
+        for opportunity in scored_opportunities:
+            feasibility = self.analyze(
+                opportunity.insight,
+                opportunity.score,
+                context,
+            )
+            results.append((opportunity, feasibility))
+
+        # Sort by combined score (business * 0.6 + feasibility * 0.4)
+        results.sort(
+            key=lambda x: x[0].score.total_score * 0.6 + x[1].total_score * 0.4,
+            reverse=True,
+        )
+
+        return results
+
+    def generate_recommendations(
+        self,
+        opportunities: list["ScoredOpportunity"],
+        context: "AnalysisContext",
+        top_n: int = 5,
+    ) -> list[ActionableRecommendation]:
+        """
+        상위 N개 실행 가능한 추천 생성.
+
+        비즈니스 점수와 실행 가능성을 종합하여 최종 추천을 생성한다.
+
+        Args:
+            opportunities: 스코어링된 기회 목록
+            context: 분석 컨텍스트
+            top_n: 반환할 최대 추천 수
+
+        Returns:
+            실행 가능한 추천 목록
+        """
+        # Analyze all opportunities
+        analyzed = self.analyze_opportunities(opportunities, context)
+
+        recommendations: list[ActionableRecommendation] = []
+
+        for rank, (opportunity, feasibility) in enumerate(analyzed[:top_n], start=1):
+            # Generate action items based on insight type
+            action_items = self._generate_action_items(
+                opportunity.insight, feasibility
+            )
+
+            # Generate next steps based on feasibility
+            next_steps = self._generate_next_steps(
+                opportunity.insight, feasibility
+            )
+
+            recommendation = ActionableRecommendation(
+                insight=opportunity.insight,
+                business_score=opportunity.score,
+                feasibility_score=feasibility,
+                final_rank=rank,
+                action_items=action_items,
+                next_steps=next_steps,
+            )
+            recommendations.append(recommendation)
+
+        return recommendations
+
+    def _calculate_risk_level(self, score: float) -> str:
+        """
+        리스크 수준 계산.
+
+        Args:
+            score: 종합 점수 (0-100)
+
+        Returns:
+            리스크 수준 (LOW/MEDIUM/HIGH)
+        """
+        if score >= 70:
+            return "LOW"
+        elif score >= 40:
+            return "MEDIUM"
+        else:
+            return "HIGH"
+
+    def _generate_recommendation(
+        self,
+        insight: "Insight",
+        factors: list[FactorAssessment],
+        total_score: float,
+        risk_level: str,
+    ) -> str:
+        """
+        추천 문구 생성.
+
+        Args:
+            insight: 인사이트
+            factors: 요소별 평가
+            total_score: 종합 점수
+            risk_level: 리스크 수준
+
+        Returns:
+            추천 문구
+        """
+        # Find strengths and weaknesses
+        strengths = [f for f in factors if f.score >= 70]
+        weaknesses = [f for f in factors if f.score < 40]
+
+        if risk_level == "LOW":
+            base = "Highly feasible - recommend immediate action."
+        elif risk_level == "MEDIUM":
+            base = "Moderately feasible - proceed with careful planning."
+        else:
+            base = "High risk - requires significant mitigation efforts."
+
+        # Add strength highlights
+        if strengths:
+            strength_names = [
+                s.factor.value.replace("_", " ").title() for s in strengths[:2]
+            ]
+            base += f" Strengths: {', '.join(strength_names)}."
+
+        # Add weakness warnings
+        if weaknesses:
+            weakness_names = [
+                w.factor.value.replace("_", " ").title() for w in weaknesses[:2]
+            ]
+            base += f" Risks: {', '.join(weakness_names)}."
+
+        return base
+
+    def _generate_action_items(
+        self,
+        insight: "Insight",
+        feasibility: FeasibilityScore,
+    ) -> list[str]:
+        """
+        실행 항목 생성.
+
+        Args:
+            insight: 인사이트
+            feasibility: 실행 가능성 점수
+
+        Returns:
+            실행 항목 목록
+        """
+        from reddit_insight.insights.rules_engine import InsightType
+
+        action_items: list[str] = []
+
+        # Base actions by insight type
+        if insight.insight_type == InsightType.MARKET_GAP:
+            action_items.append("Conduct detailed market research")
+            action_items.append("Define MVP feature set")
+            action_items.append("Build prototype for user testing")
+
+        elif insight.insight_type == InsightType.IMPROVEMENT_OPPORTUNITY:
+            action_items.append("Analyze competitor weaknesses in detail")
+            action_items.append("Design improved solution addressing pain points")
+            action_items.append("Create comparison landing page")
+
+        elif insight.insight_type == InsightType.EMERGING_TREND:
+            action_items.append("Monitor trend velocity and trajectory")
+            action_items.append("Identify early adopter communities")
+            action_items.append("Build quick MVP to test market")
+
+        elif insight.insight_type == InsightType.COMPETITIVE_WEAKNESS:
+            action_items.append("Target dissatisfied competitor users")
+            action_items.append("Create migration guides and tools")
+            action_items.append("Develop competitive positioning")
+
+        elif insight.insight_type == InsightType.UNMET_NEED:
+            action_items.append("Validate willingness to pay")
+            action_items.append("Define pricing strategy")
+            action_items.append("Build minimum viable product")
+
+        # Add mitigation actions for weaknesses
+        for weakness in feasibility.weaknesses[:2]:
+            if weakness.factor == FeasibilityFactor.TECHNICAL_COMPLEXITY:
+                action_items.append("Consider technical partnerships or outsourcing")
+            elif weakness.factor == FeasibilityFactor.RESOURCE_REQUIREMENT:
+                action_items.append("Explore phased development approach")
+            elif weakness.factor == FeasibilityFactor.MARKET_BARRIER:
+                action_items.append("Research regulatory requirements")
+            elif weakness.factor == FeasibilityFactor.TIME_TO_VALUE:
+                action_items.append("Identify quick wins for early validation")
+            elif weakness.factor == FeasibilityFactor.COMPETITION_RISK:
+                action_items.append("Develop unique differentiation strategy")
+
+        return action_items[:5]  # Limit to 5 action items
+
+    def _generate_next_steps(
+        self,
+        insight: "Insight",
+        feasibility: FeasibilityScore,
+    ) -> list[str]:
+        """
+        다음 단계 생성.
+
+        Args:
+            insight: 인사이트
+            feasibility: 실행 가능성 점수
+
+        Returns:
+            다음 단계 목록
+        """
+        next_steps: list[str] = []
+
+        # Universal next steps based on risk level
+        if feasibility.risk_level == "LOW":
+            next_steps.append("Begin development planning")
+            next_steps.append("Allocate initial resources")
+            next_steps.append("Set project milestones")
+
+        elif feasibility.risk_level == "MEDIUM":
+            next_steps.append("Conduct feasibility deep-dive")
+            next_steps.append("Identify risk mitigation strategies")
+            next_steps.append("Build proof of concept")
+
+        else:  # HIGH
+            next_steps.append("Re-evaluate opportunity value")
+            next_steps.append("Explore partnership options")
+            next_steps.append("Consider pivot or alternative approach")
+
+        # Add specific next steps based on strengths
+        for strength in feasibility.strengths[:2]:
+            if strength.factor == FeasibilityFactor.TIME_TO_VALUE:
+                next_steps.append("Accelerate go-to-market timeline")
+            elif strength.factor == FeasibilityFactor.MARKET_BARRIER:
+                next_steps.append("Prioritize market entry speed")
+            elif strength.factor == FeasibilityFactor.COMPETITION_RISK:
+                next_steps.append("Capitalize on competitive advantage")
+
+        # Add validation steps based on confidence
+        if insight.confidence < 0.7:
+            next_steps.append("Gather additional market validation data")
+
+        return next_steps[:5]  # Limit to 5 next steps
+
+    def to_markdown(
+        self,
+        recommendations: list[ActionableRecommendation],
+    ) -> str:
+        """
+        추천 목록을 마크다운으로 변환.
+
+        Args:
+            recommendations: 추천 목록
+
+        Returns:
+            마크다운 형식 문자열
+        """
+        lines: list[str] = []
+
+        lines.append("# Feasibility Analysis Report")
+        lines.append("")
+        lines.append(f"**Generated**: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
+        lines.append(f"**Total Recommendations**: {len(recommendations)}")
+        lines.append("")
+
+        if not recommendations:
+            lines.append("_No recommendations to display._")
+            return "\n".join(lines)
+
+        # Summary table
+        lines.append("## Summary")
+        lines.append("")
+        lines.append("| Rank | Risk | Combined | Business | Feasibility | Title |")
+        lines.append("|------|------|----------|----------|-------------|-------|")
+
+        for rec in recommendations:
+            title = (
+                rec.insight.title[:30] + "..."
+                if len(rec.insight.title) > 30
+                else rec.insight.title
+            )
+            lines.append(
+                f"| {rec.final_rank} | {rec.feasibility_score.risk_level} | "
+                f"{rec.combined_score:.1f} | {rec.business_score.total_score:.1f} | "
+                f"{rec.feasibility_score.total_score:.1f} | {title} |"
+            )
+
+        lines.append("")
+
+        # Detailed breakdown
+        lines.append("## Detailed Recommendations")
+        lines.append("")
+
+        for rec in recommendations:
+            lines.append(f"### #{rec.final_rank}: {rec.insight.title}")
+            lines.append("")
+            lines.append(
+                f"**Risk**: {rec.feasibility_score.risk_level} | "
+                f"**Combined Score**: {rec.combined_score:.1f}"
+            )
+            lines.append("")
+            lines.append(f"**Business Score**: {rec.business_score.total_score:.1f} ({rec.business_score.grade})")
+            lines.append(f"**Feasibility Score**: {rec.feasibility_score.total_score:.1f}")
+            lines.append("")
+
+            # Feasibility factors
+            lines.append("**Feasibility Breakdown**:")
+            for factor in rec.feasibility_score.factors:
+                factor_name = factor.factor.value.replace("_", " ").title()
+                bar = "=" * int(factor.score / 5)
+                lines.append(f"- {factor_name}: {factor.score:.1f} [{bar}]")
+                lines.append(f"  - {factor.assessment}")
+            lines.append("")
+
+            # Action items
+            if rec.action_items:
+                lines.append("**Action Items**:")
+                for item in rec.action_items:
+                    lines.append(f"- {item}")
+                lines.append("")
+
+            # Next steps
+            if rec.next_steps:
+                lines.append("**Next Steps**:")
+                for step in rec.next_steps:
+                    lines.append(f"- {step}")
+                lines.append("")
+
+        return "\n".join(lines)
