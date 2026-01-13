@@ -174,3 +174,40 @@ class SubredditInfo(BaseModel):
             created_utc=datetime.fromtimestamp(subreddit.created_utc, tz=UTC),
             over18=subreddit.over18,
         )
+
+
+class SubredditMetrics(BaseModel):
+    """서브레딧 활성도 메트릭 모델.
+
+    서브레딧의 활동량과 성장세를 분석하기 위한 메트릭을 담는다.
+    최근 게시물 샘플링을 통해 계산된 추정치를 포함한다.
+
+    Attributes:
+        name: 서브레딧 이름
+        subscribers: 구독자 수
+        active_users: 현재 활성 사용자 수 (accounts_active, 가능한 경우)
+        posts_per_day: 일 평균 게시물 수 (샘플링 추정치)
+        comments_per_day: 일 평균 댓글 수 (샘플링 추정치)
+        avg_score: 평균 게시물 점수
+        growth_rate: 성장률 (가능한 경우)
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    name: str = Field(description="서브레딧 이름")
+    subscribers: int = Field(default=0, description="구독자 수")
+    active_users: int | None = Field(
+        default=None, description="현재 활성 사용자 수"
+    )
+    posts_per_day: float | None = Field(
+        default=None, description="일 평균 게시물 수"
+    )
+    comments_per_day: float | None = Field(
+        default=None, description="일 평균 댓글 수"
+    )
+    avg_score: float | None = Field(
+        default=None, description="평균 게시물 점수"
+    )
+    growth_rate: float | None = Field(
+        default=None, description="성장률"
+    )

@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from reddit_insight.reddit.models import SubredditInfo
+from reddit_insight.reddit.models import SubredditInfo, SubredditMetrics
 
 if TYPE_CHECKING:
     from reddit_insight.reddit.client import RedditClient
@@ -290,3 +290,95 @@ class SubredditExplorer:
         except Exception as e:
             logger.warning("관련 서브레딧 탐색 실패 (%s): %s", subreddit, e)
             return []
+
+    def get_metrics(self, name: str, sample_posts: int = 100) -> SubredditMetrics:
+        """서브레딧 활성도 메트릭 계산.
+
+        최근 게시물을 샘플링하여 서브레딧의 활성도 지표를 계산한다.
+        posts_per_day, comments_per_day, avg_score는 샘플링 기반 추정치이다.
+
+        Args:
+            name: 서브레딧 이름
+            sample_posts: 샘플링할 게시물 수 (기본: 100)
+
+        Returns:
+            SubredditMetrics: 서브레딧 활성도 메트릭
+
+        Example:
+            >>> metrics = explorer.get_metrics("python")
+            >>> print(f"일일 게시물: {metrics.posts_per_day:.1f}")
+            >>> print(f"평균 점수: {metrics.avg_score:.1f}")
+        """
+        from datetime import UTC, datetime
+
+        subreddit = self._client.get_subreddit(name)
+
+        # 기본 정보 수집
+        subscribers = getattr(subreddit, "subscribers", 0) or 0
+        active_users = getattr(subreddit, "accounts_active", None)
+
+        # 최근 게시물 샘플링
+        posts = list(subreddit.new(limit=sample_posts))
+
+        posts_per_day = None
+        comments_per_day = None
+        avg_score = None
+
+        if posts:
+            # 타임스탬프 분석
+            now = datetime.now(UTC)
+            timestamps = [
+                datetime.fromtimestamp(p.created_utc, tz=UTC) for p in posts
+            ]
+
+            if len(timestamps) >= 2:
+                # 가장 오래된 게시물과 현재 시간 사이의 기간 계산
+                oldest = min(timestamps)
+                time_span_days = (now - oldest).total_seconds() / 86400
+
+                if time_span_days > 0:
+                    posts_per_day = len(posts) / time_span_days
+
+                    # 댓글 수 합계로 일 평균 댓글 추정
+                    total_comments = sum(p.num_comments for p in posts)
+                    comments_per_day = total_comments / time_span_days
+
+            # 평균 점수 계산
+            scores = [p.score for p in posts]
+            avg_score = sum(scores) / len(scores) if scores else None
+
+        return SubredditMetrics(
+            name=name,
+            subscribers=subscribers,
+            active_users=active_users,
+            posts_per_day=posts_per_day,
+            comments_per_day=comments_per_day,
+            avg_score=avg_score,
+            growth_rate=None,  # Reddit API에서 직접 제공하지 않음
+        )
+
+    def compare_subreddits(self, names: list[str]) -> list[SubredditMetrics]:
+        """여러 서브레딧 메트릭 비교.
+
+        여러 서브레딧의 활성도 메트릭을 한 번에 계산하여 비교할 수 있게 한다.
+        존재하지 않거나 오류가 발생한 서브레딧은 결과에서 제외된다.
+
+        Args:
+            names: 서브레딧 이름 목록
+
+        Returns:
+            list[SubredditMetrics]: 서브레딧 메트릭 목록
+
+        Example:
+            >>> metrics = explorer.compare_subreddits(["python", "java", "rust"])
+            >>> for m in sorted(metrics, key=lambda x: x.subscribers, reverse=True):
+            ...     print(f"{m.name}: {m.subscribers:,} subscribers")
+        """
+        results = []
+        for name in names:
+            try:
+                metrics = self.get_metrics(name)
+                results.append(metrics)
+            except Exception as e:
+                logger.warning("메트릭 계산 실패 (%s): %s", name, e)
+        return results
