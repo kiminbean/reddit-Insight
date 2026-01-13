@@ -1,6 +1,7 @@
 """트렌드 시각화 라우터.
 
 키워드 트렌드와 Rising 키워드를 시각화하는 라우터.
+예측 기능을 포함하여 ML 기반 트렌드 예측 시각화를 제공한다.
 """
 
 
@@ -8,6 +9,10 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
+from reddit_insight.dashboard.services.prediction_service import (
+    PredictionService,
+    get_prediction_service,
+)
 from reddit_insight.dashboard.trend_service import (
     TrendService,
     get_trend_service,
@@ -203,3 +208,77 @@ async def top_keywords_chart_data(
     }
 
     return JSONResponse(content=chart_data)
+
+
+# =============================================================================
+# PREDICTION ENDPOINTS
+# =============================================================================
+
+
+@router.get("/predict/{keyword}", response_class=JSONResponse)
+async def predict_keyword(
+    keyword: str,
+    days: int = Query(default=7, ge=1, le=14, description="예측 기간(일)"),
+    historical_days: int = Query(default=14, ge=10, le=30, description="과거 데이터 기간(일)"),
+    confidence: float = Query(default=0.95, ge=0.5, le=0.99, description="신뢰수준"),
+    service: PredictionService = Depends(get_prediction_service),
+) -> JSONResponse:
+    """키워드의 트렌드 예측 데이터를 반환한다.
+
+    ML 기반 시계열 예측 모델(ETS/ARIMA)을 사용하여 키워드 트렌드를 예측한다.
+
+    Args:
+        keyword: 예측할 키워드
+        days: 예측 기간 (1-14일)
+        historical_days: 과거 데이터 기간 (10-30일)
+        confidence: 신뢰수준 (0.5-0.99)
+        service: PredictionService 인스턴스
+
+    Returns:
+        JSONResponse: Chart.js 형식의 예측 데이터 및 메타데이터
+    """
+    prediction = service.predict_keyword_trend(
+        keyword=keyword,
+        historical_days=historical_days,
+        forecast_days=days,
+        confidence_level=confidence,
+    )
+
+    return JSONResponse(content=prediction.to_chart_data())
+
+
+@router.get("/predict-partial/{keyword}", response_class=HTMLResponse)
+async def predict_partial(
+    request: Request,
+    keyword: str,
+    days: int = Query(default=7, ge=1, le=14, description="예측 기간(일)"),
+    service: PredictionService = Depends(get_prediction_service),
+) -> HTMLResponse:
+    """예측 차트 파셜 HTML을 반환한다.
+
+    HTMX로 동적 로딩할 수 있는 예측 차트 컴포넌트를 반환한다.
+
+    Args:
+        request: FastAPI Request 객체
+        keyword: 예측할 키워드
+        days: 예측 기간
+        service: PredictionService 인스턴스
+
+    Returns:
+        HTMLResponse: 예측 차트 HTML 파셜
+    """
+    templates = get_templates(request)
+
+    prediction = service.predict_keyword_trend(
+        keyword=keyword,
+        forecast_days=days,
+    )
+
+    context = {
+        "request": request,
+        "keyword": keyword,
+        "prediction": prediction,
+        "forecast_days": days,
+    }
+
+    return templates.TemplateResponse(request, "trends/partials/prediction_chart.html", context)
