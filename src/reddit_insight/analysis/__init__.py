@@ -86,6 +86,21 @@ from reddit_insight.analysis.entity_recognition import (
     ProductEntity,
     ENTITY_PATTERNS,
 )
+from reddit_insight.analysis.sentiment import (
+    DIMINISHERS,
+    INTENSIFIERS,
+    NEGATORS,
+    NEGATIVE_EMOTICONS,
+    NEGATIVE_WORDS,
+    POSITIVE_EMOTICONS,
+    POSITIVE_WORDS,
+    EntitySentiment,
+    EntitySentimentAnalyzer,
+    RuleBasedSentimentAnalyzer,
+    Sentiment,
+    SentimentAnalyzerConfig,
+    SentimentScore,
+)
 
 __all__ = [
     # Tokenizer
@@ -154,4 +169,19 @@ __all__ = [
     "PatternEntityExtractor",
     "EntityRecognizerConfig",
     "EntityRecognizer",
+    # Sentiment Analysis
+    "Sentiment",
+    "SentimentScore",
+    "SentimentAnalyzerConfig",
+    "RuleBasedSentimentAnalyzer",
+    "EntitySentiment",
+    "EntitySentimentAnalyzer",
+    # Sentiment Lexicons
+    "POSITIVE_WORDS",
+    "NEGATIVE_WORDS",
+    "NEGATORS",
+    "INTENSIFIERS",
+    "DIMINISHERS",
+    "POSITIVE_EMOTICONS",
+    "NEGATIVE_EMOTICONS",
 ]
