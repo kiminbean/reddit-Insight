@@ -24,6 +24,7 @@ None
 - [x] **Phase 8: Business Model Insights** - 인사이트 → 실행 가능한 기회 연결
 - [x] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
 - [x] **Phase 10: Report Export & Polish** - 마크다운 리포트 생성, 통합 테스트
+- [ ] **Phase 11: Advanced Analytics** - 고급 분석 기능 (머신러닝 기반 예측)
 
 ## Phase Details
 
@@ -145,10 +146,23 @@ Plans:
 - [x] 10-03: 엔드투엔드 테스트
 - [x] 10-04: UX 개선 및 문서화
 
+### Phase 11: Advanced Analytics
+**Goal**: 머신러닝 기반 고급 분석 기능 구현 - 트렌드 예측, 이상 탐지, 클러스터링
+**Depends on**: Phase 10
+**Research**: Likely (ML algorithms, model selection)
+**Research topics**: 시계열 예측 (statsmodels ETS/ARIMA), 이상 탐지 (Isolation Forest, z-score), 토픽 모델링 (LDA/NMF), 클러스터링 (K-means)
+**Plans**: 4 plans
+
+Plans:
+- [ ] 11-01: ML Infrastructure - 의존성, 기반 클래스, 데이터 모델
+- [ ] 11-02: Trend Prediction - 시계열 예측 엔진 (ETS/ARIMA)
+- [ ] 11-03: Anomaly Detection - 이상 탐지 엔진 (z-score, IQR, Isolation Forest)
+- [ ] 11-04: Topic Modeling & Clustering - 토픽 모델링 (LDA/NMF), 텍스트 클러스터링
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -162,3 +176,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Business Model Insights | 3/3 | Complete | 2026-01-13 |
 | 9. Web Dashboard | 5/5 | Complete | 2026-01-13 |
 | 10. Report Export & Polish | 4/4 | Complete | 2026-01-13 |
+| 11. Advanced Analytics | 0/4 | Planned | - |
