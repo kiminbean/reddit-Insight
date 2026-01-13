@@ -15,7 +15,7 @@ None
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation** - 프로젝트 셋업, 개발 환경 구성
-- [ ] **Phase 2: Reddit API Integration** - Reddit API 클라이언트, 인증, 데이터 수집
+- [x] **Phase 2: Reddit API Integration** - Reddit API 클라이언트, 인증, 데이터 수집
 - [ ] **Phase 3: Web Scraping Fallback** - API 제한 시 스크래핑 백업 시스템
 - [ ] **Phase 4: Data Storage & Pipeline** - 데이터베이스, 전처리 파이프라인
 - [ ] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
@@ -45,9 +45,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Reddit API 클라이언트 및 인증
-- [ ] 02-02: 게시물 및 댓글 수집기
-- [ ] 02-03: Subreddit 탐색 및 메타데이터 수집
+- [x] 02-01: Reddit API 클라이언트 및 인증
+- [x] 02-02: 게시물 및 댓글 수집기
+- [x] 02-03: Subreddit 탐색 및 메타데이터 수집
 
 ### Phase 3: Web Scraping Fallback
 **Goal**: API 제한 시 백업으로 사용할 스크래핑 시스템 구축
@@ -153,7 +153,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-01-13 |
-| 2. Reddit API Integration | 0/3 | Not started | - |
+| 2. Reddit API Integration | 3/3 | Complete | 2026-01-13 |
 | 3. Web Scraping Fallback | 0/3 | Not started | - |
 | 4. Data Storage & Pipeline | 0/3 | Not started | - |
 | 5. Trend Analysis Engine | 0/4 | Not started | - |
