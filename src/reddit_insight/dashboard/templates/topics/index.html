@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}Topics{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <!-- Header Section -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900">Topic Modeling Analysis</h2>
+                <p class="text-sm text-gray-500 mt-1">
+                    Discover hidden themes in your Reddit data using LDA/NMF topic modeling.
+                </p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium">{{ document_count }}</span> documents available
+                </div>
+                {% if has_data %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Ready to analyze
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Need more data
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if has_data %}
+    <!-- Analysis Controls -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+            <div class="flex-1 min-w-[150px] max-w-[200px]">
+                <label for="n-topics" class="block text-sm font-medium text-gray-700 mb-1">
+                    Number of Topics
+                </label>
+                <div class="flex items-center gap-3">
+                    <input type="range"
+                           id="n-topics"
+                           min="2"
+                           max="10"
+                           value="5"
+                           class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                           oninput="document.getElementById('n-topics-value').textContent = this.value">
+                    <span id="n-topics-value" class="text-sm font-medium text-gray-900 w-6 text-center">5</span>
+                </div>
+            </div>
+            <div class="w-36">
+                <label for="method" class="block text-sm font-medium text-gray-700 mb-1">
+                    Method
+                </label>
+                <select id="method"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                    <option value="auto">Auto</option>
+                    <option value="lda">LDA</option>
+                    <option value="nmf">NMF</option>
+                </select>
+            </div>
+            <button type="button"
+                    onclick="runTopicAnalysis()"
+                    id="analyze-btn"
+                    class="inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+                Run Analysis
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm font-medium text-gray-500">Topics Found</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900" id="topics-count">-</div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm font-medium text-gray-500">Method Used</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900" id="method-used">-</div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm font-medium text-gray-500">Coherence Score</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900" id="coherence-score">-</div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm font-medium text-gray-500">Documents Analyzed</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900" id="doc-count">-</div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Topic Distribution Pie Chart -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Topic Distribution</h3>
+                <div class="h-80">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Topic Coherence Bar Chart -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Topic Coherence Scores</h3>
+                <div class="h-80">
+                    <canvas id="coherenceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic Keywords Cards -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Topic Keywords</h3>
+            <div id="topic-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Topic cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-section" class="hidden">
+        <div class="bg-white rounded-lg shadow p-12">
+            <div class="flex flex-col items-center justify-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600"></div>
+                <span class="mt-4 text-lg text-gray-600">Analyzing topics...</span>
+                <p class="mt-2 text-sm text-gray-500">This may take a few moments depending on the data size.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Results State -->
+    <div id="no-results-section" class="hidden">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <div class="flex items-start">
+                <svg class="h-6 w-6 text-yellow-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">No topics extracted</h3>
+                    <p class="text-sm text-yellow-700 mt-1" id="no-results-message">
+                        Unable to extract meaningful topics from the current data. Try adjusting the number of topics or ensure you have enough data.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Not Enough Data State -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div class="flex items-start">
+            <svg class="h-6 w-6 text-yellow-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Insufficient Data</h3>
+                <p class="text-sm text-yellow-700 mt-1">
+                    Topic modeling requires at least 2 documents to analyze. Please run an analysis first by clicking
+                    <a href="/dashboard/analyze" class="font-medium text-yellow-800 underline hover:text-yellow-900">New Analysis</a>
+                    to collect data from a subreddit.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Chart instances
+    let distributionChart = null;
+    let coherenceChart = null;
+
+    // Run topic analysis
+    async function runTopicAnalysis() {
+        const nTopics = document.getElementById('n-topics').value;
+        const method = document.getElementById('method').value;
+
+        // Show loading, hide other sections
+        showSection('loading');
+
+        try {
+            const params = new URLSearchParams({
+                n_topics: nTopics,
+                method: method
+            });
+
+            const response = await fetch(`/dashboard/topics/analyze?${params}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.metadata.n_topics === 0) {
+                showSection('no-results');
+                return;
+            }
+
+            // Update summary cards
+            updateSummaryCards(data.metadata);
+
+            // Update charts
+            updateDistributionChart(data);
+            updateCoherenceChart(data.metadata.topics);
+
+            // Update topic cards
+            updateTopicCards(data.metadata.topics);
+
+            // Show results
+            showSection('results');
+        } catch (error) {
+            console.error('Failed to run topic analysis:', error);
+            document.getElementById('no-results-message').textContent =
+                `Analysis failed: ${error.message}. Please try again.`;
+            showSection('no-results');
+        }
+    }
+
+    // Show specific section
+    function showSection(section) {
+        const sections = ['results', 'loading', 'no-results'];
+        sections.forEach(s => {
+            const el = document.getElementById(`${s}-section`);
+            if (el) {
+                el.classList.toggle('hidden', s !== section);
+            }
+        });
+    }
+
+    // Update summary cards
+    function updateSummaryCards(metadata) {
+        document.getElementById('topics-count').textContent = metadata.n_topics;
+        document.getElementById('method-used').textContent = metadata.method.toUpperCase();
+        document.getElementById('coherence-score').textContent = metadata.overall_coherence.toFixed(3);
+        document.getElementById('doc-count').textContent = metadata.document_count;
+    }
+
+    // Update distribution pie chart
+    function updateDistributionChart(data) {
+        const ctx = document.getElementById('distributionChart').getContext('2d');
+
+        if (distributionChart) {
+            distributionChart.destroy();
+        }
+
+        distributionChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.datasets[0].data,
+                    backgroundColor: data.datasets[0].backgroundColor,
+                    borderColor: data.datasets[0].borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 10,
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update coherence bar chart
+    function updateCoherenceChart(topics) {
+        const ctx = document.getElementById('coherenceChart').getContext('2d');
+
+        if (coherenceChart) {
+            coherenceChart.destroy();
+        }
+
+        const labels = topics.map(t => `Topic ${t.id}`);
+        const data = topics.map(t => t.coherence || 0);
+        const colors = topics.map((_, i) => {
+            const baseColors = [
+                'rgba(59, 130, 246, 0.6)',
+                'rgba(239, 68, 68, 0.6)',
+                'rgba(34, 197, 94, 0.6)',
+                'rgba(168, 85, 247, 0.6)',
+                'rgba(249, 115, 22, 0.6)',
+                'rgba(20, 184, 166, 0.6)',
+                'rgba(236, 72, 153, 0.6)',
+                'rgba(234, 179, 8, 0.6)',
+                'rgba(99, 102, 241, 0.6)',
+                'rgba(107, 114, 128, 0.6)'
+            ];
+            return baseColors[i % baseColors.length];
+        });
+
+        coherenceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Coherence Score',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: colors.map(c => c.replace('0.6', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Coherence Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Topics'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Update topic cards
+    function updateTopicCards(topics) {
+        const container = document.getElementById('topic-cards');
+
+        const cardColors = [
+            { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', badge: 'bg-blue-100 text-blue-700' },
+            { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', badge: 'bg-red-100 text-red-700' },
+            { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', badge: 'bg-green-100 text-green-700' },
+            { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', badge: 'bg-purple-100 text-purple-700' },
+            { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', badge: 'bg-orange-100 text-orange-700' },
+            { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-800', badge: 'bg-teal-100 text-teal-700' },
+            { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800', badge: 'bg-pink-100 text-pink-700' },
+            { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', badge: 'bg-yellow-100 text-yellow-700' },
+            { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-800', badge: 'bg-indigo-100 text-indigo-700' },
+            { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', badge: 'bg-gray-100 text-gray-700' }
+        ];
+
+        container.innerHTML = topics.map((topic, i) => {
+            const colors = cardColors[i % cardColors.length];
+            const keywordsHtml = topic.keywords.map(kw => `
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors.badge}">
+                    ${kw.word}
+                    <span class="ml-1 text-xs opacity-60">${(kw.weight * 100).toFixed(0)}%</span>
+                </span>
+            `).join('');
+
+            return `
+                <div class="rounded-lg border ${colors.border} ${colors.bg} p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-medium ${colors.text}">Topic ${topic.id}</h4>
+                        ${topic.coherence !== null ? `
+                            <span class="text-xs ${colors.text} opacity-70">
+                                Coherence: ${topic.coherence.toFixed(3)}
+                            </span>
+                        ` : ''}
+                    </div>
+                    <p class="text-sm ${colors.text} font-medium mb-2 truncate" title="${topic.label}">
+                        ${topic.label}
+                    </p>
+                    <div class="flex flex-wrap gap-1">
+                        ${keywordsHtml}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+</script>
+{% endblock %}
