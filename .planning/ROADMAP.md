@@ -16,7 +16,7 @@ None
 
 - [x] **Phase 1: Foundation** - 프로젝트 셋업, 개발 환경 구성
 - [x] **Phase 2: Reddit API Integration** - Reddit API 클라이언트, 인증, 데이터 수집
-- [ ] **Phase 3: Web Scraping Fallback** - API 제한 시 스크래핑 백업 시스템
+- [x] **Phase 3: Web Scraping Fallback** - API 제한 시 스크래핑 백업 시스템
 - [ ] **Phase 4: Data Storage & Pipeline** - 데이터베이스, 전처리 파이프라인
 - [ ] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
 - [ ] **Phase 6: Demand Discovery** - "이거 있으면 좋겠다" 패턴 탐지
@@ -57,9 +57,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: 스크래핑 인프라 설정
-- [ ] 03-02: Reddit 페이지 파서
-- [ ] 03-03: API/스크래핑 자동 전환 로직
+- [x] 03-01: 스크래핑 인프라 설정
+- [x] 03-02: Reddit 페이지 파서
+- [x] 03-03: API/스크래핑 자동 전환 로직
 
 ### Phase 4: Data Storage & Pipeline
 **Goal**: 수집된 데이터를 저장하고 분석을 위해 전처리하는 파이프라인 구축
@@ -154,7 +154,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete | 2026-01-13 |
 | 2. Reddit API Integration | 3/3 | Complete | 2026-01-13 |
-| 3. Web Scraping Fallback | 0/3 | Not started | - |
+| 3. Web Scraping Fallback | 3/3 | Complete | 2026-01-13 |
 | 4. Data Storage & Pipeline | 0/3 | Not started | - |
 | 5. Trend Analysis Engine | 0/4 | Not started | - |
 | 6. Demand Discovery | 0/3 | Not started | - |
