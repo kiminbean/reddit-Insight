@@ -182,73 +182,73 @@ Plans:
 **Goal**: DemandService, CompetitionService에 실제 분석 데이터 연동
 **Depends on**: Phase 11
 **Research**: Unlikely (internal patterns, existing data_store.py)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: TBD (run /gsd:plan-phase 12 to break down)
+- [ ] 12-01: Dashboard Data Integration Verification
 
 #### Phase 13: Recent Analyses
 **Goal**: 대시보드 홈에 최근 분석 기록 표시 기능 완성
 **Depends on**: Phase 12
 **Research**: Unlikely (existing DashboardService patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 13-01: TBD
+- [ ] 13-01: Recent Analyses Display Enhancement
 
 #### Phase 14: Trend Prediction UI
 **Goal**: 시계열 예측 결과를 차트로 시각화 (예측값 + 신뢰구간)
 **Depends on**: Phase 13
 **Research**: Unlikely (Chart.js already integrated)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 14-01: TBD
+- [ ] 14-01: Trend Prediction UI
 
 #### Phase 15: Anomaly Detection UI
 **Goal**: 이상 탐지 결과 시각화 (이상 포인트 하이라이트)
 **Depends on**: Phase 14
 **Research**: Unlikely (existing chart patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 15-01: TBD
+- [ ] 15-01: Anomaly Detection UI
 
 #### Phase 16: Topic Modeling UI
 **Goal**: 토픽 분석 결과 시각화 (토픽별 키워드, 문서 분포)
 **Depends on**: Phase 15
 **Research**: Unlikely (existing visualization patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 16-01: TBD
+- [ ] 16-01: Topic Modeling UI
 
 #### Phase 17: Text Clustering UI
 **Goal**: 클러스터링 결과 시각화 (클러스터별 키워드, 대표 문서)
 **Depends on**: Phase 16
 **Research**: Unlikely (existing visualization patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 17-01: TBD
+- [ ] 17-01: Text Clustering UI
 
 #### Phase 18: Dashboard Polish
 **Goal**: UI/UX 개선, 반응형 디자인, 사용성 향상
 **Depends on**: Phase 17
 **Research**: Unlikely (Tailwind/HTMX existing patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 18-01: TBD
+- [ ] 18-01: Dashboard UI/UX Polish
 
 #### Phase 19: Integration Testing
 **Goal**: E2E 테스트 보강, 성능 최적화, 문서 업데이트
 **Depends on**: Phase 18
 **Research**: Unlikely (existing test patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 19-01: Integration Testing & Performance Optimization
 
 ## Progress
 
@@ -268,11 +268,11 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 9. Web Dashboard | 5/5 | Complete | 2026-01-13 |
 | 10. Report Export & Polish | 4/4 | Complete | 2026-01-13 |
 | 11. Advanced Analytics | 4/4 | Complete | 2026-01-14 |
-| 12. Dashboard Data Integration | 0/? | Not started | - |
-| 13. Recent Analyses | 0/? | Not started | - |
-| 14. Trend Prediction UI | 0/? | Not started | - |
-| 15. Anomaly Detection UI | 0/? | Not started | - |
-| 16. Topic Modeling UI | 0/? | Not started | - |
-| 17. Text Clustering UI | 0/? | Not started | - |
-| 18. Dashboard Polish | 0/? | Not started | - |
-| 19. Integration Testing | 0/? | Not started | - |
+| 12. Dashboard Data Integration | 0/1 | Not started | - |
+| 13. Recent Analyses | 0/1 | Not started | - |
+| 14. Trend Prediction UI | 0/1 | Not started | - |
+| 15. Anomaly Detection UI | 0/1 | Not started | - |
+| 16. Topic Modeling UI | 0/1 | Not started | - |
+| 17. Text Clustering UI | 0/1 | Not started | - |
+| 18. Dashboard Polish | 0/1 | Not started | - |
+| 19. Integration Testing | 0/1 | Not started | - |
