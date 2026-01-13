@@ -84,6 +84,11 @@
         <!-- Prediction chart will be loaded here via HTMX -->
     </div>
 
+    <!-- Anomaly Detection Section (Hidden by default) -->
+    <div id="anomaly-section" class="mb-6 hidden">
+        <!-- Anomaly detection chart will be loaded here via HTMX -->
+    </div>
+
     <!-- Data Tables Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Top Keywords Table -->
@@ -92,14 +97,22 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <h3 class="text-lg font-medium text-gray-900">Trending Keywords</h3>
-                        <p class="text-sm text-gray-500">Click a keyword to see trend prediction</p>
+                        <p class="text-sm text-gray-500">Click keyword for prediction, icon for anomaly detection</p>
                     </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                        <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        ML Prediction
-                    </span>
+                    <div class="flex gap-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            Prediction
+                        </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Anomaly
+                        </span>
+                    </div>
                 </div>
             </div>
             <div id="keywords-table"
@@ -366,6 +379,80 @@
         if (predictionSection) {
             predictionSection.innerHTML = '';
             predictionSection.classList.add('hidden');
+        }
+    }
+
+    // ==========================================================================
+    // ANOMALY DETECTION FUNCTIONALITY
+    // ==========================================================================
+
+    // Load anomaly detection chart for a keyword
+    async function loadAnomalyDetection(keyword) {
+        const anomalySection = document.getElementById('anomaly-section');
+        if (!anomalySection) return;
+
+        // Show section with loading indicator
+        anomalySection.classList.remove('hidden');
+        anomalySection.innerHTML = `
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-center h-64">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    <span class="ml-3 text-gray-600">Detecting anomalies for "${keyword}"...</span>
+                </div>
+            </div>
+        `;
+
+        // Scroll to anomaly section
+        anomalySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        try {
+            // Use fetch to load anomaly detection partial
+            const response = await fetch(`/dashboard/trends/anomalies-partial/${encodeURIComponent(keyword)}?days=30`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const html = await response.text();
+            anomalySection.innerHTML = html;
+
+            // Execute any inline scripts in the loaded content
+            const scripts = anomalySection.querySelectorAll('script');
+            scripts.forEach(script => {
+                const newScript = document.createElement('script');
+                newScript.textContent = script.textContent;
+                document.body.appendChild(newScript);
+                document.body.removeChild(newScript);
+            });
+        } catch (error) {
+            console.error('Failed to load anomaly detection:', error);
+            anomalySection.innerHTML = `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Failed to load anomaly detection</h3>
+                            <p class="text-sm text-red-700 mt-1">Could not analyze anomalies for "${keyword}". Please try again.</p>
+                        </div>
+                        <button onclick="closeAnomalyChart()" class="ml-auto text-red-500 hover:text-red-700">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Close anomaly detection chart
+    function closeAnomalyChart() {
+        const anomalySection = document.getElementById('anomaly-section');
+        if (anomalySection) {
+            anomalySection.innerHTML = '';
+            anomalySection.classList.add('hidden');
         }
     }
 </script>
