@@ -9,6 +9,15 @@ from reddit_insight.dashboard.services.anomaly_service import (
     get_anomaly_service,
 )
 
+# 클러스터링 서비스
+from reddit_insight.dashboard.services.cluster_service import (
+    ClusterAnalysisView,
+    ClusterKeywordView,
+    ClusterService,
+    ClusterView,
+    get_cluster_service,
+)
+
 # 새 인사이트 서비스
 from reddit_insight.dashboard.services.insight_service import (
     InsightDetail,
@@ -52,6 +61,12 @@ __all__ = [
     "AnomalyView",
     "AnomalyPointView",
     "get_anomaly_service",
+    # Cluster service
+    "ClusterService",
+    "ClusterAnalysisView",
+    "ClusterView",
+    "ClusterKeywordView",
+    "get_cluster_service",
     # Insight service
     "InsightService",
     "InsightView",
