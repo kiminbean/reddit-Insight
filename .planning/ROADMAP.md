@@ -4,6 +4,11 @@
 
 Reddit 데이터 수집부터 비즈니스 인사이트 도출까지의 전체 파이프라인을 구축한다. 먼저 데이터 수집 인프라(API + 스크래핑)를 구축하고, 분석 엔진(트렌드, 수요, 경쟁)을 순차적으로 개발한 후, 이를 비즈니스 모델로 연결하는 인사이트 레이어를 추가한다. 최종적으로 웹 대시보드와 리포트 기능으로 결과를 제공한다.
 
+## Milestones
+
+- ✅ **v1.0 MVP** - Phases 1-11 (shipped 2026-01-14)
+- 🚧 **v1.1 Dashboard & ML Integration** - Phases 12-19 (in progress)
+
 ## Domain Expertise
 
 None
@@ -25,6 +30,14 @@ None
 - [x] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
 - [x] **Phase 10: Report Export & Polish** - 마크다운 리포트 생성, 통합 테스트
 - [x] **Phase 11: Advanced Analytics** - 고급 분석 기능 (머신러닝 기반 예측)
+- [ ] **Phase 12: Dashboard Data Integration** - DemandService, CompetitionService 실제 데이터 연동
+- [ ] **Phase 13: Recent Analyses** - 대시보드 홈 분석 기록 표시
+- [ ] **Phase 14: Trend Prediction UI** - 시계열 예측 차트 시각화
+- [ ] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
+- [ ] **Phase 16: Topic Modeling UI** - 토픽 분석 결과 시각화
+- [ ] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
+- [ ] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
+- [ ] **Phase 19: Integration Testing** - E2E 테스트, 성능 최적화
 
 ## Phase Details
 
@@ -159,10 +172,88 @@ Plans:
 - [x] 11-03: Anomaly Detection - 이상 탐지 엔진 (z-score, IQR, Isolation Forest)
 - [x] 11-04: Topic Modeling & Clustering - 토픽 모델링 (LDA/NMF), 텍스트 클러스터링
 
+---
+
+### 🚧 v1.1 Dashboard & ML Integration (In Progress)
+
+**Milestone Goal:** 대시보드의 실제 데이터 연동 완성 및 ML 분석 결과 시각화 통합
+
+#### Phase 12: Dashboard Data Integration
+**Goal**: DemandService, CompetitionService에 실제 분석 데이터 연동
+**Depends on**: Phase 11
+**Research**: Unlikely (internal patterns, existing data_store.py)
+**Plans**: TBD
+
+Plans:
+- [ ] 12-01: TBD (run /gsd:plan-phase 12 to break down)
+
+#### Phase 13: Recent Analyses
+**Goal**: 대시보드 홈에 최근 분석 기록 표시 기능 완성
+**Depends on**: Phase 12
+**Research**: Unlikely (existing DashboardService patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 13-01: TBD
+
+#### Phase 14: Trend Prediction UI
+**Goal**: 시계열 예측 결과를 차트로 시각화 (예측값 + 신뢰구간)
+**Depends on**: Phase 13
+**Research**: Unlikely (Chart.js already integrated)
+**Plans**: TBD
+
+Plans:
+- [ ] 14-01: TBD
+
+#### Phase 15: Anomaly Detection UI
+**Goal**: 이상 탐지 결과 시각화 (이상 포인트 하이라이트)
+**Depends on**: Phase 14
+**Research**: Unlikely (existing chart patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 15-01: TBD
+
+#### Phase 16: Topic Modeling UI
+**Goal**: 토픽 분석 결과 시각화 (토픽별 키워드, 문서 분포)
+**Depends on**: Phase 15
+**Research**: Unlikely (existing visualization patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 16-01: TBD
+
+#### Phase 17: Text Clustering UI
+**Goal**: 클러스터링 결과 시각화 (클러스터별 키워드, 대표 문서)
+**Depends on**: Phase 16
+**Research**: Unlikely (existing visualization patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 17-01: TBD
+
+#### Phase 18: Dashboard Polish
+**Goal**: UI/UX 개선, 반응형 디자인, 사용성 향상
+**Depends on**: Phase 17
+**Research**: Unlikely (Tailwind/HTMX existing patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 18-01: TBD
+
+#### Phase 19: Integration Testing
+**Goal**: E2E 테스트 보강, 성능 최적화, 문서 업데이트
+**Depends on**: Phase 18
+**Research**: Unlikely (existing test patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 19-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
+Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (v1.1)
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -177,3 +268,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 9. Web Dashboard | 5/5 | Complete | 2026-01-13 |
 | 10. Report Export & Polish | 4/4 | Complete | 2026-01-13 |
 | 11. Advanced Analytics | 4/4 | Complete | 2026-01-14 |
+| 12. Dashboard Data Integration | 0/? | Not started | - |
+| 13. Recent Analyses | 0/? | Not started | - |
+| 14. Trend Prediction UI | 0/? | Not started | - |
+| 15. Anomaly Detection UI | 0/? | Not started | - |
+| 16. Topic Modeling UI | 0/? | Not started | - |
+| 17. Text Clustering UI | 0/? | Not started | - |
+| 18. Dashboard Polish | 0/? | Not started | - |
+| 19. Integration Testing | 0/? | Not started | - |
