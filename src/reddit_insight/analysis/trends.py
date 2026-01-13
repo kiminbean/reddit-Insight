@@ -12,10 +12,18 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from reddit_insight.analysis.time_series import TimeSeries
+from reddit_insight.analysis.time_series import (
+    TimeGranularity,
+    TimePoint,
+    TimeSeries,
+    bucket_timestamp,
+)
 
 if TYPE_CHECKING:
-    pass
+    from collections import defaultdict
+
+    from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
+    from reddit_insight.reddit.models import Post
 
 
 # Threshold constants for trend classification
@@ -352,3 +360,287 @@ class TrendCalculator:
             metrics.slope,
             metrics.volatility,
         )
+
+
+@dataclass
+class KeywordTrendResult:
+    """
+    Result of keyword trend analysis.
+
+    Attributes:
+        keyword: The analyzed keyword
+        series: Time series data for the keyword
+        metrics: Trend metrics calculated from the series
+        analyzed_at: Timestamp when analysis was performed
+    """
+
+    keyword: str
+    series: TimeSeries
+    metrics: TrendMetrics
+    analyzed_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary representation."""
+        return {
+            "keyword": self.keyword,
+            "series": self.series.to_dict(),
+            "metrics": self.metrics.to_dict(),
+            "analyzed_at": self.analyzed_at.isoformat(),
+        }
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return (
+            f"KeywordTrendResult(keyword='{self.keyword}', "
+            f"direction={self.metrics.direction.value}, "
+            f"points={len(self.series)})"
+        )
+
+
+@dataclass
+class KeywordTrendAnalyzer:
+    """
+    Analyzer for keyword trends in Reddit posts.
+
+    Combines keyword extraction with time series analysis to track
+    how keyword frequencies change over time.
+
+    Attributes:
+        keyword_extractor: Extractor for identifying keywords in text
+        trend_calculator: Calculator for trend metrics
+
+    Example:
+        >>> analyzer = KeywordTrendAnalyzer()
+        >>> result = analyzer.analyze_keyword_trend(posts, "python")
+        >>> print(result.metrics.direction)
+        TrendDirection.RISING
+    """
+
+    keyword_extractor: "UnifiedKeywordExtractor | None" = None
+    trend_calculator: TrendCalculator | None = None
+
+    def __post_init__(self) -> None:
+        """Initialize default components if not provided."""
+        if self.trend_calculator is None:
+            self.trend_calculator = TrendCalculator()
+
+    def _get_extractor(self) -> "UnifiedKeywordExtractor":
+        """Lazy initialization of keyword extractor."""
+        if self.keyword_extractor is None:
+            from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
+
+            self.keyword_extractor = UnifiedKeywordExtractor()
+        return self.keyword_extractor
+
+    def _count_keyword_in_text(self, text: str, keyword: str) -> int:
+        """
+        Count occurrences of a keyword in text.
+
+        Case-insensitive counting of keyword occurrences.
+
+        Args:
+            text: Text to search in
+            keyword: Keyword to count
+
+        Returns:
+            Number of occurrences
+        """
+        if not text or not keyword:
+            return 0
+
+        # Simple case-insensitive word boundary matching
+        text_lower = text.lower()
+        keyword_lower = keyword.lower()
+
+        # Count occurrences
+        count = 0
+        start = 0
+        while True:
+            pos = text_lower.find(keyword_lower, start)
+            if pos == -1:
+                break
+            count += 1
+            start = pos + 1
+
+        return count
+
+    def build_keyword_timeseries(
+        self,
+        posts: list["Post"],
+        keyword: str,
+        granularity: TimeGranularity = TimeGranularity.DAY,
+    ) -> TimeSeries:
+        """
+        Build a time series for a specific keyword.
+
+        Counts keyword occurrences in posts and aggregates them
+        by the specified time granularity.
+
+        Args:
+            posts: List of Post objects to analyze
+            keyword: Keyword to track
+            granularity: Time unit for aggregation
+
+        Returns:
+            TimeSeries with keyword frequency over time
+        """
+        if not posts:
+            return TimeSeries(
+                keyword=keyword,
+                granularity=granularity,
+                points=[],
+            )
+
+        # Import defaultdict here to avoid circular imports
+        from collections import defaultdict
+
+        # Group posts by time bucket and count keyword occurrences
+        bucket_counts: dict[datetime, list[int]] = defaultdict(list)
+
+        for post in posts:
+            # Use created_utc for timestamp
+            bucket = bucket_timestamp(post.created_utc, granularity)
+
+            # Combine title and selftext for search
+            text = post.title
+            if post.selftext:
+                text = f"{text} {post.selftext}"
+
+            count = self._count_keyword_in_text(text, keyword)
+            bucket_counts[bucket].append(count)
+
+        # Convert to time points
+        points = []
+        for timestamp in sorted(bucket_counts.keys()):
+            counts = bucket_counts[timestamp]
+            total_count = sum(counts)
+            points.append(
+                TimePoint(
+                    timestamp=timestamp,
+                    value=float(total_count),
+                    count=len(counts),  # Number of posts in this bucket
+                )
+            )
+
+        return TimeSeries(
+            keyword=keyword,
+            granularity=granularity,
+            points=points,
+        )
+
+    def build_multiple_timeseries(
+        self,
+        posts: list["Post"],
+        keywords: list[str],
+        granularity: TimeGranularity = TimeGranularity.DAY,
+    ) -> dict[str, TimeSeries]:
+        """
+        Build time series for multiple keywords.
+
+        Args:
+            posts: List of Post objects to analyze
+            keywords: List of keywords to track
+            granularity: Time unit for aggregation
+
+        Returns:
+            Dictionary mapping keywords to their time series
+        """
+        result = {}
+        for keyword in keywords:
+            result[keyword] = self.build_keyword_timeseries(
+                posts, keyword, granularity
+            )
+        return result
+
+    def analyze_keyword_trend(
+        self,
+        posts: list["Post"],
+        keyword: str,
+        granularity: TimeGranularity = TimeGranularity.DAY,
+    ) -> KeywordTrendResult:
+        """
+        Analyze the trend for a specific keyword.
+
+        Builds a time series and calculates trend metrics for
+        the specified keyword.
+
+        Args:
+            posts: List of Post objects to analyze
+            keyword: Keyword to analyze
+            granularity: Time unit for aggregation
+
+        Returns:
+            KeywordTrendResult with series and metrics
+        """
+        # Build time series
+        series = self.build_keyword_timeseries(posts, keyword, granularity)
+
+        # Calculate trend metrics
+        metrics = self.trend_calculator.calculate_trend(series)
+
+        return KeywordTrendResult(
+            keyword=keyword,
+            series=series,
+            metrics=metrics,
+        )
+
+    def analyze_multiple_keywords(
+        self,
+        posts: list["Post"],
+        keywords: list[str],
+        granularity: TimeGranularity = TimeGranularity.DAY,
+    ) -> list[KeywordTrendResult]:
+        """
+        Analyze trends for multiple keywords.
+
+        Args:
+            posts: List of Post objects to analyze
+            keywords: List of keywords to analyze
+            granularity: Time unit for aggregation
+
+        Returns:
+            List of KeywordTrendResult objects
+        """
+        results = []
+        for keyword in keywords:
+            result = self.analyze_keyword_trend(posts, keyword, granularity)
+            results.append(result)
+        return results
+
+    def find_trending_keywords(
+        self,
+        posts: list["Post"],
+        num_keywords: int = 10,
+        granularity: TimeGranularity = TimeGranularity.DAY,
+    ) -> list[KeywordTrendResult]:
+        """
+        Find and analyze the top trending keywords.
+
+        Extracts keywords from posts and analyzes their trends,
+        returning results sorted by trend strength.
+
+        Args:
+            posts: List of Post objects to analyze
+            num_keywords: Number of top keywords to analyze
+            granularity: Time unit for aggregation
+
+        Returns:
+            List of KeywordTrendResult sorted by change rate
+        """
+        if not posts:
+            return []
+
+        # Extract keywords from all posts
+        extractor = self._get_extractor()
+        keyword_result = extractor.extract_from_posts(posts, num_keywords=num_keywords * 2)
+
+        # Get top keyword strings
+        keywords = [kw.keyword for kw in keyword_result.keywords[:num_keywords * 2]]
+
+        # Analyze each keyword
+        results = self.analyze_multiple_keywords(posts, keywords, granularity)
+
+        # Sort by absolute change rate (trending up or down)
+        results.sort(key=lambda r: abs(r.metrics.change_rate), reverse=True)
+
+        return results[:num_keywords]
