@@ -18,8 +18,8 @@ None
 - [x] **Phase 2: Reddit API Integration** - Reddit API 클라이언트, 인증, 데이터 수집
 - [x] **Phase 3: Web Scraping Fallback** - API 제한 시 스크래핑 백업 시스템
 - [x] **Phase 4: Data Storage & Pipeline** - 데이터베이스, 전처리 파이프라인
-- [ ] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
-- [ ] **Phase 6: Demand Discovery** - "이거 있으면 좋겠다" 패턴 탐지
+- [x] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
+- [x] **Phase 6: Demand Discovery** - "이거 있으면 좋겠다" 패턴 탐지
 - [ ] **Phase 7: Competitive Analysis** - 제품/서비스 반응 및 불만 분석
 - [ ] **Phase 8: Business Model Insights** - 인사이트 → 실행 가능한 기회 연결
 - [ ] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
@@ -80,10 +80,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 05-01: 텍스트 전처리 및 토큰화
-- [ ] 05-02: 키워드 추출 엔진
-- [ ] 05-03: 시계열 트렌드 분석
-- [ ] 05-04: 급상승 키워드 탐지
+- [x] 05-01: 텍스트 전처리 및 토큰화
+- [x] 05-02: 키워드 추출 엔진
+- [x] 05-03: 시계열 트렌드 분석
+- [x] 05-04: 급상승 키워드 탐지
 
 ### Phase 6: Demand Discovery
 **Goal**: "이거 있으면 좋겠다" 패턴을 자동 탐지하여 미충족 수요 발굴
@@ -93,9 +93,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: 수요 표현 패턴 정의
-- [ ] 06-02: 패턴 매칭 엔진
-- [ ] 06-03: 수요 분류 및 우선순위화
+- [x] 06-01: 수요 표현 패턴 정의
+- [x] 06-02: 패턴 매칭 엔진
+- [x] 06-03: 수요 분류 및 우선순위화
 
 ### Phase 7: Competitive Analysis
 **Goal**: 제품/서비스에 대한 반응, 불만, 대안 요구 분석
@@ -156,8 +156,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Reddit API Integration | 3/3 | Complete | 2026-01-13 |
 | 3. Web Scraping Fallback | 3/3 | Complete | 2026-01-13 |
 | 4. Data Storage & Pipeline | 3/3 | Complete | 2026-01-13 |
-| 5. Trend Analysis Engine | 0/4 | Not started | - |
-| 6. Demand Discovery | 0/3 | Not started | - |
+| 5. Trend Analysis Engine | 4/4 | Complete | 2026-01-13 |
+| 6. Demand Discovery | 3/3 | Complete | 2026-01-13 |
 | 7. Competitive Analysis | 0/3 | Not started | - |
 | 8. Business Model Insights | 0/3 | Not started | - |
 | 9. Web Dashboard | 0/5 | Not started | - |
