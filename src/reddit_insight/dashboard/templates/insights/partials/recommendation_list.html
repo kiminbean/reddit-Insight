@@ -1,0 +1,99 @@
+<!-- Recommendation List Partial -->
+<div class="p-6">
+    {% if recommendations %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for rec in recommendations %}
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+            <!-- Header with Rank and Grade -->
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 text-sm font-bold">
+                            #{{ rec.rank }}
+                        </span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ rec.grade_color }}">
+                            Grade {{ rec.grade }}
+                        </span>
+                    </div>
+                    <span class="inline-flex items-center text-sm {{ rec.risk_color }}">
+                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            {% if rec.risk_level == 'LOW' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            {% elif rec.risk_level == 'MEDIUM' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            {% endif %}
+                        </svg>
+                        {{ rec.risk_level }} Risk
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 py-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
+                    <a href="/dashboard/insights/{{ rec.insight_id }}" class="hover:text-primary-600">
+                        {{ rec.insight_title }}
+                    </a>
+                </h3>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 mb-3">
+                    {{ rec.type_display }}
+                </span>
+
+                <!-- Score Breakdown -->
+                <div class="space-y-2 mt-4">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Business Score</span>
+                        <div class="flex items-center">
+                            <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: {{ rec.business_score }}%"></div>
+                            </div>
+                            <span class="font-medium text-gray-900 w-10 text-right">{{ rec.business_score|round(1) }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-500">Feasibility</span>
+                        <div class="flex items-center">
+                            <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: {{ rec.feasibility_score }}%"></div>
+                            </div>
+                            <span class="font-medium text-gray-900 w-10 text-right">{{ rec.feasibility_score|round(1) }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm pt-2 border-t border-gray-100">
+                        <span class="font-medium text-gray-700">Final Score</span>
+                        <span class="text-lg font-bold text-primary-600">{{ rec.final_score|round(1) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Items -->
+            {% if rec.action_items %}
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Action Items</h4>
+                <ul class="space-y-1">
+                    {% for item in rec.action_items[:3] %}
+                    <li class="flex items-start text-sm text-gray-600">
+                        <svg class="h-4 w-4 mr-2 mt-0.5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        {{ item }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No recommendations yet</h3>
+        <p class="mt-1 text-sm text-gray-500">Recommendations will appear after analysis is complete.</p>
+    </div>
+    {% endif %}
+</div>

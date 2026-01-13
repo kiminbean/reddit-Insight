@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Insights{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <!-- Tab Navigation -->
+    <div class="bg-white shadow rounded-lg mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                <button type="button"
+                        id="tab-insights"
+                        onclick="showTab('insights')"
+                        class="tab-button border-primary-500 text-primary-600 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+                    Insights
+                </button>
+                <button type="button"
+                        id="tab-recommendations"
+                        onclick="showTab('recommendations')"
+                        class="tab-button border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+                    Recommendations
+                </button>
+                <button type="button"
+                        id="tab-opportunities"
+                        onclick="showTab('opportunities')"
+                        class="tab-button border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
+                    Opportunities
+                </button>
+            </nav>
+        </div>
+
+        <!-- Filter Form (Insights Tab) -->
+        <div id="filter-section" class="p-6">
+            <form id="filter-form" class="flex flex-wrap gap-4 items-end">
+                <div class="w-48">
+                    <label for="insight_type" class="block text-sm font-medium text-gray-700 mb-1">Insight Type</label>
+                    <select id="insight_type"
+                            name="insight_type"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="">All Types</option>
+                        {% for type in insight_types %}
+                        <option value="{{ type.value }}" {% if filters.insight_type == type.value %}selected{% endif %}>{{ type.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-40">
+                    <label for="min_confidence" class="block text-sm font-medium text-gray-700 mb-1">Min Confidence</label>
+                    <select id="min_confidence"
+                            name="min_confidence"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="0" {% if filters.min_confidence == 0 %}selected{% endif %}>Any</option>
+                        <option value="0.5" {% if filters.min_confidence == 0.5 %}selected{% endif %}>50%+</option>
+                        <option value="0.7" {% if filters.min_confidence == 0.7 %}selected{% endif %}>70%+</option>
+                        <option value="0.8" {% if filters.min_confidence == 0.8 %}selected{% endif %}>80%+</option>
+                        <option value="0.9" {% if filters.min_confidence == 0.9 %}selected{% endif %}>90%+</option>
+                    </select>
+                </div>
+                <div class="w-32">
+                    <label for="limit" class="block text-sm font-medium text-gray-700 mb-1">Show</label>
+                    <select id="limit"
+                            name="limit"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                        <option value="10" {% if filters.limit == 10 %}selected{% endif %}>10</option>
+                        <option value="20" {% if filters.limit == 20 %}selected{% endif %}>20</option>
+                        <option value="50" {% if filters.limit == 50 %}selected{% endif %}>50</option>
+                    </select>
+                </div>
+                <button type="submit"
+                        hx-get="/dashboard/insights/list"
+                        hx-target="#insights-content"
+                        hx-include="#filter-form"
+                        class="inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                    <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                    </svg>
+                    Apply Filter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="tab-content-insights" class="tab-content">
+        <!-- Grade Distribution Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Grade Distribution</h3>
+                <div class="h-48">
+                    <canvas id="gradeDistributionChart"></canvas>
+                </div>
+            </div>
+            <div class="lg:col-span-2 bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Overview</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-600">{{ insights|length }}</div>
+                        <div class="text-sm text-gray-600">Total Insights</div>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="text-3xl font-bold text-green-600">{{ recommendations|length }}</div>
+                        <div class="text-sm text-gray-600">Recommendations</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-600">{{ opportunities|length }}</div>
+                        <div class="text-sm text-gray-600">Opportunities</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Grid -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Business Insights</h3>
+                <p class="text-sm text-gray-500">Discovered patterns and opportunities from Reddit data</p>
+            </div>
+            <div id="insights-content">
+                {% include "insights/partials/insight_list.html" %}
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-content-recommendations" class="tab-content hidden">
+        <!-- Recommendations Section -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Actionable Recommendations</h3>
+                <p class="text-sm text-gray-500">Top opportunities ranked by business value and feasibility</p>
+            </div>
+            <div id="recommendations-content"
+                 hx-get="/dashboard/insights/recommendations?top_n=10"
+                 hx-trigger="revealed"
+                 hx-swap="innerHTML">
+                {% include "insights/partials/recommendation_list.html" %}
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-content-opportunities" class="tab-content hidden">
+        <!-- Opportunities Table -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Opportunity Ranking</h3>
+                <p class="text-sm text-gray-500">Business opportunities scored across multiple dimensions</p>
+            </div>
+            <div id="opportunities-content"
+                 hx-get="/dashboard/insights/opportunities?limit=20"
+                 hx-trigger="revealed"
+                 hx-swap="innerHTML">
+                {% include "insights/partials/opportunity_table.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Tab switching functionality
+    function showTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+
+        // Remove active state from all tabs
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('border-primary-500', 'text-primary-600');
+            button.classList.add('border-transparent', 'text-gray-500');
+        });
+
+        // Show selected tab content
+        document.getElementById('tab-content-' + tabName).classList.remove('hidden');
+
+        // Set active state on selected tab
+        const activeTab = document.getElementById('tab-' + tabName);
+        activeTab.classList.remove('border-transparent', 'text-gray-500');
+        activeTab.classList.add('border-primary-500', 'text-primary-600');
+
+        // Show/hide filter section based on tab
+        const filterSection = document.getElementById('filter-section');
+        if (tabName === 'insights') {
+            filterSection.classList.remove('hidden');
+        } else {
+            filterSection.classList.add('hidden');
+        }
+    }
+
+    // Initialize Grade Distribution Chart
+    let gradeChart;
+    async function initGradeDistributionChart() {
+        const ctx = document.getElementById('gradeDistributionChart').getContext('2d');
+
+        try {
+            const response = await fetch('/dashboard/insights/chart/grade-distribution');
+            const data = await response.json();
+
+            gradeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        } catch (error) {
+            console.error('Failed to load grade distribution chart:', error);
+        }
+    }
+
+    // Initialize charts on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        initGradeDistributionChart();
+    });
+</script>
+{% endblock %}

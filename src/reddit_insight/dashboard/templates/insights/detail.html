@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block page_header %}
+<header class="bg-white shadow">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-2">
+                        <li>
+                            <a href="/dashboard/insights" class="text-sm text-gray-500 hover:text-gray-700">Insights</a>
+                        </li>
+                        <li>
+                            <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </li>
+                        <li>
+                            <span class="text-sm text-gray-900">Detail</span>
+                        </li>
+                    </ol>
+                </nav>
+                {% if insight %}
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    {{ insight.title }}
+                </h1>
+                {% else %}
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    Insight Not Found
+                </h1>
+                {% endif %}
+            </div>
+            <div class="mt-4 flex md:ml-4 md:mt-0">
+                <a href="/dashboard/insights"
+                   class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Insights
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    {% if insight %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Overview Card -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-gray-900">Overview</h3>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ insight.type_color }}">
+                            {{ insight.type_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-gray-700 leading-relaxed">
+                        {{ insight.description }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Evidence Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Supporting Evidence</h3>
+                    <p class="text-sm text-gray-500">Data points that support this insight</p>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    {% for ev in insight.evidence %}
+                    <div class="px-6 py-4 flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                                <svg class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-gray-700">{{ ev }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Related Entities -->
+            {% if insight.related_entities %}
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Related Entities</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="flex flex-wrap gap-2">
+                        {% for entity in insight.related_entities %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ entity }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Related Demands -->
+            {% if insight.related_demands %}
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Related Demands</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="flex flex-wrap gap-2">
+                        {% for demand in insight.related_demands %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                            {{ demand }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Metrics Card -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Metrics</h3>
+                </div>
+                <div class="px-6 py-4 space-y-4">
+                    <!-- Confidence -->
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-1">
+                            <span class="text-gray-500">Confidence</span>
+                            <span class="font-semibold text-gray-900">{{ insight.confidence_percent }}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-primary-600 h-2.5 rounded-full" style="width: {{ insight.confidence_percent }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <div class="flex items-center justify-between text-sm mb-1">
+                            <span class="text-gray-500">Priority</span>
+                            <span class="font-semibold text-gray-900">{{ insight.priority|round(1) }}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="{% if insight.priority >= 80 %}bg-green-500{% elif insight.priority >= 60 %}bg-blue-500{% elif insight.priority >= 40 %}bg-yellow-500{% else %}bg-gray-500{% endif %} h-2.5 rounded-full" style="width: {{ insight.priority }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Evidence Count -->
+                    <div class="pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500">Evidence Points</span>
+                            <span class="text-2xl font-bold text-gray-900">{{ insight.evidence_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score Breakdown Chart -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Score Breakdown</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="h-64">
+                        <canvas id="scoreBreakdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Details</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <dl class="space-y-3">
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">ID</dt>
+                            <dd class="text-sm font-mono text-gray-900">{{ insight.id }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">Type</dt>
+                            <dd class="text-sm text-gray-900">{{ insight.type_display }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm text-gray-500">Created</dt>
+                            <dd class="text-sm text-gray-900">{{ insight.created_at_display }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Error State -->
+    <div class="bg-white shadow rounded-lg p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">Insight Not Found</h3>
+        <p class="mt-2 text-sm text-gray-500">{{ error_message or "The requested insight could not be found." }}</p>
+        <div class="mt-6">
+            <a href="/dashboard/insights"
+               class="inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                Return to Insights
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if insight %}
+<script>
+    // Initialize Score Breakdown Radar Chart
+    async function initScoreBreakdownChart() {
+        const ctx = document.getElementById('scoreBreakdownChart').getContext('2d');
+
+        try {
+            const response = await fetch('/dashboard/insights/chart/score-breakdown/{{ insight.id }}');
+            const data = await response.json();
+
+            if (data.error) {
+                console.error('Chart data error:', data.error);
+                return;
+            }
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                display: false
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Failed to load score breakdown chart:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initScoreBreakdownChart();
+    });
+</script>
+{% endif %}
+{% endblock %}
