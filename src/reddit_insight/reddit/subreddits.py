@@ -165,3 +165,128 @@ class SubredditExplorer:
             if info is not None:
                 results.append(info)
         return results
+
+    def get_popular(self, limit: int = 25) -> list[SubredditInfo]:
+        """인기 서브레딧 조회.
+
+        Reddit 전체에서 인기 있는 서브레딧 목록을 반환한다.
+        구독자 수와 활동량을 기준으로 정렬된다.
+
+        Args:
+            limit: 최대 결과 수 (기본: 25)
+
+        Returns:
+            list[SubredditInfo]: 인기 서브레딧 목록
+
+        Example:
+            >>> popular = explorer.get_popular(limit=10)
+            >>> for sub in popular:
+            ...     print(f"{sub.display_name}: {sub.subscribers:,}")
+        """
+        reddit = self._client._ensure_connected()
+        subreddits = reddit.subreddits.popular(limit=limit)
+        results = []
+        for sub in subreddits:
+            try:
+                results.append(self._convert_subreddit(sub))
+            except Exception as e:
+                logger.warning("서브레딧 변환 실패 (%s): %s", getattr(sub, "display_name", "unknown"), e)
+        return results
+
+    def get_new(self, limit: int = 25) -> list[SubredditInfo]:
+        """최근 생성된 서브레딧 조회.
+
+        최근에 생성된 새로운 서브레딧 목록을 반환한다.
+
+        Args:
+            limit: 최대 결과 수 (기본: 25)
+
+        Returns:
+            list[SubredditInfo]: 최근 생성된 서브레딧 목록
+
+        Example:
+            >>> new_subs = explorer.get_new(limit=10)
+            >>> for sub in new_subs:
+            ...     print(f"{sub.display_name} - created: {sub.created_utc}")
+        """
+        reddit = self._client._ensure_connected()
+        subreddits = reddit.subreddits.new(limit=limit)
+        results = []
+        for sub in subreddits:
+            try:
+                results.append(self._convert_subreddit(sub))
+            except Exception as e:
+                logger.warning("서브레딧 변환 실패 (%s): %s", getattr(sub, "display_name", "unknown"), e)
+        return results
+
+    def get_default(self) -> list[SubredditInfo]:
+        """기본 서브레딧 목록 조회.
+
+        Reddit의 기본 구독 서브레딧 목록을 반환한다.
+        새 계정 생성 시 자동으로 구독되는 서브레딧들이다.
+
+        Returns:
+            list[SubredditInfo]: 기본 서브레딧 목록
+
+        Example:
+            >>> defaults = explorer.get_default()
+            >>> for sub in defaults:
+            ...     print(sub.display_name)
+        """
+        reddit = self._client._ensure_connected()
+        subreddits = reddit.subreddits.default(limit=None)
+        results = []
+        for sub in subreddits:
+            try:
+                results.append(self._convert_subreddit(sub))
+            except Exception as e:
+                logger.warning("서브레딧 변환 실패 (%s): %s", getattr(sub, "display_name", "unknown"), e)
+        return results
+
+    def get_related(self, subreddit: str) -> list[str]:
+        """관련 서브레딧 탐색.
+
+        서브레딧의 사이드바 또는 설명에서 언급된 관련 서브레딧을 추출한다.
+        Reddit API는 공식적인 '관련 서브레딧' 엔드포인트를 제공하지 않으므로,
+        서브레딧 설명에서 r/xxx 패턴을 찾아 추출한다.
+
+        Args:
+            subreddit: 서브레딧 이름
+
+        Returns:
+            list[str]: 관련 서브레딧 이름 목록 (없으면 빈 리스트)
+
+        Example:
+            >>> related = explorer.get_related("python")
+            >>> for name in related:
+            ...     print(f"r/{name}")
+        """
+        import re
+
+        try:
+            sub = self._client.get_subreddit(subreddit)
+            # description과 sidebar에서 서브레딧 언급 추출
+            text_sources = [
+                getattr(sub, "description", "") or "",
+                getattr(sub, "public_description", "") or "",
+            ]
+            combined_text = " ".join(text_sources)
+
+            # r/xxx 패턴 매칭 (대소문자 무관)
+            pattern = r"r/([a-zA-Z0-9_]+)"
+            matches = re.findall(pattern, combined_text)
+
+            # 중복 제거 및 원본 서브레딧 제외
+            related_names = []
+            seen = set()
+            for name in matches:
+                lower_name = name.lower()
+                if lower_name not in seen and lower_name != subreddit.lower():
+                    seen.add(lower_name)
+                    related_names.append(name)
+
+            return related_names
+
+        except Exception as e:
+            logger.warning("관련 서브레딧 탐색 실패 (%s): %s", subreddit, e)
+            return []
