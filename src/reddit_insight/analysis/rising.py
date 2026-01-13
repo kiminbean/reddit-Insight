@@ -423,3 +423,243 @@ class RisingKeywordDetector:
         )
 
         return self.detect_rising(posts, top_n=top_n, reference_time=now)
+
+
+@dataclass
+class TrendReport:
+    """
+    Comprehensive trend report for a time period.
+
+    Combines rising keywords with top keywords to provide
+    a complete picture of trends.
+
+    Attributes:
+        generated_at: When the report was generated
+        period_start: Start of the analysis period
+        period_end: End of the analysis period
+        subreddit: Subreddit filter (None = all)
+        rising_keywords: List of rising keyword scores
+        top_keywords: List of top keywords by frequency
+        total_posts_analyzed: Number of posts included in analysis
+    """
+
+    generated_at: datetime
+    period_start: datetime
+    period_end: datetime
+    subreddit: str | None
+    rising_keywords: list[RisingScore]
+    top_keywords: list["Keyword"]
+    total_posts_analyzed: int
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary representation."""
+        return {
+            "generated_at": self.generated_at.isoformat(),
+            "period_start": self.period_start.isoformat(),
+            "period_end": self.period_end.isoformat(),
+            "subreddit": self.subreddit,
+            "rising_keywords": [rs.to_dict() for rs in self.rising_keywords],
+            "top_keywords": [
+                {"keyword": kw.keyword, "score": kw.score}
+                for kw in self.top_keywords
+            ],
+            "total_posts_analyzed": self.total_posts_analyzed,
+        }
+
+
+@dataclass
+class TrendReporter:
+    """
+    Generator for comprehensive trend reports.
+
+    Combines rising keyword detection with top keyword extraction
+    to create detailed trend reports.
+
+    Attributes:
+        rising_detector: Detector for rising keywords
+        keyword_extractor: Extractor for top keywords
+
+    Example:
+        >>> reporter = TrendReporter()
+        >>> report = reporter.generate_report(posts)
+        >>> print(reporter.to_markdown(report))
+    """
+
+    rising_detector: RisingKeywordDetector | None = None
+    keyword_extractor: "UnifiedKeywordExtractor | None" = None
+
+    def _get_detector(self) -> RisingKeywordDetector:
+        """Lazy initialization of rising detector."""
+        if self.rising_detector is None:
+            self.rising_detector = RisingKeywordDetector()
+        return self.rising_detector
+
+    def _get_extractor(self) -> "UnifiedKeywordExtractor":
+        """Lazy initialization of keyword extractor."""
+        if self.keyword_extractor is None:
+            from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
+
+            self.keyword_extractor = UnifiedKeywordExtractor()
+        return self.keyword_extractor
+
+    def generate_report(
+        self,
+        posts: list["Post"],
+        subreddit: str | None = None,
+        num_rising: int = 10,
+        num_top: int = 20,
+    ) -> TrendReport:
+        """
+        Generate a comprehensive trend report.
+
+        Analyzes posts to identify both rising and top keywords.
+
+        Args:
+            posts: List of posts to analyze
+            subreddit: Subreddit name for labeling (None = all)
+            num_rising: Number of rising keywords to include
+            num_top: Number of top keywords to include
+
+        Returns:
+            TrendReport with analysis results
+        """
+        now = datetime.now(UTC)
+        detector = self._get_detector()
+        extractor = self._get_extractor()
+
+        # Detect rising keywords
+        rising = detector.detect_rising(posts, top_n=num_rising, reference_time=now)
+
+        # Extract top keywords
+        result = extractor.extract_from_posts(posts, num_keywords=num_top)
+        top_keywords = result.keywords
+
+        # Calculate period boundaries
+        config = detector.config
+        period_end = now
+        period_start = now - timedelta(
+            hours=config.recent_period_hours + config.comparison_period_hours
+        )
+
+        return TrendReport(
+            generated_at=now,
+            period_start=period_start,
+            period_end=period_end,
+            subreddit=subreddit,
+            rising_keywords=rising,
+            top_keywords=top_keywords,
+            total_posts_analyzed=len(posts),
+        )
+
+    def to_dict(self, report: TrendReport) -> dict:
+        """
+        Convert report to JSON-serializable dictionary.
+
+        Args:
+            report: TrendReport to convert
+
+        Returns:
+            Dictionary representation
+        """
+        return report.to_dict()
+
+    def to_markdown(self, report: TrendReport) -> str:
+        """
+        Convert report to markdown format.
+
+        Creates a human-readable markdown document
+        summarizing the trend report.
+
+        Args:
+            report: TrendReport to format
+
+        Returns:
+            Markdown-formatted string
+        """
+        lines = []
+
+        # Header
+        lines.append("# Trend Report")
+        lines.append("")
+
+        # Metadata
+        lines.append("## Overview")
+        lines.append("")
+        lines.append(f"- **Generated**: {report.generated_at.strftime('%Y-%m-%d %H:%M UTC')}")
+        lines.append(f"- **Period**: {report.period_start.strftime('%Y-%m-%d')} to {report.period_end.strftime('%Y-%m-%d')}")
+        if report.subreddit:
+            lines.append(f"- **Subreddit**: r/{report.subreddit}")
+        lines.append(f"- **Posts Analyzed**: {report.total_posts_analyzed:,}")
+        lines.append("")
+
+        # Rising keywords
+        lines.append("## Rising Keywords")
+        lines.append("")
+        if report.rising_keywords:
+            lines.append("| Rank | Keyword | Score | Growth | Recent | Previous | New |")
+            lines.append("|------|---------|-------|--------|--------|----------|-----|")
+            for i, rs in enumerate(report.rising_keywords, 1):
+                new_marker = "Yes" if rs.is_new else "No"
+                growth_str = f"{rs.growth_rate:+.0%}" if not rs.is_new else "N/A"
+                lines.append(
+                    f"| {i} | {rs.keyword} | {rs.score:.1f} | "
+                    f"{growth_str} | {rs.recent_frequency} | "
+                    f"{rs.previous_frequency} | {new_marker} |"
+                )
+        else:
+            lines.append("_No rising keywords detected._")
+        lines.append("")
+
+        # Top keywords
+        lines.append("## Top Keywords")
+        lines.append("")
+        if report.top_keywords:
+            lines.append("| Rank | Keyword | Score |")
+            lines.append("|------|---------|-------|")
+            for i, kw in enumerate(report.top_keywords[:10], 1):
+                lines.append(f"| {i} | {kw.keyword} | {kw.score:.3f} |")
+        else:
+            lines.append("_No keywords extracted._")
+        lines.append("")
+
+        # Summary
+        lines.append("## Summary")
+        lines.append("")
+        lines.append(self._summarize_trends(report))
+        lines.append("")
+
+        return "\n".join(lines)
+
+    def _summarize_trends(self, report: TrendReport) -> str:
+        """
+        Generate a text summary of trends.
+
+        Args:
+            report: TrendReport to summarize
+
+        Returns:
+            Summary paragraph
+        """
+        parts = []
+
+        # Rising keywords summary
+        rising_count = len(report.rising_keywords)
+        new_count = sum(1 for rs in report.rising_keywords if rs.is_new)
+
+        if rising_count > 0:
+            top_rising = report.rising_keywords[0].keyword if report.rising_keywords else None
+            parts.append(
+                f"Detected {rising_count} rising keywords"
+                f"{f', including {new_count} new keywords' if new_count > 0 else ''}."
+            )
+            if top_rising:
+                parts.append(f"The fastest rising keyword is '{top_rising}'.")
+        else:
+            parts.append("No significant rising trends detected in this period.")
+
+        # Top keywords summary
+        if report.top_keywords:
+            top_kw = report.top_keywords[0].keyword
+            parts.append(f"The most prominent keyword overall is '{top_kw}'.")
+
+        return " ".join(parts)
