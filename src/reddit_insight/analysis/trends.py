@@ -2,7 +2,8 @@
 Trend analysis for keyword time series.
 
 Provides tools for calculating trend metrics, detecting trend direction,
-and analyzing keyword frequency changes over time.
+and analyzing keyword frequency changes over time. Includes prediction
+capabilities for forecasting future trends.
 """
 
 from __future__ import annotations
@@ -22,6 +23,8 @@ from reddit_insight.analysis.time_series import (
 if TYPE_CHECKING:
 
     from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
+    from reddit_insight.analysis.ml.models import PredictionResult
+    from reddit_insight.analysis.ml.trend_predictor import TrendPredictor
     from reddit_insight.reddit.models import Post
 
 
@@ -371,28 +374,36 @@ class KeywordTrendResult:
         series: Time series data for the keyword
         metrics: Trend metrics calculated from the series
         analyzed_at: Timestamp when analysis was performed
+        forecast: Optional prediction of future values
     """
 
     keyword: str
     series: TimeSeries
     metrics: TrendMetrics
     analyzed_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    forecast: PredictionResult | None = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary representation."""
-        return {
+        result = {
             "keyword": self.keyword,
             "series": self.series.to_dict(),
             "metrics": self.metrics.to_dict(),
             "analyzed_at": self.analyzed_at.isoformat(),
         }
+        if self.forecast is not None:
+            result["forecast"] = self.forecast.to_dict()
+        return result
 
     def __repr__(self) -> str:
         """String representation for debugging."""
+        forecast_info = ""
+        if self.forecast:
+            forecast_info = f", forecast={len(self.forecast.values)} periods"
         return (
             f"KeywordTrendResult(keyword='{self.keyword}', "
             f"direction={self.metrics.direction.value}, "
-            f"points={len(self.series)})"
+            f"points={len(self.series)}{forecast_info})"
         )
 
 
@@ -402,21 +413,27 @@ class KeywordTrendAnalyzer:
     Analyzer for keyword trends in Reddit posts.
 
     Combines keyword extraction with time series analysis to track
-    how keyword frequencies change over time.
+    how keyword frequencies change over time. Supports forecasting
+    future trends using ML-based prediction.
 
     Attributes:
         keyword_extractor: Extractor for identifying keywords in text
         trend_calculator: Calculator for trend metrics
+        _predictor: Lazy-initialized TrendPredictor for forecasting
 
     Example:
         >>> analyzer = KeywordTrendAnalyzer()
         >>> result = analyzer.analyze_keyword_trend(posts, "python")
         >>> print(result.metrics.direction)
         TrendDirection.RISING
+        >>> # With forecasting
+        >>> results = analyzer.analyze_with_forecast(posts, ["python"], forecast_periods=7)
+        >>> print(results[0].forecast.values)  # 7 predicted values
     """
 
     keyword_extractor: UnifiedKeywordExtractor | None = None
     trend_calculator: TrendCalculator | None = None
+    _predictor: TrendPredictor | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Initialize default components if not provided."""
@@ -643,3 +660,84 @@ class KeywordTrendAnalyzer:
         results.sort(key=lambda r: abs(r.metrics.change_rate), reverse=True)
 
         return results[:num_keywords]
+
+    def _get_predictor(self, forecast_periods: int = 7) -> TrendPredictor:
+        """
+        Get or create the TrendPredictor.
+
+        Args:
+            forecast_periods: Number of periods to forecast
+
+        Returns:
+            Initialized TrendPredictor instance
+        """
+        from reddit_insight.analysis.ml.trend_predictor import (
+            TrendPredictor,
+            TrendPredictorConfig,
+        )
+
+        if self._predictor is None:
+            self._predictor = TrendPredictor(
+                TrendPredictorConfig(forecast_periods=forecast_periods)
+            )
+        return self._predictor
+
+    def analyze_with_forecast(
+        self,
+        posts: list[Post],
+        keywords: list[str],
+        granularity: TimeGranularity = TimeGranularity.DAY,
+        forecast_periods: int = 7,
+        min_data_points: int = 10,
+    ) -> list[KeywordTrendResult]:
+        """
+        Analyze keyword trends with future predictions.
+
+        Extends analyze_multiple_keywords() to include ML-based forecasts
+        for each keyword's time series.
+
+        Args:
+            posts: List of Post objects to analyze
+            keywords: List of keywords to analyze
+            granularity: Time unit for aggregation
+            forecast_periods: Number of future periods to predict
+            min_data_points: Minimum data points required for prediction
+
+        Returns:
+            List of KeywordTrendResult with forecast field populated
+
+        Example:
+            >>> analyzer = KeywordTrendAnalyzer()
+            >>> results = analyzer.analyze_with_forecast(
+            ...     posts, ["python", "ml"], forecast_periods=7
+            ... )
+            >>> for r in results:
+            ...     if r.forecast:
+            ...         print(f"{r.keyword}: {len(r.forecast.values)} predictions")
+        """
+        from reddit_insight.analysis.ml.trend_predictor import (
+            TrendPredictor,
+            TrendPredictorConfig,
+        )
+
+        # First get basic trend analysis
+        results = self.analyze_multiple_keywords(posts, keywords, granularity)
+
+        # Create predictor with specified forecast periods
+        predictor = TrendPredictor(
+            TrendPredictorConfig(
+                forecast_periods=forecast_periods,
+                min_data_points=min_data_points,
+            )
+        )
+
+        # Add forecasts to each result
+        for result in results:
+            if len(result.series) >= min_data_points:
+                try:
+                    result.forecast = predictor.predict(result.series)
+                except Exception:
+                    # If prediction fails, leave forecast as None
+                    pass
+
+        return results
