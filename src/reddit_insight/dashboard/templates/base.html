@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,9 +17,10 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
-    <!-- TailwindCSS Config -->
+    <!-- TailwindCSS Config with Dark Mode -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -41,18 +42,140 @@
         }
     </script>
 
+    <!-- Dark Mode Initial Script (prevents flash) -->
+    <script>
+        (function() {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     {% block head %}{% endblock %}
 </head>
-<body class="h-full">
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div class="min-h-full">
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu-overlay"
+             class="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/80 z-40 hidden opacity-0 transition-opacity duration-300"
+             aria-hidden="true"></div>
+
+        <!-- Mobile Sidebar -->
+        <aside id="mobile-sidebar"
+               class="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out sm:hidden"
+               role="dialog"
+               aria-modal="true"
+               aria-label="Mobile navigation">
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
+                <a href="/dashboard" class="text-xl font-bold text-primary-600 dark:text-primary-400">
+                    Reddit Insight
+                </a>
+                <button type="button"
+                        id="mobile-menu-close"
+                        class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        aria-label="Close menu">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <!-- Sidebar Navigation -->
+            <nav class="px-2 py-4 space-y-1 overflow-y-auto h-[calc(100vh-4rem)]" aria-label="Mobile menu">
+                <a href="/dashboard"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Dashboard' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/dashboard/analyze"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Start Analysis' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    New Analysis
+                </a>
+                <hr class="my-2 border-gray-200 dark:border-gray-700">
+                <a href="/dashboard/trends"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Trends' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                    </svg>
+                    Trends
+                </a>
+                <a href="/dashboard/demands"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Demands' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                    Demands
+                </a>
+                <a href="/dashboard/competition"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Competition' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                    Competition
+                </a>
+                <a href="/dashboard/insights"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Insights' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                    </svg>
+                    Insights
+                </a>
+                <a href="/dashboard/topics"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Topics' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                    Topics
+                </a>
+                <a href="/dashboard/clusters"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Clusters' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
+                    </svg>
+                    Clusters
+                </a>
+                <hr class="my-2 border-gray-200 dark:border-gray-700">
+                <a href="/search"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Search' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    Search
+                </a>
+                <!-- Theme Toggle in Mobile Menu -->
+                <div class="px-3 py-2.5 mt-4">
+                    <button type="button"
+                            id="mobile-theme-toggle"
+                            class="flex items-center w-full px-3 py-2 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            aria-label="Toggle dark mode">
+                        <svg class="mr-3 h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                        </svg>
+                        <svg class="mr-3 h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                        </svg>
+                        <span class="dark:hidden">Dark Mode</span>
+                        <span class="hidden dark:inline">Light Mode</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
         <!-- Navigation -->
-        <nav class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between">
                     <div class="flex">
                         <!-- Logo -->
                         <div class="flex flex-shrink-0 items-center">
-                            <a href="/dashboard" class="text-xl font-bold text-primary-600">
+                            <a href="/dashboard" class="text-xl font-bold text-primary-600 dark:text-primary-400">
                                 Reddit Insight
                             </a>
                         </div>
@@ -60,35 +183,35 @@
                         <!-- Navigation Links -->
                         <div class="hidden sm:ml-8 sm:flex sm:space-x-8">
                             <a href="/dashboard"
-                               class="{% if page_title == 'Dashboard' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Dashboard' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Dashboard
                             </a>
                             <a href="/dashboard/trends"
-                               class="{% if page_title == 'Trends' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Trends' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Trends
                             </a>
                             <a href="/dashboard/demands"
-                               class="{% if page_title == 'Demands' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Demands' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Demands
                             </a>
                             <a href="/dashboard/competition"
-                               class="{% if page_title == 'Competition' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Competition' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Competition
                             </a>
                             <a href="/dashboard/insights"
-                               class="{% if page_title == 'Insights' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Insights' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Insights
                             </a>
                             <a href="/dashboard/topics"
-                               class="{% if page_title == 'Topics' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Topics' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Topics
                             </a>
                             <a href="/dashboard/clusters"
-                               class="{% if page_title == 'Clusters' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Clusters' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Clusters
                             </a>
                             <a href="/search"
-                               class="{% if page_title == 'Search' %}border-primary-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                               class="{% if page_title == 'Search' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Search
                             </a>
                         </div>
@@ -98,87 +221,69 @@
                     <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
                         <!-- New Analysis Button -->
                         <a href="/dashboard/analyze"
-                           class="inline-flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
-                            <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                           class="inline-flex items-center rounded-md bg-primary-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors">
+                            <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
                             </svg>
                             New Analysis
                         </a>
                         <!-- Global Search -->
                         <div class="relative">
-                            <form action="/search" method="get" class="flex items-center">
+                            <form action="/search" method="get" class="flex items-center" role="search">
+                                <label for="global-search" class="sr-only">Search</label>
                                 <div class="relative">
                                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
                                         </svg>
                                     </div>
                                     <input type="text"
+                                           id="global-search"
                                            name="q"
                                            placeholder="Search..."
-                                           class="block w-48 lg:w-64 rounded-md border-0 py-1.5 pl-9 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                                           class="block w-48 lg:w-64 rounded-md border-0 py-1.5 pl-9 pr-3 text-gray-900 dark:text-white dark:bg-gray-700 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 transition-colors">
                                 </div>
                             </form>
                         </div>
-                        <span class="text-sm text-gray-500">v0.1.0</span>
+                        <!-- Theme Toggle Button -->
+                        <button type="button"
+                                id="theme-toggle"
+                                class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
+                                aria-label="Toggle dark mode">
+                            <!-- Sun icon (shown in dark mode) -->
+                            <svg class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                            </svg>
+                            <!-- Moon icon (shown in light mode) -->
+                            <svg class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                            </svg>
+                        </button>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">v0.1.0</span>
                     </div>
 
                     <!-- Mobile menu button -->
                     <div class="-mr-2 flex items-center sm:hidden">
                         <button type="button"
                                 id="mobile-menu-btn"
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
                                 aria-expanded="false"
-                                aria-controls="mobile-menu">
-                            <span class="sr-only">Open main menu</span>
+                                aria-controls="mobile-sidebar"
+                                aria-label="Open main menu">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <title>Menu</title>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                             </svg>
                         </button>
                     </div>
                 </div>
             </div>
-
-            <!-- Mobile menu -->
-            <div class="hidden sm:hidden" id="mobile-menu">
-                <div class="space-y-1 pb-3 pt-2">
-                    <a href="/dashboard" class="block border-l-4 {% if page_title == 'Dashboard' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Dashboard
-                    </a>
-                    <a href="/dashboard/analyze" class="block border-l-4 {% if page_title == 'Start Analysis' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        + New Analysis
-                    </a>
-                    <a href="/dashboard/trends" class="block border-l-4 {% if page_title == 'Trends' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Trends
-                    </a>
-                    <a href="/dashboard/demands" class="block border-l-4 {% if page_title == 'Demands' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Demands
-                    </a>
-                    <a href="/dashboard/competition" class="block border-l-4 {% if page_title == 'Competition' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Competition
-                    </a>
-                    <a href="/dashboard/insights" class="block border-l-4 {% if page_title == 'Insights' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Insights
-                    </a>
-                    <a href="/dashboard/topics" class="block border-l-4 {% if page_title == 'Topics' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Topics
-                    </a>
-                    <a href="/dashboard/clusters" class="block border-l-4 {% if page_title == 'Clusters' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Clusters
-                    </a>
-                    <a href="/search" class="block border-l-4 {% if page_title == 'Search' %}border-primary-500 bg-primary-50 text-primary-700{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700{% endif %} py-2 pl-3 pr-4 text-base font-medium">
-                        Search
-                    </a>
-                </div>
-            </div>
         </nav>
 
         <!-- Page Header -->
         {% block page_header %}
-        <header class="bg-white shadow">
+        <header class="bg-white dark:bg-gray-800 shadow dark:shadow-gray-900/50 transition-colors">
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                     {% block page_title_display %}{{ page_title }}{% endblock %}
                 </h1>
             </div>
@@ -193,13 +298,16 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200 mt-auto">
+        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto transition-colors">
             <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                <p class="text-center text-sm text-gray-500">
+                <p class="text-center text-sm text-gray-500 dark:text-gray-400">
                     Reddit Insight Dashboard - Discover business opportunities from Reddit trends
                 </p>
             </div>
         </footer>
+
+        <!-- Toast Container for Notifications -->
+        <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2" aria-live="polite" aria-atomic="true"></div>
     </div>
 
     <!-- Custom JavaScript -->

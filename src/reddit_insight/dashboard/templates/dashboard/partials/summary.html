@@ -1,62 +1,62 @@
 <!-- Summary Cards Partial - Can be loaded via HTMX -->
 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Total Posts Analyzed -->
-    <div class="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6">
+    <div class="relative overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 py-5 shadow sm:px-6 sm:py-6 card-hover transition-colors">
         <dt>
             <div class="absolute rounded-md bg-primary-500 p-3">
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
             </div>
-            <p class="ml-16 truncate text-sm font-medium text-gray-500">Posts Analyzed</p>
+            <p class="ml-16 truncate text-sm font-medium text-gray-500 dark:text-gray-400">Posts Analyzed</p>
         </dt>
         <dd class="ml-16 flex items-baseline">
-            <p class="text-2xl font-semibold text-gray-900">{{ summary.total_posts_analyzed | default(0) }}</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ summary.total_posts_analyzed | default(0) }}</p>
         </dd>
     </div>
 
     <!-- Trending Keywords -->
-    <div class="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6">
+    <div class="relative overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 py-5 shadow sm:px-6 sm:py-6 card-hover transition-colors">
         <dt>
             <div class="absolute rounded-md bg-green-500 p-3">
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                 </svg>
             </div>
-            <p class="ml-16 truncate text-sm font-medium text-gray-500">Trending Keywords</p>
+            <p class="ml-16 truncate text-sm font-medium text-gray-500 dark:text-gray-400">Trending Keywords</p>
         </dt>
         <dd class="ml-16 flex items-baseline">
-            <p class="text-2xl font-semibold text-gray-900">{{ summary.trending_keywords_count | default(0) }}</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ summary.trending_keywords_count | default(0) }}</p>
         </dd>
     </div>
 
     <!-- Demands Found -->
-    <div class="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6">
+    <div class="relative overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 py-5 shadow sm:px-6 sm:py-6 card-hover transition-colors">
         <dt>
             <div class="absolute rounded-md bg-yellow-500 p-3">
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
             </div>
-            <p class="ml-16 truncate text-sm font-medium text-gray-500">Demands Found</p>
+            <p class="ml-16 truncate text-sm font-medium text-gray-500 dark:text-gray-400">Demands Found</p>
         </dt>
         <dd class="ml-16 flex items-baseline">
-            <p class="text-2xl font-semibold text-gray-900">{{ summary.demands_found | default(0) }}</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ summary.demands_found | default(0) }}</p>
         </dd>
     </div>
 
     <!-- Insights Generated -->
-    <div class="relative overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:px-6 sm:py-6">
+    <div class="relative overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 py-5 shadow sm:px-6 sm:py-6 card-hover transition-colors">
         <dt>
             <div class="absolute rounded-md bg-purple-500 p-3">
-                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
                 </svg>
             </div>
-            <p class="ml-16 truncate text-sm font-medium text-gray-500">Insights Generated</p>
+            <p class="ml-16 truncate text-sm font-medium text-gray-500 dark:text-gray-400">Insights Generated</p>
         </dt>
         <dd class="ml-16 flex items-baseline">
-            <p class="text-2xl font-semibold text-gray-900">{{ summary.insights_generated | default(0) }}</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ summary.insights_generated | default(0) }}</p>
         </dd>
     </div>
 </div>

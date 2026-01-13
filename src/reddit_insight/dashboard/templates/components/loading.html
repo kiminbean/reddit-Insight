@@ -1,0 +1,73 @@
+{# Loading Component Templates #}
+{# Usage: {% include 'components/loading.html' %} #}
+
+{# Spinner - Basic loading indicator #}
+{% macro spinner(size='md', color='primary') %}
+<div class="inline-flex items-center justify-center" role="status" aria-label="Loading">
+    <div class="spinner spinner-{{ size }} {% if color == 'primary' %}text-primary-600 dark:text-primary-400{% elif color == 'white' %}text-white{% else %}text-gray-600 dark:text-gray-400{% endif %}"></div>
+    <span class="sr-only">Loading...</span>
+</div>
+{% endmacro %}
+
+{# Spinner with text #}
+{% macro spinner_with_text(text='Loading...', size='md') %}
+<div class="flex items-center space-x-3" role="status">
+    <div class="spinner spinner-{{ size }} text-primary-600 dark:text-primary-400"></div>
+    <span class="text-sm text-gray-600 dark:text-gray-400">{{ text }}</span>
+</div>
+{% endmacro %}
+
+{# Full page loading overlay #}
+{% macro page_loader(text='Loading...') %}
+<div class="fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center" role="status" aria-live="polite">
+    <div class="text-center">
+        <div class="spinner spinner-lg text-primary-600 dark:text-primary-400 mx-auto mb-4"></div>
+        <p class="text-gray-600 dark:text-gray-400 font-medium">{{ text }}</p>
+    </div>
+</div>
+{% endmacro %}
+
+{# Button loading state #}
+{% macro button_loading(text='Processing...') %}
+<span class="inline-flex items-center">
+    <div class="spinner spinner-sm text-current mr-2"></div>
+    {{ text }}
+</span>
+{% endmacro %}
+
+{# Loading indicator for HTMX requests #}
+{% macro htmx_indicator(size='sm') %}
+<span class="htmx-indicator">
+    <div class="spinner spinner-{{ size }} text-primary-600 dark:text-primary-400"></div>
+</span>
+{% endmacro %}
+
+{# Dots loading animation #}
+{% macro loading_dots() %}
+<div class="flex space-x-1" role="status" aria-label="Loading">
+    <div class="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full animate-bounce" style="animation-delay: 0ms;"></div>
+    <div class="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full animate-bounce" style="animation-delay: 150ms;"></div>
+    <div class="w-2 h-2 bg-primary-600 dark:bg-primary-400 rounded-full animate-bounce" style="animation-delay: 300ms;"></div>
+    <span class="sr-only">Loading...</span>
+</div>
+{% endmacro %}
+
+{# Progress bar loading #}
+{% macro progress_bar(percent=0, animated=true, color='primary') %}
+<div class="progress-bar {% if animated %}progress-bar-animated{% endif %}" role="progressbar" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar-fill bg-{{ color }}-600 dark:bg-{{ color }}-500" style="width: {{ percent }}%;"></div>
+</div>
+{% endmacro %}
+
+{# Indeterminate progress bar #}
+{% macro progress_indeterminate() %}
+<div class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden" role="progressbar" aria-label="Loading">
+    <div class="h-full bg-primary-600 dark:bg-primary-400 rounded-full animate-pulse" style="width: 100%; animation: indeterminate 1.5s infinite ease-in-out;"></div>
+</div>
+<style>
+    @keyframes indeterminate {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+</style>
+{% endmacro %}
