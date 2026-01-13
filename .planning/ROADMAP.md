@@ -34,7 +34,7 @@ None
 - [x] **Phase 13: Recent Analyses** - 대시보드 홈 분석 기록 표시
 - [x] **Phase 14: Trend Prediction UI** - 시계열 예측 차트 시각화
 - [x] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
-- [ ] **Phase 16: Topic Modeling UI** - 토픽 분석 결과 시각화
+- [x] **Phase 16: Topic Modeling UI** - 토픽 분석 결과 시각화
 - [ ] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
 - [ ] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
 - [ ] **Phase 19: Integration Testing** - E2E 테스트, 성능 최적화
@@ -221,7 +221,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 16-01: Topic Modeling UI
+- [x] 16-01: Topic Modeling UI
 
 #### Phase 17: Text Clustering UI
 **Goal**: 클러스터링 결과 시각화 (클러스터별 키워드, 대표 문서)
@@ -272,7 +272,7 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 13. Recent Analyses | 1/1 | Complete | 2026-01-14 |
 | 14. Trend Prediction UI | 1/1 | Complete | 2026-01-14 |
 | 15. Anomaly Detection UI | 1/1 | Complete | 2026-01-14 |
-| 16. Topic Modeling UI | 0/1 | Not started | - |
+| 16. Topic Modeling UI | 1/1 | Complete | 2026-01-14 |
 | 17. Text Clustering UI | 0/1 | Not started | - |
 | 18. Dashboard Polish | 0/1 | Not started | - |
 | 19. Integration Testing | 0/1 | Not started | - |
