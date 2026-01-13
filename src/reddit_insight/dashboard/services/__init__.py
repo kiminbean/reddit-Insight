@@ -1,6 +1,14 @@
 """대시보드 서비스 패키지."""
 
 # 기존 services.py에서 임포트 (하위 호환성 유지)
+# 이상 탐지 서비스
+from reddit_insight.dashboard.services.anomaly_service import (
+    AnomalyPointView,
+    AnomalyService,
+    AnomalyView,
+    get_anomaly_service,
+)
+
 # 새 인사이트 서비스
 from reddit_insight.dashboard.services.insight_service import (
     InsightDetail,
@@ -30,6 +38,11 @@ __all__ = [
     "DashboardSummary",
     "AnalysisRecord",
     "get_dashboard_service",
+    # Anomaly service
+    "AnomalyService",
+    "AnomalyView",
+    "AnomalyPointView",
+    "get_anomaly_service",
     # Insight service
     "InsightService",
     "InsightView",
