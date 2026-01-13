@@ -25,6 +25,15 @@ from reddit_insight.dashboard.services.prediction_service import (
     PredictionView,
     get_prediction_service,
 )
+
+# 토픽 모델링 서비스
+from reddit_insight.dashboard.services.topic_service import (
+    TopicAnalysisView,
+    TopicKeywordView,
+    TopicService,
+    TopicView,
+    get_topic_service,
+)
 from reddit_insight.dashboard.services_module import (
     AnalysisRecord,
     DashboardService,
@@ -54,4 +63,10 @@ __all__ = [
     "PredictionService",
     "PredictionView",
     "get_prediction_service",
+    # Topic service
+    "TopicService",
+    "TopicAnalysisView",
+    "TopicView",
+    "TopicKeywordView",
+    "get_topic_service",
 ]
