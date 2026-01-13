@@ -23,7 +23,8 @@ if TYPE_CHECKING:
     from praw.models import Subreddit
 
     from reddit_insight.reddit.collectors import CommentCollector, PostCollector
-    from reddit_insight.reddit.models import Comment, Post
+    from reddit_insight.reddit.models import Comment, Post, SubredditInfo
+    from reddit_insight.reddit.subreddits import SubredditExplorer
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +61,10 @@ class RedditClient:
             client_secret=self._settings.reddit_client_secret,
             user_agent=self._settings.reddit_user_agent or DEFAULT_USER_AGENT,
         )
-        # 수집기 인스턴스 (lazy initialization)
+        # 수집기 및 탐색기 인스턴스 (lazy initialization)
         self._post_collector: PostCollector | None = None
         self._comment_collector: CommentCollector | None = None
+        self._subreddit_explorer: SubredditExplorer | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -119,6 +121,25 @@ class RedditClient:
 
             self._comment_collector = CommentCollector(self)
         return self._comment_collector
+
+    @property
+    def subreddits(self) -> SubredditExplorer:
+        """서브레딧 탐색기 반환 (lazy initialization).
+
+        Returns:
+            SubredditExplorer: 서브레딧 탐색기 인스턴스
+
+        Example:
+            >>> client = RedditClient()
+            >>> results = client.subreddits.search("python")
+            >>> for sub in results:
+            ...     print(sub.display_name)
+        """
+        if self._subreddit_explorer is None:
+            from reddit_insight.reddit.subreddits import SubredditExplorer
+
+            self._subreddit_explorer = SubredditExplorer(self)
+        return self._subreddit_explorer
 
     def connect(self, *, read_only: bool | None = None) -> None:
         """Reddit API에 연결.
@@ -205,19 +226,29 @@ class RedditClient:
         self,
         query: str,
         *,
-        limit: int = 10,
-    ) -> list[Subreddit]:
-        """서브레딧 검색.
+        limit: int = 25,
+    ) -> list[SubredditInfo]:
+        """서브레딧 검색 (편의 메서드).
 
         Args:
             query: 검색어
-            limit: 최대 결과 수 (기본: 10)
+            limit: 최대 결과 수 (기본: 25)
 
         Returns:
-            list[Subreddit]: 검색된 서브레딧 목록
+            list[SubredditInfo]: 검색된 서브레딧 목록
         """
-        reddit = self._ensure_connected()
-        return list(reddit.subreddits.search(query, limit=limit))
+        return self.subreddits.search(query, limit=limit)
+
+    def get_subreddit_info(self, name: str) -> SubredditInfo | None:
+        """서브레딧 정보 조회 (편의 메서드).
+
+        Args:
+            name: 서브레딧 이름
+
+        Returns:
+            SubredditInfo | None: 서브레딧 정보 또는 None
+        """
+        return self.subreddits.get_info(name)
 
     def get_hot_posts(self, subreddit: str, limit: int = 100) -> list[Post]:
         """서브레딧의 hot 게시물 수집 (편의 메서드).
