@@ -14,6 +14,7 @@ from reddit_insight.dashboard.data_store import (
     clear_cache,
     get_analysis_history,
     get_current_data,
+    load_analysis_by_id,
     save_to_database,
     set_current_data,
 )
@@ -215,6 +216,30 @@ class TestDataStoreIntegration:
         latest = history[0]
         assert latest["subreddit"] == "test_subreddit"
         assert latest["post_count"] == 100
+
+    def test_load_analysis_by_id(self, sample_analysis_data: AnalysisData):
+        """ID로 특정 분석 결과를 조회할 수 있다."""
+        # Given: 데이터 저장 후 ID 확인
+        set_current_data(sample_analysis_data)
+        history = get_analysis_history(limit=1)
+        analysis_id = history[0]["id"]
+
+        # When
+        result = load_analysis_by_id(analysis_id)
+
+        # Then
+        assert result is not None
+        assert result.subreddit == "test_subreddit"
+        assert result.post_count == 100
+        assert len(result.keywords) == 3
+
+    def test_load_analysis_by_id_not_found(self):
+        """존재하지 않는 ID 조회 시 None을 반환한다."""
+        # When
+        result = load_analysis_by_id(99999)
+
+        # Then
+        assert result is None
 
 
 # =============================================================================

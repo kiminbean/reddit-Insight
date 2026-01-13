@@ -266,3 +266,40 @@ def clear_cache() -> None:
 
     _current_data = None
     _cache_subreddit = None
+
+
+def load_analysis_by_id(analysis_id: int) -> AnalysisData | None:
+    """특정 ID의 분석 결과를 데이터베이스에서 로드한다.
+
+    Args:
+        analysis_id: 조회할 분석 결과 ID
+
+    Returns:
+        AnalysisData 또는 None (존재하지 않는 경우)
+    """
+    try:
+        init_db()
+    except Exception:
+        return None
+
+    db = SessionLocal()
+    try:
+        result = db.query(AnalysisResult).filter(AnalysisResult.id == analysis_id).first()
+
+        if result is None:
+            return None
+
+        return AnalysisData(
+            subreddit=result.subreddit,
+            analyzed_at=result.analyzed_at.isoformat() if result.analyzed_at else "",
+            post_count=result.post_count,
+            keywords=result.keywords or [],
+            trends=result.trends or [],
+            demands=result.demands or {},
+            competition=result.competition or {},
+            insights=result.insights or [],
+        )
+    except Exception:
+        return None
+    finally:
+        db.close()

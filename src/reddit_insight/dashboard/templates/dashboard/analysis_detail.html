@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block page_header %}
+<header class="bg-white shadow">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <nav class="flex mb-4" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-2">
+                        <li>
+                            <a href="/dashboard" class="text-sm text-gray-500 hover:text-gray-700">Dashboard</a>
+                        </li>
+                        <li>
+                            <svg class="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </li>
+                        <li>
+                            <span class="text-sm text-gray-900">Analysis Detail</span>
+                        </li>
+                    </ol>
+                </nav>
+                {% if analysis %}
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    r/{{ analysis.subreddit }}
+                </h1>
+                <p class="mt-1 text-sm text-gray-500">
+                    Analyzed at {{ analysis.analyzed_at[:19].replace('T', ' ') }} | {{ analysis.post_count }} posts
+                </p>
+                {% else %}
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    Analysis Not Found
+                </h1>
+                {% endif %}
+            </div>
+            <div class="mt-4 flex md:ml-4 md:mt-0">
+                <a href="/dashboard"
+                   class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <svg class="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    {% if analysis %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Top Keywords Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Top Keywords</h3>
+                        <p class="text-sm text-gray-500">Most frequently mentioned topics</p>
+                    </div>
+                    <a href="/dashboard/trends" class="text-sm text-primary-600 hover:text-primary-500">
+                        View all trends
+                    </a>
+                </div>
+                {% if top_keywords %}
+                <div class="divide-y divide-gray-200">
+                    {% for keyword in top_keywords %}
+                    <div class="px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-primary-100 text-primary-700 text-sm font-semibold">
+                                {{ loop.index }}
+                            </span>
+                            <span class="ml-4 text-sm font-medium text-gray-900">{{ keyword.keyword }}</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-sm text-gray-500">{{ keyword.count }} mentions</span>
+                            {% if keyword.growth %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {% if keyword.growth > 0 %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if keyword.growth > 0 %}+{% endif %}{{ keyword.growth }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="px-6 py-8 text-center text-gray-500">
+                    <p>No keywords data available</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Top Demands Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Top Demands</h3>
+                        <p class="text-sm text-gray-500">Highest urgency user needs</p>
+                    </div>
+                    <a href="/dashboard/demands" class="text-sm text-primary-600 hover:text-primary-500">
+                        View all demands
+                    </a>
+                </div>
+                {% if top_demands %}
+                <div class="divide-y divide-gray-200">
+                    {% for demand in top_demands %}
+                    <div class="px-6 py-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900">{{ demand.title or demand.description[:50] }}</h4>
+                                <p class="mt-1 text-sm text-gray-500 line-clamp-2">{{ demand.description }}</p>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if demand.urgency_score >= 0.8 %}bg-red-100 text-red-800
+                                    {% elif demand.urgency_score >= 0.5 %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    Urgency: {{ (demand.urgency_score * 100)|round|int }}%
+                                </span>
+                            </div>
+                        </div>
+                        {% if demand.type %}
+                        <div class="mt-2">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ demand.type }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="px-6 py-8 text-center text-gray-500">
+                    <p>No demand data available</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Top Insights Section -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Top Insights</h3>
+                        <p class="text-sm text-gray-500">Key business opportunities</p>
+                    </div>
+                    <a href="/dashboard/insights" class="text-sm text-primary-600 hover:text-primary-500">
+                        View all insights
+                    </a>
+                </div>
+                {% if top_insights %}
+                <div class="divide-y divide-gray-200">
+                    {% for insight in top_insights %}
+                    <div class="px-6 py-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-sm font-medium text-gray-900">{{ insight.title }}</h4>
+                                <p class="mt-1 text-sm text-gray-500 line-clamp-2">{{ insight.description }}</p>
+                            </div>
+                            <div class="ml-4 flex-shrink-0 flex flex-col items-end space-y-1">
+                                {% if insight.type %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                    {{ insight.type }}
+                                </span>
+                                {% endif %}
+                                {% if insight.confidence %}
+                                <span class="text-xs text-gray-500">
+                                    Confidence: {{ (insight.confidence * 100)|round|int }}%
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="px-6 py-8 text-center text-gray-500">
+                    <p>No insights data available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <!-- Analysis Summary Card -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Summary</h3>
+                </div>
+                <div class="px-6 py-4 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Subreddit</span>
+                        <span class="text-sm font-medium text-gray-900">r/{{ analysis.subreddit }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Posts Analyzed</span>
+                        <span class="text-sm font-medium text-gray-900">{{ analysis.post_count }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Keywords Found</span>
+                        <span class="text-sm font-medium text-gray-900">{{ analysis.keywords|length }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">Insights Generated</span>
+                        <span class="text-sm font-medium text-gray-900">{{ analysis.insights|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Navigation Card -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Explore Data</h3>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    <a href="/dashboard/trends" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                                </svg>
+                                <span class="ml-3 text-sm font-medium text-gray-900">Trends</span>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </a>
+                    <a href="/dashboard/demands" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                                </svg>
+                                <span class="ml-3 text-sm font-medium text-gray-900">Demands</span>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </a>
+                    <a href="/dashboard/competition" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z" />
+                                </svg>
+                                <span class="ml-3 text-sm font-medium text-gray-900">Competition</span>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </a>
+                    <a href="/dashboard/insights" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                                </svg>
+                                <span class="ml-3 text-sm font-medium text-gray-900">Insights</span>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Actions Card -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Actions</h3>
+                </div>
+                <div class="px-6 py-4 space-y-3">
+                    <a href="/dashboard/analyze"
+                       class="w-full inline-flex justify-center items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                        <svg class="mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0v2.43l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd" />
+                        </svg>
+                        Re-analyze Subreddit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Error State -->
+    <div class="bg-white shadow rounded-lg p-12 text-center">
+        <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">Analysis Not Found</h3>
+        <p class="mt-2 text-sm text-gray-500">{{ error_message or "The requested analysis could not be found." }}</p>
+        <div class="mt-6">
+            <a href="/dashboard"
+               class="inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                Return to Dashboard
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

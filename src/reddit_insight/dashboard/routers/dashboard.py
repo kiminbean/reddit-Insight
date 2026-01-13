@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from reddit_insight.dashboard.data_store import get_all_subreddits
+from reddit_insight.dashboard.data_store import get_all_subreddits, load_analysis_by_id
 from reddit_insight.dashboard.services import (
     DashboardService,
     get_dashboard_service,
@@ -105,3 +105,79 @@ async def analyze_page(
     }
 
     return templates.TemplateResponse(request, "dashboard/analyze.html", context)
+
+
+@router.get("/analysis/{analysis_id}", response_class=HTMLResponse)
+async def analysis_detail(
+    request: Request,
+    analysis_id: int,
+) -> HTMLResponse:
+    """특정 분석 결과의 상세 페이지를 렌더링한다.
+
+    Args:
+        request: FastAPI Request 객체
+        analysis_id: 조회할 분석 결과 ID
+
+    Returns:
+        HTMLResponse: 렌더링된 HTML 페이지
+    """
+    templates = get_templates(request)
+
+    # DB에서 분석 결과 로드
+    analysis_data = load_analysis_by_id(analysis_id)
+
+    if analysis_data is None:
+        # 404 상태로 에러 페이지 렌더링
+        context = {
+            "request": request,
+            "page_title": "Analysis Not Found",
+            "analysis": None,
+            "analysis_id": analysis_id,
+            "error_message": f"Analysis with ID {analysis_id} could not be found.",
+        }
+        return templates.TemplateResponse(
+            request, "dashboard/analysis_detail.html", context, status_code=404
+        )
+
+    # 주요 키워드 Top 5 추출
+    top_keywords = []
+    if analysis_data.keywords:
+        sorted_keywords = sorted(
+            analysis_data.keywords,
+            key=lambda x: x.get("count", 0),
+            reverse=True,
+        )
+        top_keywords = sorted_keywords[:5]
+
+    # 주요 수요 Top 3 추출
+    top_demands = []
+    if analysis_data.demands and "items" in analysis_data.demands:
+        demand_items = analysis_data.demands.get("items", [])
+        sorted_demands = sorted(
+            demand_items,
+            key=lambda x: x.get("urgency_score", 0),
+            reverse=True,
+        )
+        top_demands = sorted_demands[:3]
+
+    # 주요 인사이트 Top 3 추출
+    top_insights = []
+    if analysis_data.insights:
+        sorted_insights = sorted(
+            analysis_data.insights,
+            key=lambda x: x.get("priority", 0),
+            reverse=True,
+        )
+        top_insights = sorted_insights[:3]
+
+    context = {
+        "request": request,
+        "page_title": f"Analysis: r/{analysis_data.subreddit}",
+        "analysis": analysis_data,
+        "analysis_id": analysis_id,
+        "top_keywords": top_keywords,
+        "top_demands": top_demands,
+        "top_insights": top_insights,
+    }
+
+    return templates.TemplateResponse(request, "dashboard/analysis_detail.html", context)
