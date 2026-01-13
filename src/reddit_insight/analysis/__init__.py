@@ -45,6 +45,14 @@ from reddit_insight.analysis.trends import (
     TrendDirection,
     TrendMetrics,
 )
+from reddit_insight.analysis.rising import (
+    RisingConfig,
+    RisingKeywordDetector,
+    RisingScore,
+    RisingScoreCalculator,
+    TrendReport,
+    TrendReporter,
+)
 
 __all__ = [
     # Tokenizer
@@ -77,4 +85,11 @@ __all__ = [
     "TrendMetrics",
     "KeywordTrendAnalyzer",
     "KeywordTrendResult",
+    # Rising Keywords
+    "RisingScore",
+    "RisingConfig",
+    "RisingScoreCalculator",
+    "RisingKeywordDetector",
+    "TrendReport",
+    "TrendReporter",
 ]
