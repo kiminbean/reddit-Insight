@@ -63,9 +63,10 @@ def create_app() -> FastAPI:
         }
 
     # 라우터 등록 (지연 임포트로 순환 참조 방지)
-    from reddit_insight.dashboard.routers import dashboard
+    from reddit_insight.dashboard.routers import dashboard, trends
 
     application.include_router(dashboard.router)
+    application.include_router(trends.router)
 
     return application
 
