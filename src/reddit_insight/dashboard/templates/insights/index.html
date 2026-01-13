@@ -90,7 +90,16 @@
                 </div>
             </div>
             <div class="lg:col-span-2 bg-white shadow rounded-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Overview</h3>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-lg font-medium text-gray-900">Overview</h3>
+                    <a href="/dashboard/insights/report/generate"
+                       class="inline-flex items-center rounded-md bg-gradient-to-r from-primary-600 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-primary-500 hover:to-purple-500 transition-all">
+                        <svg class="-ml-0.5 mr-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clip-rule="evenodd" />
+                        </svg>
+                        Generate Report
+                    </a>
+                </div>
                 <div class="grid grid-cols-3 gap-4">
                     <div class="text-center p-4 bg-blue-50 rounded-lg">
                         <div class="text-3xl font-bold text-blue-600">{{ insights|length }}</div>

@@ -1,0 +1,72 @@
+{% if has_data and report %}
+<div class="space-y-4">
+    <!-- Summary Card -->
+    <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-primary-800">Report Summary</h3>
+        <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-primary-600">Subreddit:</span>
+                <span class="ml-1 font-medium text-primary-900">r/{{ report.subreddit }}</span>
+            </div>
+            <div>
+                <span class="text-primary-600">Posts Analyzed:</span>
+                <span class="ml-1 font-medium text-primary-900">{{ report.total_posts_analyzed }}</span>
+            </div>
+            <div>
+                <span class="text-primary-600">Business Items:</span>
+                <span class="ml-1 font-medium text-primary-900">{{ report.business_items|length }}</span>
+            </div>
+            <div>
+                <span class="text-primary-600">Insights:</span>
+                <span class="ml-1 font-medium text-primary-900">{{ report.total_insights }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Business Items Preview -->
+    {% if report.business_items %}
+    <div>
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Top Business Opportunities</h3>
+        <div class="space-y-2">
+            {% for item in report.business_items[:3] %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <span class="flex-shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-full
+                        {% if item.opportunity_score >= 80 %}bg-green-100 text-green-800{% elif item.opportunity_score >= 60 %}bg-blue-100 text-blue-800{% else %}bg-yellow-100 text-yellow-800{% endif %} text-xs font-bold">
+                        {{ item.rank }}
+                    </span>
+                    <span class="ml-2 text-sm text-gray-900">{{ item.title[:50] }}{% if item.title|length > 50 %}...{% endif %}</span>
+                </div>
+                <span class="text-xs font-medium
+                    {% if item.opportunity_score >= 80 %}text-green-600{% elif item.opportunity_score >= 60 %}text-blue-600{% else %}text-yellow-600{% endif %}">
+                    {{ "%.0f"|format(item.opportunity_score) }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Download Button -->
+    <div class="pt-2">
+        <a href="/dashboard/insights/report/download"
+           class="w-full inline-flex justify-center items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+            <svg class="-ml-0.5 mr-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+            </svg>
+            Download Full Report
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-4">
+    <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+    <p class="mt-2 text-sm text-gray-500">No data available</p>
+    <a href="/dashboard/analyze" class="mt-2 text-sm text-primary-600 hover:text-primary-500">
+        Run an analysis first
+    </a>
+</div>
+{% endif %}
