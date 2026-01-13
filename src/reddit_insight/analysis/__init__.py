@@ -53,6 +53,14 @@ from reddit_insight.analysis.rising import (
     TrendReport,
     TrendReporter,
 )
+from reddit_insight.analysis.demand_patterns import (
+    DemandCategory,
+    DemandMatch,
+    DemandPattern,
+    DemandPatternLibrary,
+    ENGLISH_PATTERNS,
+    KOREAN_PATTERNS,
+)
 
 __all__ = [
     # Tokenizer
@@ -92,4 +100,11 @@ __all__ = [
     "RisingKeywordDetector",
     "TrendReport",
     "TrendReporter",
+    # Demand Patterns
+    "DemandCategory",
+    "DemandPattern",
+    "DemandMatch",
+    "DemandPatternLibrary",
+    "ENGLISH_PATTERNS",
+    "KOREAN_PATTERNS",
 ]
