@@ -438,11 +438,19 @@ class TrendPredictor(MLAnalyzerBase):
         residuals = list(fitted.resid)
         metrics = self._calculate_metrics(values[order[1]:], fitted_values)
 
+        # conf_int can be DataFrame or numpy array depending on statsmodels version
+        if hasattr(conf_int, 'iloc'):
+            lower = conf_int.iloc[:, 0]
+            upper = conf_int.iloc[:, 1]
+        else:
+            lower = conf_int[:, 0]
+            upper = conf_int[:, 1]
+
         return PredictionResult(
             timestamps=timestamps,
             values=[float(v) for v in forecast],
-            lower_bound=[float(v) for v in conf_int.iloc[:, 0]],
-            upper_bound=[float(v) for v in conf_int.iloc[:, 1]],
+            lower_bound=[float(v) for v in lower],
+            upper_bound=[float(v) for v in upper],
             confidence_level=self.config.confidence_level,
             model_name=f"ARIMA{order}",
             metrics=metrics,
@@ -504,23 +512,27 @@ class TrendPredictor(MLAnalyzerBase):
         if n < 5:
             return False
 
+        # Convert to numpy array for calculations
+        values_arr = np.array(values)
+
         # Simple linear regression
         x = np.arange(n)
         x_mean = np.mean(x)
-        y_mean = np.mean(values)
+        y_mean = np.mean(values_arr)
 
-        numerator = np.sum((x - x_mean) * (values - y_mean))
+        numerator = np.sum((x - x_mean) * (values_arr - y_mean))
         denominator = np.sum((x - x_mean) ** 2)
 
         if denominator == 0:
             return False
 
         slope = numerator / denominator
+        intercept = y_mean - slope * x_mean
 
         # Calculate R-squared
-        y_pred = x_mean + slope * (x - x_mean)
-        ss_res = np.sum((values - y_pred) ** 2)
-        ss_tot = np.sum((values - y_mean) ** 2)
+        y_pred = intercept + slope * x
+        ss_res = np.sum((values_arr - y_pred) ** 2)
+        ss_tot = np.sum((values_arr - y_mean) ** 2)
 
         if ss_tot == 0:
             return False
@@ -529,7 +541,7 @@ class TrendPredictor(MLAnalyzerBase):
 
         # Consider trend significant if R-squared > 0.3 and slope is meaningful
         relative_slope = abs(slope) / (y_mean if y_mean != 0 else 1)
-        return r_squared > 0.3 and relative_slope > 0.01
+        return bool(r_squared > 0.3 and relative_slope > 0.01)
 
     def _detect_seasonality(self, values: list[float], period: int) -> bool:
         """
