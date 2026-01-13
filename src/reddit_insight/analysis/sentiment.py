@@ -798,3 +798,284 @@ class RuleBasedSentimentAnalyzer:
 
         # Aggregate scores
         return self._aggregate_scores(word_scores)
+
+
+# ============================================================================
+# Entity-Sentiment Integration
+# ============================================================================
+
+
+@dataclass
+class EntitySentiment:
+    """
+    Represents sentiment associated with a specific entity.
+
+    Attributes:
+        entity: The product/service entity
+        sentiment: Sentiment score for the entity
+        context: Text context where entity was found
+        mention_count: Number of times this entity was mentioned
+    """
+
+    entity: "ProductEntity"
+    sentiment: SentimentScore
+    context: str
+    mention_count: int = 1
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return (
+            f"EntitySentiment('{self.entity.name}', "
+            f"{self.sentiment.sentiment.value}, "
+            f"mentions={self.mention_count})"
+        )
+
+
+@dataclass
+class EntitySentimentAnalyzer:
+    """
+    Analyzer that combines entity recognition with sentiment analysis.
+
+    Extracts entities from text and analyzes sentiment in the context
+    surrounding each entity mention.
+
+    Example:
+        >>> analyzer = EntitySentimentAnalyzer()
+        >>> results = analyzer.analyze_text("Slack is great but Notion is better")
+        >>> for r in results:
+        ...     print(f"{r.entity.name}: {r.sentiment.sentiment.value}")
+    """
+
+    _entity_recognizer: "EntityRecognizer | None" = field(default=None, repr=False)
+    _sentiment_analyzer: RuleBasedSentimentAnalyzer = field(
+        default_factory=RuleBasedSentimentAnalyzer, repr=False
+    )
+    _context_window: int = field(default=50, repr=False)
+
+    def __post_init__(self) -> None:
+        """Initialize recognizer if not provided."""
+        if self._entity_recognizer is None:
+            from reddit_insight.analysis.entity_recognition import EntityRecognizer
+
+            self._entity_recognizer = EntityRecognizer()
+
+    def _extract_entity_context(
+        self,
+        text: str,
+        entity_start: int,
+        entity_end: int,
+        window: int | None = None,
+    ) -> str:
+        """
+        Extract context window around an entity mention.
+
+        Args:
+            text: Full text
+            entity_start: Start position of entity
+            entity_end: End position of entity
+            window: Context window size (characters on each side)
+
+        Returns:
+            Context string containing the entity and surrounding text
+        """
+        if window is None:
+            window = self._context_window
+
+        # Expand to word boundaries
+        start = max(0, entity_start - window)
+        end = min(len(text), entity_end + window)
+
+        # Try to extend to word boundaries
+        while start > 0 and text[start - 1].isalnum():
+            start -= 1
+        while end < len(text) and text[end].isalnum():
+            end += 1
+
+        return text[start:end].strip()
+
+    def _find_entity_position(self, text: str, entity_name: str) -> tuple[int, int] | None:
+        """
+        Find position of entity in text (case-insensitive).
+
+        Args:
+            text: Text to search
+            entity_name: Entity name to find
+
+        Returns:
+            Tuple of (start, end) positions or None if not found
+        """
+        import re
+
+        # Case-insensitive search
+        pattern = re.compile(re.escape(entity_name), re.IGNORECASE)
+        match = pattern.search(text)
+
+        if match:
+            return (match.start(), match.end())
+        return None
+
+    def analyze_text(self, text: str) -> list[EntitySentiment]:
+        """
+        Analyze text for entities and their associated sentiment.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            List of EntitySentiment objects for each detected entity
+        """
+        if not text or not text.strip():
+            return []
+
+        # Recognize entities
+        assert self._entity_recognizer is not None
+        entities = self._entity_recognizer.recognize(text)
+
+        if not entities:
+            return []
+
+        results: list[EntitySentiment] = []
+
+        for entity in entities:
+            # Find entity position for context extraction
+            position = self._find_entity_position(text, entity.name)
+
+            if position:
+                # Extract context around entity
+                context = self._extract_entity_context(
+                    text, position[0], position[1]
+                )
+            else:
+                # Fallback: use entity's stored context or full text
+                context = entity.context if entity.context else text[:200]
+
+            # Analyze sentiment of the context
+            sentiment = self._sentiment_analyzer.analyze(context)
+
+            results.append(
+                EntitySentiment(
+                    entity=entity,
+                    sentiment=sentiment,
+                    context=context,
+                    mention_count=entity.mentions,
+                )
+            )
+
+        return results
+
+    def analyze_post(self, post: "Post") -> list[EntitySentiment]:
+        """
+        Analyze a Reddit Post for entity sentiment.
+
+        Combines title and selftext for analysis.
+
+        Args:
+            post: Reddit Post object
+
+        Returns:
+            List of EntitySentiment objects
+        """
+        # Combine title and selftext
+        text_parts = [post.title]
+        if post.selftext:
+            text_parts.append(post.selftext)
+
+        combined_text = " ".join(text_parts)
+        return self.analyze_text(combined_text)
+
+    def _aggregate_entity_sentiments(
+        self,
+        sentiments: list[EntitySentiment],
+    ) -> dict[str, EntitySentiment]:
+        """
+        Aggregate sentiments for the same entity across multiple mentions.
+
+        Averages sentiment scores and sums mention counts.
+
+        Args:
+            sentiments: List of EntitySentiment objects
+
+        Returns:
+            Dictionary mapping entity names to aggregated EntitySentiment
+        """
+        if not sentiments:
+            return {}
+
+        # Group by normalized entity name
+        grouped: dict[str, list[EntitySentiment]] = {}
+        for es in sentiments:
+            key = es.entity.normalized_name
+            if key not in grouped:
+                grouped[key] = []
+            grouped[key].append(es)
+
+        # Aggregate each group
+        result: dict[str, EntitySentiment] = {}
+
+        for name, group in grouped.items():
+            if len(group) == 1:
+                result[name] = group[0]
+                continue
+
+            # Calculate average sentiment scores
+            total_mentions = sum(es.mention_count for es in group)
+            avg_positive = sum(es.sentiment.positive_score * es.mention_count for es in group) / total_mentions
+            avg_negative = sum(es.sentiment.negative_score * es.mention_count for es in group) / total_mentions
+            avg_neutral = sum(es.sentiment.neutral_score * es.mention_count for es in group) / total_mentions
+            avg_compound = sum(es.sentiment.compound * es.mention_count for es in group) / total_mentions
+            avg_confidence = sum(es.sentiment.confidence * es.mention_count for es in group) / total_mentions
+
+            # Determine overall sentiment from averaged compound
+            if abs(avg_compound) < 0.03:
+                sentiment_class = Sentiment.NEUTRAL
+            elif avg_positive > 0.25 and avg_negative > 0.25:
+                sentiment_class = Sentiment.MIXED
+            elif avg_compound > 0:
+                sentiment_class = Sentiment.POSITIVE
+            else:
+                sentiment_class = Sentiment.NEGATIVE
+
+            # Use the entity with highest confidence as the representative
+            best_entity = max(group, key=lambda es: es.entity.confidence).entity
+
+            # Collect all contexts
+            contexts = [es.context for es in group]
+            combined_context = " | ".join(contexts[:3])  # Limit to 3 contexts
+
+            result[name] = EntitySentiment(
+                entity=best_entity,
+                sentiment=SentimentScore(
+                    sentiment=sentiment_class,
+                    positive_score=round(avg_positive, 4),
+                    negative_score=round(avg_negative, 4),
+                    neutral_score=round(avg_neutral, 4),
+                    compound=round(avg_compound, 4),
+                    confidence=round(avg_confidence, 4),
+                ),
+                context=combined_context,
+                mention_count=total_mentions,
+            )
+
+        return result
+
+    def analyze_posts(self, posts: list["Post"]) -> dict[str, EntitySentiment]:
+        """
+        Analyze multiple posts and aggregate entity sentiments.
+
+        Args:
+            posts: List of Post objects
+
+        Returns:
+            Dictionary mapping entity names to aggregated EntitySentiment
+        """
+        if not posts:
+            return {}
+
+        # Collect all entity sentiments
+        all_sentiments: list[EntitySentiment] = []
+        for post in posts:
+            sentiments = self.analyze_post(post)
+            all_sentiments.extend(sentiments)
+
+        # Aggregate by entity
+        return self._aggregate_entity_sentiments(all_sentiments)
