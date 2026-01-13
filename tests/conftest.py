@@ -7,11 +7,15 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pytest
+
+# 테스트에서 rate limiting 비활성화 (모든 테스트에 적용)
+os.environ["RATE_LIMIT_PER_MINUTE"] = "10000"
 
 if TYPE_CHECKING:
     from reddit_insight.reddit.models import Comment, Post

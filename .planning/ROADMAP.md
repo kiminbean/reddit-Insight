@@ -7,7 +7,7 @@ Reddit 데이터 수집부터 비즈니스 인사이트 도출까지의 전체 �
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-11 (shipped 2026-01-14)
-- 🚧 **v1.1 Dashboard & ML Integration** - Phases 12-19 (in progress)
+- ✅ **v1.1 Dashboard & ML Integration** - Phases 12-19 (shipped 2026-01-14)
 
 ## Domain Expertise
 
@@ -35,9 +35,9 @@ None
 - [x] **Phase 14: Trend Prediction UI** - 시계열 예측 차트 시각화
 - [x] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
 - [x] **Phase 16: Topic Modeling UI** - 토픽 분석 결과 시각화
-- [ ] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
-- [ ] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
-- [ ] **Phase 19: Integration Testing** - E2E 테스트, 성능 최적화
+- [x] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
+- [x] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
+- [x] **Phase 19: Integration Testing** - E2E 테스트, 성능 최적화
 
 ## Phase Details
 
@@ -174,9 +174,10 @@ Plans:
 
 ---
 
-### 🚧 v1.1 Dashboard & ML Integration (In Progress)
+### ✅ v1.1 Dashboard & ML Integration (Complete)
 
 **Milestone Goal:** 대시보드의 실제 데이터 연동 완성 및 ML 분석 결과 시각화 통합
+**Shipped:** 2026-01-14
 
 #### Phase 12: Dashboard Data Integration
 **Goal**: DemandService, CompetitionService에 실제 분석 데이터 연동
@@ -230,7 +231,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 17-01: Text Clustering UI
+- [x] 17-01: Text Clustering UI
 
 #### Phase 18: Dashboard Polish
 **Goal**: UI/UX 개선, 반응형 디자인, 사용성 향상
@@ -239,7 +240,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 18-01: Dashboard UI/UX Polish
+- [x] 18-01: Dashboard UI/UX Polish
 
 #### Phase 19: Integration Testing
 **Goal**: E2E 테스트 보강, 성능 최적화, 문서 업데이트
@@ -248,7 +249,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 19-01: Integration Testing & Performance Optimization
+- [x] 19-01: Integration Testing & Performance Optimization
 
 ## Progress
 
@@ -273,6 +274,6 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 14. Trend Prediction UI | 1/1 | Complete | 2026-01-14 |
 | 15. Anomaly Detection UI | 1/1 | Complete | 2026-01-14 |
 | 16. Topic Modeling UI | 1/1 | Complete | 2026-01-14 |
-| 17. Text Clustering UI | 0/1 | Not started | - |
-| 18. Dashboard Polish | 0/1 | Not started | - |
-| 19. Integration Testing | 0/1 | Not started | - |
+| 17. Text Clustering UI | 1/1 | Complete | 2026-01-14 |
+| 18. Dashboard Polish | 1/1 | Complete | 2026-01-14 |
+| 19. Integration Testing | 1/1 | Complete | 2026-01-14 |

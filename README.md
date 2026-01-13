@@ -33,8 +33,15 @@ Reddit Insight는 Reddit 커뮤니티의 데이터를 수집하고 분석하여 
 - 비즈니스 스코어 및 실현 가능성 평가
 - 실행 권고사항 생성
 
+### ML 분석 기능
+- 트렌드 예측 (ETS/ARIMA 시계열 모델)
+- 이상 탐지 (Z-Score, IQR, Isolation Forest)
+- 토픽 모델링 (LDA, NMF)
+- 텍스트 클러스터링 (K-Means, Agglomerative)
+
 ### 시각화
 - 웹 대시보드 (FastAPI + HTMX)
+- ML 분석 결과 인터랙티브 차트
 - 마크다운 리포트 생성
 - CLI 기반 분석 결과 출력
 
@@ -111,6 +118,17 @@ reddit-insight dashboard start --reload
 ```
 
 브라우저에서 http://localhost:8000 접속
+
+### 5. ML 분석 사용
+
+대시보드에서 ML 분석 기능을 사용할 수 있습니다:
+
+- **트렌드 예측**: `/dashboard/trends/predict/{keyword}` - 키워드의 미래 트렌드 예측
+- **이상 탐지**: `/dashboard/trends/anomalies/{keyword}` - 비정상적인 트렌드 포인트 탐지
+- **토픽 분석**: `/dashboard/topics` - 문서에서 잠재 토픽 추출
+- **클러스터링**: `/dashboard/clusters` - 유사 문서 자동 그룹화
+
+자세한 사용법은 [대시보드 가이드](docs/dashboard-guide.md)를 참조하세요.
 
 ## CLI 명령어
 
