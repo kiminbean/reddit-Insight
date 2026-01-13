@@ -10,6 +10,13 @@ from reddit_insight.dashboard.services.insight_service import (
     RecommendationView,
     get_insight_service,
 )
+
+# 예측 서비스
+from reddit_insight.dashboard.services.prediction_service import (
+    PredictionService,
+    PredictionView,
+    get_prediction_service,
+)
 from reddit_insight.dashboard.services_module import (
     AnalysisRecord,
     DashboardService,
@@ -30,4 +37,8 @@ __all__ = [
     "RecommendationView",
     "OpportunityView",
     "get_insight_service",
+    # Prediction service
+    "PredictionService",
+    "PredictionView",
+    "get_prediction_service",
 ]
