@@ -425,3 +425,256 @@ ENGLISH_PATTERNS: list[DemandPattern] = [
         ],
     ),
 ]
+
+
+# =============================================================================
+# KOREAN PATTERNS (for future multilingual support)
+# =============================================================================
+
+KOREAN_PATTERNS: list[DemandPattern] = [
+    # -------------------------------------------------------------------------
+    # FEATURE_REQUEST patterns (Korean)
+    # -------------------------------------------------------------------------
+    DemandPattern(
+        pattern_id="ko_feature_wish",
+        category=DemandCategory.FEATURE_REQUEST,
+        regex_pattern=r"(?:있었으면|있으면) (?:좋겠|좋을 것 같)",
+        keywords=["있었으면 좋겠다", "있으면 좋겠다"],
+        language="ko",
+        weight=1.0,
+        examples=[
+            "이런 기능이 있었으면 좋겠다",
+            "무료 버전이 있으면 좋겠어요",
+        ],
+    ),
+    DemandPattern(
+        pattern_id="ko_feature_none",
+        category=DemandCategory.FEATURE_REQUEST,
+        regex_pattern=r"(?:하는|할 수 있는) (?:거|것|앱|도구) 없나요",
+        keywords=["없나요", "없을까요"],
+        language="ko",
+        weight=0.95,
+        examples=[
+            "이거 자동으로 하는 거 없나요?",
+            "파일 정리할 수 있는 앱 없나요?",
+        ],
+    ),
+    # -------------------------------------------------------------------------
+    # SEARCH_QUERY patterns (Korean)
+    # -------------------------------------------------------------------------
+    DemandPattern(
+        pattern_id="ko_search_looking",
+        category=DemandCategory.SEARCH_QUERY,
+        regex_pattern=r"(?:찾고|구하고) (?:있는데|있어요)",
+        keywords=["찾고 있는데", "구하고 있는데"],
+        language="ko",
+        weight=0.95,
+        examples=[
+            "좋은 메모 앱 찾고 있는데요",
+            "저렴한 대안 구하고 있어요",
+        ],
+    ),
+    DemandPattern(
+        pattern_id="ko_search_method",
+        category=DemandCategory.SEARCH_QUERY,
+        regex_pattern=r"(?:할 수 있는|하는) 방법",
+        keywords=["할 수 있는 방법", "하는 방법"],
+        language="ko",
+        weight=0.9,
+        examples=[
+            "무료로 할 수 있는 방법 있나요?",
+            "자동화하는 방법 아시는 분?",
+        ],
+    ),
+    # -------------------------------------------------------------------------
+    # PAIN_POINT patterns (Korean)
+    # -------------------------------------------------------------------------
+    DemandPattern(
+        pattern_id="ko_pain_solution",
+        category=DemandCategory.PAIN_POINT,
+        regex_pattern=r"해결책 없을까요",
+        keywords=["해결책", "해결 방법"],
+        language="ko",
+        weight=0.9,
+        examples=[
+            "이 문제 해결책 없을까요?",
+            "계속 에러 나는데 해결책 없을까요?",
+        ],
+    ),
+]
+
+
+# =============================================================================
+# DEMAND PATTERN LIBRARY
+# =============================================================================
+
+@dataclass
+class DemandPatternLibrary:
+    """
+    수요 패턴 라이브러리.
+
+    정규식 패턴을 사전 컴파일하여 효율적인 매칭을 지원한다.
+
+    Attributes:
+        language: 라이브러리 언어 (기본값: "en")
+
+    Example:
+        >>> library = DemandPatternLibrary.create_english_library()
+        >>> patterns = library.get_patterns(DemandCategory.FEATURE_REQUEST)
+        >>> print(f"Feature request patterns: {len(patterns)}")
+    """
+
+    language: str = "en"
+    _patterns: list[DemandPattern] = field(default_factory=list)
+    _compiled: dict[str, re.Pattern[str]] = field(default_factory=dict, repr=False)
+
+    def __post_init__(self) -> None:
+        """Initialize compiled patterns if patterns exist."""
+        if self._patterns:
+            self._compile_patterns()
+
+    def _compile_patterns(self) -> None:
+        """Compile all regex patterns for efficient matching."""
+        self._compiled = {}
+        for pattern in self._patterns:
+            try:
+                # Use case-insensitive matching for better coverage
+                self._compiled[pattern.pattern_id] = re.compile(
+                    pattern.regex_pattern, re.IGNORECASE
+                )
+            except re.error as e:
+                # Log compilation error but don't fail
+                print(f"Warning: Failed to compile pattern {pattern.pattern_id}: {e}")
+
+    def add_pattern(self, pattern: DemandPattern) -> None:
+        """
+        Add a pattern to the library.
+
+        Args:
+            pattern: DemandPattern to add
+        """
+        self._patterns.append(pattern)
+        # Compile the new pattern
+        try:
+            self._compiled[pattern.pattern_id] = re.compile(
+                pattern.regex_pattern, re.IGNORECASE
+            )
+        except re.error as e:
+            print(f"Warning: Failed to compile pattern {pattern.pattern_id}: {e}")
+
+    def get_patterns(
+        self, category: DemandCategory | None = None
+    ) -> list[DemandPattern]:
+        """
+        Get patterns, optionally filtered by category.
+
+        Args:
+            category: Optional category filter
+
+        Returns:
+            List of matching patterns
+        """
+        if category is None:
+            return list(self._patterns)
+        return [p for p in self._patterns if p.category == category]
+
+    def get_pattern_by_id(self, pattern_id: str) -> DemandPattern | None:
+        """
+        Get a pattern by its ID.
+
+        Args:
+            pattern_id: Pattern identifier
+
+        Returns:
+            DemandPattern if found, None otherwise
+        """
+        for pattern in self._patterns:
+            if pattern.pattern_id == pattern_id:
+                return pattern
+        return None
+
+    def get_compiled_pattern(self, pattern_id: str) -> re.Pattern[str] | None:
+        """
+        Get a compiled regex pattern by ID.
+
+        Args:
+            pattern_id: Pattern identifier
+
+        Returns:
+            Compiled regex pattern if found, None otherwise
+        """
+        return self._compiled.get(pattern_id)
+
+    def load_default_patterns(self, language: str = "en") -> None:
+        """
+        Load default patterns for the specified language.
+
+        Args:
+            language: Language code ("en" or "ko")
+        """
+        self.language = language
+        self._patterns = []
+        self._compiled = {}
+
+        if language == "en":
+            for pattern in ENGLISH_PATTERNS:
+                self._patterns.append(pattern)
+        elif language == "ko":
+            for pattern in KOREAN_PATTERNS:
+                self._patterns.append(pattern)
+        else:
+            raise ValueError(f"Unsupported language: {language}")
+
+        self._compile_patterns()
+
+    @classmethod
+    def create_english_library(cls) -> "DemandPatternLibrary":
+        """
+        Create a library with English patterns.
+
+        Returns:
+            DemandPatternLibrary with English patterns loaded
+        """
+        library = cls(language="en")
+        library.load_default_patterns("en")
+        return library
+
+    @classmethod
+    def create_korean_library(cls) -> "DemandPatternLibrary":
+        """
+        Create a library with Korean patterns.
+
+        Returns:
+            DemandPatternLibrary with Korean patterns loaded
+        """
+        library = cls(language="ko")
+        library.load_default_patterns("ko")
+        return library
+
+    @classmethod
+    def create_multilingual_library(cls) -> "DemandPatternLibrary":
+        """
+        Create a library with patterns from all supported languages.
+
+        Returns:
+            DemandPatternLibrary with patterns from all languages
+        """
+        library = cls(language="multi")
+        library._patterns = []
+
+        # Add all language patterns
+        for pattern in ENGLISH_PATTERNS:
+            library._patterns.append(pattern)
+        for pattern in KOREAN_PATTERNS:
+            library._patterns.append(pattern)
+
+        library._compile_patterns()
+        return library
+
+    def __len__(self) -> int:
+        """Return the number of patterns in the library."""
+        return len(self._patterns)
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return f"DemandPatternLibrary(language='{self.language}', patterns={len(self._patterns)})"
