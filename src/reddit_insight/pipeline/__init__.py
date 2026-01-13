@@ -3,6 +3,16 @@
 Reddit 데이터 수집, 전처리, 저장을 위한 파이프라인을 제공한다.
 """
 
+from reddit_insight.pipeline.data_pipeline import (
+    CollectionResult,
+    DataPipeline,
+    ProcessingResult,
+)
 from reddit_insight.pipeline.preprocessor import TextPreprocessor
 
-__all__ = ["TextPreprocessor"]
+__all__ = [
+    "TextPreprocessor",
+    "DataPipeline",
+    "ProcessingResult",
+    "CollectionResult",
+]
