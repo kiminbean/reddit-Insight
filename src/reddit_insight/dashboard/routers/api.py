@@ -3,6 +3,9 @@
 인증이 필요한 API 엔드포인트를 제공한다.
 """
 
+import asyncio
+import logging
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
@@ -22,6 +25,29 @@ from reddit_insight.dashboard.data_store import (
     get_analysis_history,
     get_current_data,
 )
+
+logger = logging.getLogger(__name__)
+
+# ============================================================================
+# Analysis Job State Management
+# ============================================================================
+
+_analysis_jobs: dict[str, dict[str, Any]] = {}
+
+
+def get_job_status(job_id: str) -> dict[str, Any] | None:
+    """분석 작업 상태를 반환한다."""
+    return _analysis_jobs.get(job_id)
+
+
+def set_job_status(job_id: str, status_data: dict[str, Any]) -> None:
+    """분석 작업 상태를 설정한다."""
+    _analysis_jobs[job_id] = status_data
+
+
+def get_all_jobs() -> dict[str, dict[str, Any]]:
+    """모든 분석 작업 상태를 반환한다."""
+    return _analysis_jobs.copy()
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
 
@@ -84,6 +110,35 @@ class SubredditDataResponse(BaseModel):
     trends: list[dict[str, Any]]
 
 
+class AnalyzeRequest(BaseModel):
+    """분석 요청."""
+
+    subreddit: str
+    limit: int = 100
+
+
+class AnalyzeResponse(BaseModel):
+    """분석 응답."""
+
+    job_id: str
+    subreddit: str
+    status: str
+    message: str
+
+
+class JobStatusResponse(BaseModel):
+    """작업 상태 응답."""
+
+    job_id: str
+    subreddit: str
+    status: str
+    progress: int
+    current_step: str
+    started_at: str | None
+    completed_at: str | None
+    error: str | None
+
+
 # ============================================================================
 # Public Endpoints (No Auth Required)
 # ============================================================================
@@ -96,6 +151,126 @@ async def api_status() -> dict[str, Any]:
         "status": "healthy",
         "version": "1.0.0",
         "auth_required": True,
+    }
+
+
+# ============================================================================
+# Analysis Endpoints (대시보드에서 사용 - No Auth for Dashboard)
+# ============================================================================
+
+
+async def run_analysis_task(job_id: str, subreddit: str, limit: int) -> None:
+    """백그라운드에서 분석 작업을 실행한다."""
+    from reddit_insight.dashboard.analyze_and_store import collect_and_analyze
+
+    try:
+        set_job_status(job_id, {
+            "job_id": job_id,
+            "subreddit": subreddit,
+            "status": "running",
+            "progress": 10,
+            "current_step": "데이터 수집 중...",
+            "started_at": datetime.now(UTC).isoformat(),
+            "completed_at": None,
+            "error": None,
+        })
+
+        # 분석 실행
+        await collect_and_analyze(subreddit, limit)
+
+        set_job_status(job_id, {
+            "job_id": job_id,
+            "subreddit": subreddit,
+            "status": "completed",
+            "progress": 100,
+            "current_step": "완료",
+            "started_at": _analysis_jobs[job_id]["started_at"],
+            "completed_at": datetime.now(UTC).isoformat(),
+            "error": None,
+        })
+
+        logger.info(f"Analysis completed for r/{subreddit}")
+
+    except Exception as e:
+        logger.error(f"Analysis failed for r/{subreddit}: {e}")
+        set_job_status(job_id, {
+            "job_id": job_id,
+            "subreddit": subreddit,
+            "status": "failed",
+            "progress": 0,
+            "current_step": "실패",
+            "started_at": _analysis_jobs.get(job_id, {}).get("started_at"),
+            "completed_at": datetime.now(UTC).isoformat(),
+            "error": str(e),
+        })
+
+
+@router.post("/analyze", response_model=AnalyzeResponse)
+async def start_analysis(
+    request: AnalyzeRequest,
+    background_tasks: BackgroundTasks,
+) -> AnalyzeResponse:
+    """새 분석 작업을 시작한다.
+
+    대시보드에서 직접 호출 가능 (인증 불필요).
+    """
+    # 중복 작업 체크
+    for job_id, job in _analysis_jobs.items():
+        if job["subreddit"] == request.subreddit and job["status"] == "running":
+            return AnalyzeResponse(
+                job_id=job_id,
+                subreddit=request.subreddit,
+                status="running",
+                message=f"r/{request.subreddit} 분석이 이미 진행 중입니다.",
+            )
+
+    # 새 작업 ID 생성
+    job_id = f"{request.subreddit}_{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
+
+    # 백그라운드 작업 시작
+    background_tasks.add_task(run_analysis_task, job_id, request.subreddit, request.limit)
+
+    # 초기 상태 설정
+    set_job_status(job_id, {
+        "job_id": job_id,
+        "subreddit": request.subreddit,
+        "status": "pending",
+        "progress": 0,
+        "current_step": "대기 중...",
+        "started_at": None,
+        "completed_at": None,
+        "error": None,
+    })
+
+    return AnalyzeResponse(
+        job_id=job_id,
+        subreddit=request.subreddit,
+        status="pending",
+        message=f"r/{request.subreddit} 분석이 시작되었습니다.",
+    )
+
+
+@router.get("/analyze/status/{job_id}", response_model=JobStatusResponse)
+async def get_analysis_status(job_id: str) -> JobStatusResponse:
+    """분석 작업 상태를 반환한다."""
+    job = get_job_status(job_id)
+
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job {job_id} not found",
+        )
+
+    return JobStatusResponse(**job)
+
+
+@router.get("/analyze/jobs")
+async def list_analysis_jobs() -> dict[str, Any]:
+    """모든 분석 작업 목록을 반환한다."""
+    jobs = get_all_jobs()
+    return {
+        "total": len(jobs),
+        "jobs": list(jobs.values()),
     }
 
 

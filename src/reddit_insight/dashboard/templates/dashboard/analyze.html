@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block title %}Start Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Start New Analysis</h1>
+        <p class="mt-2 text-sm text-gray-600">
+            Enter a subreddit name to analyze trending topics, user demands, and business opportunities.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Analysis Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">New Analysis</h3>
+                    <div class="mt-2 max-w-xl text-sm text-gray-500">
+                        <p>Analyze posts from any subreddit to discover insights.</p>
+                    </div>
+                    <form id="analysis-form" class="mt-5">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="subreddit" class="block text-sm font-medium text-gray-700">
+                                    Subreddit Name
+                                </label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <span class="inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-50 px-3 text-gray-500 sm:text-sm">
+                                        r/
+                                    </span>
+                                    <input type="text" name="subreddit" id="subreddit" required
+                                        class="block w-full min-w-0 flex-1 rounded-none rounded-r-md border-gray-300 px-3 py-2 focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                        placeholder="python">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="limit" class="block text-sm font-medium text-gray-700">
+                                    Number of Posts
+                                </label>
+                                <select id="limit" name="limit"
+                                    class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm">
+                                    <option value="50">50 posts</option>
+                                    <option value="100" selected>100 posts</option>
+                                    <option value="200">200 posts</option>
+                                    <option value="500">500 posts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <button type="submit" id="start-btn"
+                                class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                </svg>
+                                Start Analysis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Progress Section (Hidden by default) -->
+            <div id="progress-section" class="mt-6 bg-white shadow sm:rounded-lg hidden">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                        <span id="progress-title">Analysis in Progress</span>
+                    </h3>
+                    <div class="mt-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span id="progress-step" class="text-sm text-gray-600">Initializing...</span>
+                            <span id="progress-percent" class="text-sm font-medium text-primary-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progress-bar" class="bg-primary-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="progress-status" class="mt-4 text-sm text-gray-500">
+                        <p>Please wait while we collect and analyze Reddit data...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section (Hidden by default) -->
+            <div id="results-section" class="mt-6 hidden">
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Analysis Complete!</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p id="results-message">Your analysis has been completed successfully.</p>
+                            </div>
+                            <div class="mt-4">
+                                <div class="-mx-2 -my-1.5 flex flex-wrap gap-2">
+                                    <a id="view-trends-btn" href="/dashboard/trends" class="rounded-md bg-green-100 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200">
+                                        View Trends
+                                    </a>
+                                    <a id="view-demands-btn" href="/dashboard/demands" class="rounded-md bg-green-100 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200">
+                                        View Demands
+                                    </a>
+                                    <a id="view-competition-btn" href="/dashboard/competition" class="rounded-md bg-green-100 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200">
+                                        View Competition
+                                    </a>
+                                    <a id="view-insights-btn" href="/dashboard/insights" class="rounded-md bg-green-100 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-200">
+                                        View Insights
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Section (Hidden by default) -->
+            <div id="error-section" class="mt-6 hidden">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">Analysis Failed</h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p id="error-message">An error occurred during analysis.</p>
+                            </div>
+                            <div class="mt-4">
+                                <button type="button" onclick="resetForm()" class="rounded-md bg-red-100 px-2 py-1.5 text-sm font-medium text-red-800 hover:bg-red-200">
+                                    Try Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Previous Analyses -->
+        <div class="lg:col-span-1">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Previously Analyzed</h3>
+                    <p class="mt-2 text-sm text-gray-500">Click to re-analyze a subreddit.</p>
+
+                    {% if analyzed_subreddits %}
+                    <ul class="mt-4 divide-y divide-gray-200">
+                        {% for subreddit in analyzed_subreddits %}
+                        <li class="py-3">
+                            <button type="button" onclick="startAnalysis('{{ subreddit }}', 100)"
+                                class="w-full text-left hover:bg-gray-50 px-2 py-1 -mx-2 rounded">
+                                <span class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                                    r/{{ subreddit }}
+                                </span>
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="mt-4 text-center py-4">
+                        <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <p class="mt-2 text-sm text-gray-500">No previous analyses</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Active Jobs -->
+            <div id="active-jobs" class="mt-4 bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Active Jobs</h3>
+                    <div id="jobs-list" class="mt-4">
+                        <p class="text-sm text-gray-500">No active jobs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentJobId = null;
+let pollInterval = null;
+
+document.getElementById('analysis-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const subreddit = document.getElementById('subreddit').value.trim();
+    const limit = parseInt(document.getElementById('limit').value);
+
+    if (subreddit) {
+        startAnalysis(subreddit, limit);
+    }
+});
+
+function startAnalysis(subreddit, limit) {
+    // Disable form
+    document.getElementById('start-btn').disabled = true;
+    document.getElementById('subreddit').value = subreddit;
+
+    // Show progress section
+    document.getElementById('progress-section').classList.remove('hidden');
+    document.getElementById('results-section').classList.add('hidden');
+    document.getElementById('error-section').classList.add('hidden');
+
+    // Reset progress
+    updateProgress(0, 'Initializing...');
+
+    // Start analysis
+    fetch('/api/v1/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            subreddit: subreddit,
+            limit: limit
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        currentJobId = data.job_id;
+        updateProgress(5, 'Starting analysis...');
+
+        // Start polling for status
+        pollInterval = setInterval(() => pollStatus(currentJobId), 2000);
+    })
+    .catch(error => {
+        showError('Failed to start analysis: ' + error.message);
+    });
+}
+
+function pollStatus(jobId) {
+    fetch(`/api/v1/analyze/status/${jobId}`)
+    .then(response => response.json())
+    .then(data => {
+        updateProgress(data.progress, data.current_step);
+
+        if (data.status === 'completed') {
+            clearInterval(pollInterval);
+            showSuccess(data.subreddit);
+        } else if (data.status === 'failed') {
+            clearInterval(pollInterval);
+            showError(data.error || 'Analysis failed');
+        }
+    })
+    .catch(error => {
+        console.error('Status poll error:', error);
+    });
+}
+
+function updateProgress(percent, step) {
+    document.getElementById('progress-bar').style.width = percent + '%';
+    document.getElementById('progress-percent').textContent = percent + '%';
+    document.getElementById('progress-step').textContent = step;
+}
+
+function showSuccess(subreddit) {
+    document.getElementById('progress-section').classList.add('hidden');
+    document.getElementById('results-section').classList.remove('hidden');
+    document.getElementById('results-message').textContent =
+        `Analysis for r/${subreddit} completed successfully. View the results below.`;
+    document.getElementById('start-btn').disabled = false;
+
+    // Update links with subreddit parameter
+    const baseLinks = {
+        'view-trends-btn': '/dashboard/trends',
+        'view-demands-btn': '/dashboard/demands',
+        'view-competition-btn': '/dashboard/competition',
+        'view-insights-btn': '/dashboard/insights'
+    };
+
+    for (const [id, baseUrl] of Object.entries(baseLinks)) {
+        document.getElementById(id).href = baseUrl;
+    }
+
+    loadActiveJobs();
+}
+
+function showError(message) {
+    document.getElementById('progress-section').classList.add('hidden');
+    document.getElementById('error-section').classList.remove('hidden');
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('start-btn').disabled = false;
+}
+
+function resetForm() {
+    document.getElementById('progress-section').classList.add('hidden');
+    document.getElementById('results-section').classList.add('hidden');
+    document.getElementById('error-section').classList.add('hidden');
+    document.getElementById('subreddit').value = '';
+    document.getElementById('start-btn').disabled = false;
+    currentJobId = null;
+}
+
+function loadActiveJobs() {
+    fetch('/api/v1/analyze/jobs')
+    .then(response => response.json())
+    .then(data => {
+        const jobsList = document.getElementById('jobs-list');
+
+        if (data.total === 0) {
+            jobsList.innerHTML = '<p class="text-sm text-gray-500">No active jobs</p>';
+            return;
+        }
+
+        const runningJobs = data.jobs.filter(j => j.status === 'running' || j.status === 'pending');
+        const completedJobs = data.jobs.filter(j => j.status === 'completed').slice(-3);
+
+        let html = '';
+
+        if (runningJobs.length > 0) {
+            html += '<div class="space-y-2">';
+            for (const job of runningJobs) {
+                html += `
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-900">r/${job.subreddit}</span>
+                        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                            ${job.status}
+                        </span>
+                    </div>
+                `;
+            }
+            html += '</div>';
+        }
+
+        if (completedJobs.length > 0) {
+            html += '<div class="mt-3 pt-3 border-t border-gray-200 space-y-2">';
+            html += '<p class="text-xs text-gray-500 mb-1">Recently completed:</p>';
+            for (const job of completedJobs) {
+                html += `
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-700">r/${job.subreddit}</span>
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                            done
+                        </span>
+                    </div>
+                `;
+            }
+            html += '</div>';
+        }
+
+        if (html === '') {
+            html = '<p class="text-sm text-gray-500">No active jobs</p>';
+        }
+
+        jobsList.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Failed to load jobs:', error);
+    });
+}
+
+// Load active jobs on page load
+document.addEventListener('DOMContentLoaded', loadActiveJobs);
+</script>
+{% endblock %}

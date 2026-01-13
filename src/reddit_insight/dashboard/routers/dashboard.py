@@ -4,11 +4,13 @@
 """
 
 from dataclasses import asdict
+from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from reddit_insight.dashboard.data_store import get_all_subreddits
 from reddit_insight.dashboard.services import (
     DashboardService,
     get_dashboard_service,
@@ -75,3 +77,31 @@ async def dashboard_summary(
     }
 
     return templates.TemplateResponse(request, "dashboard/partials/summary.html", context)
+
+
+@router.get("/analyze", response_class=HTMLResponse)
+async def analyze_page(
+    request: Request,
+    service: DashboardService = Depends(get_dashboard_service),
+) -> HTMLResponse:
+    """분석 시작 페이지를 렌더링한다.
+
+    Args:
+        request: FastAPI Request 객체
+        service: DashboardService 인스턴스
+
+    Returns:
+        HTMLResponse: 렌더링된 HTML 페이지
+    """
+    templates = get_templates(request)
+
+    # 이전에 분석된 서브레딧 목록
+    analyzed_subreddits = get_all_subreddits()
+
+    context = {
+        "request": request,
+        "page_title": "Start Analysis",
+        "analyzed_subreddits": analyzed_subreddits,
+    }
+
+    return templates.TemplateResponse(request, "dashboard/analyze.html", context)
