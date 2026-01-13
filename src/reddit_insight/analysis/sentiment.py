@@ -488,3 +488,313 @@ NEGATIVE_EMOTICONS: dict[str, float] = {
     "smh": 0.3,
     "facepalm": 0.4,
 }
+
+
+# ============================================================================
+# Sentiment Analyzer Configuration
+# ============================================================================
+
+
+@dataclass
+class SentimentAnalyzerConfig:
+    """
+    Configuration for sentiment analyzer.
+
+    Attributes:
+        use_negation: Whether to handle negation (e.g., "not good")
+        use_intensifiers: Whether to apply intensifier/diminisher modifiers
+        neutral_threshold: Threshold below which sentiment is neutral
+        mixed_threshold: Threshold for mixed sentiment (when both pos/neg are high)
+    """
+
+    use_negation: bool = True
+    use_intensifiers: bool = True
+    neutral_threshold: float = 0.03
+    mixed_threshold: float = 0.25
+
+
+# ============================================================================
+# Rule-Based Sentiment Analyzer
+# ============================================================================
+
+
+@dataclass
+class RuleBasedSentimentAnalyzer:
+    """
+    Rule-based sentiment analyzer using lexicon matching.
+
+    Uses predefined sentiment lexicons with support for negation handling,
+    intensifiers, and emoticons to analyze text sentiment.
+
+    Example:
+        >>> analyzer = RuleBasedSentimentAnalyzer()
+        >>> score = analyzer.analyze("This product is really great!")
+        >>> print(score.sentiment)
+        Sentiment.POSITIVE
+    """
+
+    config: SentimentAnalyzerConfig = field(default_factory=SentimentAnalyzerConfig)
+
+    def _tokenize_simple(self, text: str) -> list[str]:
+        """
+        Simple tokenization for sentiment analysis.
+
+        Preserves emoticons and handles contractions.
+
+        Args:
+            text: Input text
+
+        Returns:
+            List of tokens (lowercase)
+        """
+        import re
+
+        if not text:
+            return []
+
+        # Preserve emoticons by extracting them first
+        emoticon_pattern = r"[:;=]['\-]?[)(DPp\[\]/\\|]|<3|[xX][Dd]|-_-|>:\("
+        emoticons = re.findall(emoticon_pattern, text)
+
+        # Replace emoticons with placeholders
+        placeholder_text = text
+        emoticon_map = {}
+        for i, emo in enumerate(emoticons):
+            placeholder = f"__EMO{i}__"
+            emoticon_map[placeholder] = emo
+            placeholder_text = placeholder_text.replace(emo, f" {placeholder} ", 1)
+
+        # Basic tokenization: split on whitespace and punctuation
+        tokens = re.findall(r"\b[\w'-]+\b|__EMO\d+__", placeholder_text.lower())
+
+        # Restore emoticons
+        result = []
+        for token in tokens:
+            if token in emoticon_map:
+                result.append(emoticon_map[token])
+            else:
+                result.append(token)
+
+        return result
+
+    def _tokenize_with_context(self, text: str) -> list[tuple[str, str | None, str | None]]:
+        """
+        Tokenize text with surrounding context for modifier handling.
+
+        Args:
+            text: Input text
+
+        Returns:
+            List of tuples (token, prev_token, prev_prev_token)
+        """
+        tokens = self._tokenize_simple(text)
+
+        if not tokens:
+            return []
+
+        result: list[tuple[str, str | None, str | None]] = []
+        for i, token in enumerate(tokens):
+            prev_token = tokens[i - 1] if i > 0 else None
+            prev_prev_token = tokens[i - 2] if i > 1 else None
+            result.append((token, prev_token, prev_prev_token))
+
+        return result
+
+    def _calculate_word_sentiment(
+        self,
+        word: str,
+        prev_word: str | None,
+        prev_prev_word: str | None,
+    ) -> float:
+        """
+        Calculate sentiment score for a single word.
+
+        Args:
+            word: Current word
+            prev_word: Previous word (for modifier detection)
+            prev_prev_word: Word before previous (for two-word modifiers)
+
+        Returns:
+            Sentiment score (-1 to 1)
+        """
+        word_lower = word.lower()
+        prev_lower = prev_word.lower() if prev_word else None
+        prev_prev_lower = prev_prev_word.lower() if prev_prev_word else None
+
+        # Check emoticons first
+        if word in POSITIVE_EMOTICONS:
+            return POSITIVE_EMOTICONS[word]
+        if word in NEGATIVE_EMOTICONS:
+            return -NEGATIVE_EMOTICONS[word]
+
+        # Determine base sentiment
+        base_score = 0.0
+        if word_lower in POSITIVE_WORDS:
+            base_score = 0.7  # Base positive score
+        elif word_lower in NEGATIVE_WORDS:
+            base_score = -0.7  # Base negative score
+        else:
+            return 0.0  # Not a sentiment word
+
+        # Apply modifiers if enabled
+        if self.config.use_intensifiers:
+            # Check for intensifiers
+            if prev_lower and prev_lower in INTENSIFIERS:
+                base_score *= INTENSIFIERS[prev_lower]
+            # Check for diminishers
+            elif prev_lower and prev_lower in DIMINISHERS:
+                base_score *= DIMINISHERS[prev_lower]
+            # Check two-word phrases (e.g., "a bit", "kind of")
+            elif prev_lower and prev_prev_lower:
+                two_word = f"{prev_prev_lower} {prev_lower}"
+                if two_word in DIMINISHERS:
+                    base_score *= DIMINISHERS[two_word]
+
+        # Apply negation if enabled
+        if self.config.use_negation:
+            # Check for negation in previous words (window of 2)
+            if prev_lower and prev_lower in NEGATORS:
+                base_score *= -0.8  # Flip and reduce intensity
+            elif prev_prev_lower and prev_prev_lower in NEGATORS:
+                base_score *= -0.6  # Weaker flip for farther negation
+
+        # Clamp to [-1, 1]
+        return max(-1.0, min(1.0, base_score))
+
+    def _aggregate_scores(self, word_scores: list[float]) -> SentimentScore:
+        """
+        Aggregate word-level sentiment scores into overall sentiment.
+
+        Args:
+            word_scores: List of word sentiment scores
+
+        Returns:
+            Aggregated SentimentScore
+        """
+        if not word_scores:
+            return SentimentScore(
+                sentiment=Sentiment.NEUTRAL,
+                positive_score=0.0,
+                negative_score=0.0,
+                neutral_score=1.0,
+                compound=0.0,
+                confidence=0.5,  # Low confidence for empty input
+            )
+
+        # Separate positive and negative scores
+        positive_scores = [s for s in word_scores if s > 0]
+        negative_scores = [s for s in word_scores if s < 0]
+
+        # Calculate raw scores
+        pos_sum = sum(positive_scores)
+        neg_sum = sum(abs(s) for s in negative_scores)
+        total_sentiment_words = len(positive_scores) + len(negative_scores)
+
+        # Normalize scores (using a normalization factor similar to VADER)
+        # This prevents the score from growing indefinitely with more words
+        alpha = 15  # Normalization constant
+        norm_pos = pos_sum / (pos_sum + alpha) if pos_sum > 0 else 0.0
+        norm_neg = neg_sum / (neg_sum + alpha) if neg_sum > 0 else 0.0
+
+        # Calculate compound score
+        # Ranges from -1 (most negative) to 1 (most positive)
+        compound = (pos_sum - neg_sum) / ((pos_sum + neg_sum + alpha))
+
+        # Calculate neutral score (proportion of non-sentiment words)
+        total_words = len(word_scores)
+        neutral_ratio = 1.0 - (total_sentiment_words / total_words) if total_words > 0 else 1.0
+        neutral_score = min(1.0, max(0.0, neutral_ratio))
+
+        # Normalize positive and negative scores
+        total_score = norm_pos + norm_neg + 0.001  # Avoid division by zero
+        positive_score = norm_pos / total_score
+        negative_score = norm_neg / total_score
+
+        # Determine sentiment classification
+        sentiment = self._classify_sentiment(
+            positive_score, negative_score, compound
+        )
+
+        # Calculate confidence based on number of sentiment words and their consistency
+        if total_sentiment_words == 0:
+            confidence = 0.3
+        else:
+            # Higher confidence with more sentiment words and clearer polarity
+            word_confidence = min(1.0, total_sentiment_words / 5.0)  # Max at 5 words
+            polarity_confidence = abs(compound)
+            confidence = 0.4 + 0.3 * word_confidence + 0.3 * polarity_confidence
+
+        return SentimentScore(
+            sentiment=sentiment,
+            positive_score=round(positive_score, 4),
+            negative_score=round(negative_score, 4),
+            neutral_score=round(neutral_score, 4),
+            compound=round(compound, 4),
+            confidence=round(confidence, 4),
+        )
+
+    def _classify_sentiment(
+        self,
+        positive_score: float,
+        negative_score: float,
+        compound: float,
+    ) -> Sentiment:
+        """
+        Classify overall sentiment based on scores.
+
+        Args:
+            positive_score: Normalized positive score
+            negative_score: Normalized negative score
+            compound: Compound sentiment score
+
+        Returns:
+            Sentiment classification
+        """
+        # Check for mixed sentiment (both positive and negative are significant)
+        if (
+            positive_score > self.config.mixed_threshold
+            and negative_score > self.config.mixed_threshold
+        ):
+            return Sentiment.MIXED
+
+        # Check for neutral
+        if abs(compound) < self.config.neutral_threshold:
+            return Sentiment.NEUTRAL
+
+        # Classify as positive or negative
+        if compound > 0:
+            return Sentiment.POSITIVE
+        else:
+            return Sentiment.NEGATIVE
+
+    def analyze(self, text: str) -> SentimentScore:
+        """
+        Analyze sentiment of text.
+
+        Args:
+            text: Input text to analyze
+
+        Returns:
+            SentimentScore with detailed sentiment information
+        """
+        if not text or not text.strip():
+            return SentimentScore(
+                sentiment=Sentiment.NEUTRAL,
+                positive_score=0.0,
+                negative_score=0.0,
+                neutral_score=1.0,
+                compound=0.0,
+                confidence=0.0,
+            )
+
+        # Tokenize with context
+        tokens_with_context = self._tokenize_with_context(text)
+
+        # Calculate word-level sentiment scores
+        word_scores: list[float] = []
+        for token, prev_token, prev_prev_token in tokens_with_context:
+            score = self._calculate_word_sentiment(token, prev_token, prev_prev_token)
+            word_scores.append(score)
+
+        # Aggregate scores
+        return self._aggregate_scores(word_scores)
