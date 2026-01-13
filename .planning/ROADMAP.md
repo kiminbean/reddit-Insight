@@ -20,7 +20,7 @@ None
 - [x] **Phase 4: Data Storage & Pipeline** - 데이터베이스, 전처리 파이프라인
 - [x] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
 - [x] **Phase 6: Demand Discovery** - "이거 있으면 좋겠다" 패턴 탐지
-- [ ] **Phase 7: Competitive Analysis** - 제품/서비스 반응 및 불만 분석
+- [x] **Phase 7: Competitive Analysis** - 제품/서비스 반응 및 불만 분석
 - [ ] **Phase 8: Business Model Insights** - 인사이트 → 실행 가능한 기회 연결
 - [ ] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
 - [ ] **Phase 10: Report Export & Polish** - 마크다운 리포트 생성, 통합 테스트
@@ -105,9 +105,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: 제품/서비스 엔티티 인식
-- [ ] 07-02: 감성 분석 엔진
-- [ ] 07-03: 불만 및 대안 요구 추출
+- [x] 07-01: 제품/서비스 엔티티 인식
+- [x] 07-02: 감성 분석 엔진
+- [x] 07-03: 불만 및 대안 요구 추출
 
 ### Phase 8: Business Model Insights
 **Goal**: 분석 결과를 비즈니스 기회로 연결하는 인사이트 생성
@@ -158,7 +158,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Data Storage & Pipeline | 3/3 | Complete | 2026-01-13 |
 | 5. Trend Analysis Engine | 4/4 | Complete | 2026-01-13 |
 | 6. Demand Discovery | 3/3 | Complete | 2026-01-13 |
-| 7. Competitive Analysis | 0/3 | Not started | - |
+| 7. Competitive Analysis | 3/3 | Complete | 2026-01-13 |
 | 8. Business Model Insights | 0/3 | Not started | - |
 | 9. Web Dashboard | 0/5 | Not started | - |
 | 10. Report Export & Polish | 0/4 | Not started | - |

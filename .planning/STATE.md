@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-13)
 
 **Core value:** 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
-**Current focus:** Phase 7 — Competitive Analysis
+**Current focus:** Phase 8 — Business Model Insights
 
 ## Current Position
 
-Phase: 7 of 10 (Competitive Analysis)
+Phase: 8 of 10 (Business Model Insights)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-01-13 — Phase 6 completed
+Last activity: 2026-01-13 — Phase 7 completed
 
-Progress: ██████░░░░ 60%
+Progress: ███████░░░ 70%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
+- Total plans completed: 25
 - Average duration: —
 - Total execution time: —
 
@@ -33,9 +33,10 @@ Progress: ██████░░░░ 60%
 | 4. Data Pipeline | 3 | — | — |
 | 5. Trend Analysis | 4 | — | — |
 | 6. Demand Discovery | 3 | — | — |
+| 7. Competitive Analysis | 3 | — | — |
 
 **Recent Trend:**
-- Last 5 plans: 05-03, 05-04, 06-01, 06-02, 06-03
+- Last 5 plans: 06-02, 06-03, 07-01, 07-02, 07-03
 - Trend: —
 
 ## Accumulated Context
@@ -61,6 +62,10 @@ Recent decisions affecting current work:
 - 정규식 기반 수요 패턴 탐지 (20개 영어 패턴)
 - 5가지 수요 카테고리 (FEATURE_REQUEST, PAIN_POINT, SEARCH_QUERY, WILLINGNESS_TO_PAY, ALTERNATIVE_SEEKING)
 - 우선순위 점수 = 빈도(30%) + 구매의향(30%) + 긴급도(20%) + 최신성(20%)
+- 패턴 기반 엔티티 인식 (제품/서비스/브랜드/기술)
+- 규칙 기반 감성 분석 (96 positive, 107 negative words + Reddit slang)
+- 불만 추출 (7가지 유형) + 대안 비교 추출 (5가지 유형)
+- CompetitiveAnalyzer로 엔티티별 인사이트 리포트
 
 ### Deferred Issues
 
@@ -73,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-13
-Stopped at: Phase 6 완료, Phase 7 준비
+Stopped at: Phase 7 완료, Phase 8 준비
 Resume file: None
