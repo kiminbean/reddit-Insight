@@ -394,14 +394,26 @@ async def cmd_analyze_full(args: argparse.Namespace) -> int:
                 posts_result = await session.execute(
                     select(PostModel)
                     .where(PostModel.subreddit_id == subreddit.id)
-                    .order_by(PostModel.created_utc.desc())
+                    .order_by(PostModel.reddit_created_utc.desc())
                     .limit(args.limit)
                 )
                 post_models = posts_result.scalars().all()
 
                 # 모델을 Post 객체로 변환
                 for pm in post_models:
-                    posts.append(pm.to_domain())
+                    posts.append(Post(
+                        id=pm.reddit_id,
+                        title=pm.title,
+                        selftext=pm.selftext or "",
+                        author=pm.author,
+                        subreddit=subreddit.name,
+                        score=pm.score,
+                        num_comments=pm.num_comments,
+                        created_utc=pm.reddit_created_utc,
+                        url=pm.url,
+                        permalink=pm.permalink,
+                        is_self=pm.is_self,
+                    ))
 
         progress.update(task, completed=100, total=100)
 
@@ -415,7 +427,7 @@ async def cmd_analyze_full(args: argparse.Namespace) -> int:
     console.print(f"\n[green]{len(posts)}개[/green] 게시물을 분석합니다.\n")
 
     # 분석 실행
-    results = {}
+    results: dict[str, object] = {}
 
     with create_progress() as progress:
         # 1. 키워드 추출
@@ -436,14 +448,14 @@ async def cmd_analyze_full(args: argparse.Namespace) -> int:
         # 3. 수요 분석
         task3 = progress.add_task("수요 분석 중...", total=100)
         demand_analyzer = DemandAnalyzer()
-        demand_report = demand_analyzer.analyze(posts)
+        demand_report = demand_analyzer.analyze_posts(posts)
         results["demand"] = demand_report
         progress.update(task3, completed=100)
 
         # 4. 경쟁 분석
         task4 = progress.add_task("경쟁 분석 중...", total=100)
         competitive_analyzer = CompetitiveAnalyzer()
-        competitive_report = competitive_analyzer.analyze(posts)
+        competitive_report = competitive_analyzer.analyze_posts(posts)
         results["competitive"] = competitive_report
         progress.update(task4, completed=100)
 
@@ -457,7 +469,7 @@ async def cmd_analyze_full(args: argparse.Namespace) -> int:
     table.add_column("점수", justify="right")
 
     for i, kw in enumerate(keyword_result.keywords[:10], 1):
-        table.add_row(str(i), kw.keyword, f"{kw.combined_score:.2f}")
+        table.add_row(str(i), kw.keyword, f"{kw.score:.2f}")
 
     console.print(table)
     console.print()
@@ -530,7 +542,6 @@ async def cmd_report_generate(args: argparse.Namespace) -> int:
     from reddit_insight.analysis.demand_analyzer import DemandAnalyzer
     from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
     from reddit_insight.analysis.trends import KeywordTrendAnalyzer
-    from reddit_insight.insights.feasibility import InsightGenerator
     from reddit_insight.reddit.models import Post
     from reddit_insight.reports.generator import (
         ReportConfig,
@@ -578,13 +589,25 @@ async def cmd_report_generate(args: argparse.Namespace) -> int:
                 posts_result = await session.execute(
                     select(PostModel)
                     .where(PostModel.subreddit_id == subreddit.id)
-                    .order_by(PostModel.created_utc.desc())
+                    .order_by(PostModel.reddit_created_utc.desc())
                     .limit(args.limit)
                 )
                 post_models = posts_result.scalars().all()
 
                 for pm in post_models:
-                    posts.append(pm.to_domain())
+                    posts.append(Post(
+                        id=pm.reddit_id,
+                        title=pm.title,
+                        selftext=pm.selftext or "",
+                        author=pm.author,
+                        subreddit=subreddit.name,
+                        score=pm.score,
+                        num_comments=pm.num_comments,
+                        created_utc=pm.reddit_created_utc,
+                        url=pm.url,
+                        permalink=pm.permalink,
+                        is_self=pm.is_self,
+                    ))
 
         progress.update(task, completed=100, total=100)
 
@@ -608,7 +631,7 @@ async def cmd_report_generate(args: argparse.Namespace) -> int:
             title=f"r/{args.subreddit} Trend Report",
             summary=f"Analyzed {len(posts)} posts from r/{args.subreddit}",
             top_keywords=[
-                {"keyword": kw.keyword, "score": kw.combined_score}
+                {"keyword": kw.keyword, "score": kw.score}
                 for kw in keyword_result.keywords[:10]
             ],
             rising_keywords=[
@@ -622,32 +645,23 @@ async def cmd_report_generate(args: argparse.Namespace) -> int:
         # 수요 분석
         task2 = progress.add_task("수요 분석 중...", total=100)
         demand_analyzer = DemandAnalyzer()
-        demand_report = demand_analyzer.analyze(posts)
+        demand_report = demand_analyzer.analyze_posts(posts)
         progress.update(task2, completed=100)
 
         # 경쟁 분석
         task3 = progress.add_task("경쟁 분석 중...", total=100)
         competitive_analyzer = CompetitiveAnalyzer()
-        competitive_report = competitive_analyzer.analyze(posts)
+        competitive_report = competitive_analyzer.analyze_posts(posts)
         progress.update(task3, completed=100)
 
-        # 인사이트 생성
-        task4 = progress.add_task("인사이트 생성 중...", total=100)
-        insight_generator = InsightGenerator()
-        insight_report = insight_generator.generate_insights(
-            demand_report=demand_report,
-            competitive_report=competitive_report,
-        )
-        progress.update(task4, completed=100)
-
-        # 리포트 생성
-        task5 = progress.add_task("리포트 생성 중...", total=100)
+        # 리포트 생성 (인사이트 리포트는 별도 생성 없이 다른 리포트로 대체)
+        task4 = progress.add_task("리포트 생성 중...", total=100)
 
         collector = ReportDataCollector(
             trend_report=trend_data,
             demand_report=demand_report,
             competitive_report=competitive_report,
-            insight_report=insight_report,
+            insight_report=None,  # 인사이트는 수요/경쟁 분석에서 추출
             metadata={"subreddit": args.subreddit, "post_count": len(posts)},
         )
 
@@ -657,7 +671,7 @@ async def cmd_report_generate(args: argparse.Namespace) -> int:
         )
         generator = ReportGenerator(config=config)
         exported_files = generator.export_all(collector, output_dir)
-        progress.update(task5, completed=100)
+        progress.update(task4, completed=100)
 
     # 결과 출력
     table = Table(title="생성된 리포트", show_header=True)
