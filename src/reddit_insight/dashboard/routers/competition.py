@@ -501,7 +501,7 @@ async def entity_detail(
             "page_title": "Entity Not Found",
             "error": f"Entity '{name}' not found.",
         }
-        return templates.TemplateResponse("competition/entity_detail.html", context, status_code=404)
+        return templates.TemplateResponse(request, "competition/entity_detail.html", context, status_code=404)
 
     context = {
         "request": request,

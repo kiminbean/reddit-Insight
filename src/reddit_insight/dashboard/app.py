@@ -4,18 +4,50 @@ Reddit Insight 분석 결과를 시각화하는 웹 대시보드를 제공한다
 서버 사이드 렌더링(Jinja2)과 HTMX를 활용하여 최소한의 JavaScript로 동적 UI를 구현한다.
 """
 
+import logging
+import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+# 로깅 설정
+logger = logging.getLogger(__name__)
 
 # 패키지 내부 경로 설정
 PACKAGE_DIR = Path(__file__).parent
 TEMPLATES_DIR = PACKAGE_DIR / "templates"
 STATIC_DIR = PACKAGE_DIR / "static"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """애플리케이션 수명 주기 관리.
+
+    Startup: 리소스 초기화
+    Shutdown: 리소스 정리
+    """
+    # Startup
+    logger.info("Starting Reddit Insight Dashboard...")
+
+    # 디렉토리 존재 확인
+    if not TEMPLATES_DIR.exists():
+        logger.warning(f"Templates directory not found: {TEMPLATES_DIR}")
+    if not STATIC_DIR.exists():
+        logger.warning(f"Static directory not found: {STATIC_DIR}")
+
+    logger.info("Dashboard startup complete")
+
+    yield
+
+    # Shutdown
+    logger.info("Shutting down Reddit Insight Dashboard...")
+    logger.info("Dashboard shutdown complete")
 
 
 def create_app() -> FastAPI:
@@ -30,7 +62,45 @@ def create_app() -> FastAPI:
         version="0.1.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
+        lifespan=lifespan,
     )
+
+    # CORS 미들웨어 설정
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # 프로덕션에서는 특정 도메인으로 제한
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # 글로벌 예외 핸들러
+    @application.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        """처리되지 않은 예외를 처리한다."""
+        logger.error(f"Unhandled exception: {exc}", exc_info=True)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Internal Server Error",
+                "detail": str(exc) if application.debug else "An unexpected error occurred",
+            },
+        )
+
+    # 요청 로깅 미들웨어
+    @application.middleware("http")
+    async def log_requests(request: Request, call_next):
+        """모든 HTTP 요청을 로깅한다."""
+        start_time = time.time()
+        response = await call_next(request)
+        process_time = time.time() - start_time
+
+        logger.info(
+            f"{request.method} {request.url.path} "
+            f"- Status: {response.status_code} "
+            f"- Time: {process_time:.3f}s"
+        )
+        return response
 
     # 정적 파일 마운트
     application.mount(

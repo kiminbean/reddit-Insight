@@ -191,7 +191,7 @@ async def insight_detail(
             "page_title": "Insight Not Found",
             "error_message": f"Insight with ID '{insight_id}' not found.",
         }
-        return templates.TemplateResponse("insights/detail.html", context, status_code=404)
+        return templates.TemplateResponse(request, "insights/detail.html", context, status_code=404)
 
     context = {
         "request": request,

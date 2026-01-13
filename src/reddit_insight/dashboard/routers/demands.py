@@ -416,7 +416,7 @@ async def demand_detail(
             "page_title": "Demand Not Found",
             "error": f"Demand with ID '{demand_id}' not found.",
         }
-        return templates.TemplateResponse("demands/detail.html", context, status_code=404)
+        return templates.TemplateResponse(request, "demands/detail.html", context, status_code=404)
 
     context = {
         "request": request,
