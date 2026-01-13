@@ -209,3 +209,133 @@ class RedditScraper:
         """
         url = self._build_subreddit_url(subreddit, "rising")
         return await self._fetch_posts(url, limit)
+
+    # ========== 댓글 수집 메서드 ==========
+
+    async def get_post_comments(
+        self, post_id: str, limit: int = 500
+    ) -> list[Comment]:
+        """게시물의 댓글 수집.
+
+        /comments/{post_id}.json 엔드포인트를 사용합니다.
+        응답 구조는 [post_listing, comments_listing] 형태입니다.
+
+        Args:
+            post_id: 게시물 ID
+            limit: 수집할 댓글 수 (기본: 500, 최대: 500)
+
+        Returns:
+            Comment 모델 리스트 (중첩 구조가 평탄화됨)
+        """
+        # Reddit은 댓글 limit 최대 500 지원
+        effective_limit = min(limit, 500)
+
+        url = f"{self.BASE_URL}/comments/{post_id}.json?limit={effective_limit}"
+        logger.debug(f"Fetching comments: {url}")
+
+        try:
+            response = await self._client.get_json(url)
+        except Exception as e:
+            logger.error(f"Failed to fetch comments for post {post_id}: {e}")
+            return []
+
+        # 응답이 리스트 형태인지 확인
+        if not isinstance(response, list):
+            logger.warning(f"Unexpected response format for comments: {type(response)}")
+            return []
+
+        # 댓글 추출 및 평탄화
+        comments = extract_comments_from_response(response)
+        return comments[:limit]
+
+    async def get_subreddit_comments(
+        self, subreddit: str, limit: int = 100
+    ) -> list[Comment]:
+        """서브레딧의 최근 댓글 스트림 수집.
+
+        /r/{subreddit}/comments.json 엔드포인트를 사용합니다.
+        서브레딧에서 작성된 최근 댓글들을 가져옵니다.
+
+        Args:
+            subreddit: 서브레딧 이름
+            limit: 수집할 댓글 수 (기본: 100)
+
+        Returns:
+            Comment 모델 리스트
+        """
+        comments: list[Comment] = []
+        after: str | None = None
+
+        while len(comments) < limit:
+            # 이번 요청에서 가져올 개수 계산
+            remaining = limit - len(comments)
+            fetch_count = min(remaining, self.MAX_PER_REQUEST)
+
+            # 파라미터 구성
+            params: dict[str, Any] = {"limit": fetch_count}
+            if after:
+                params["after"] = after
+
+            url = f"{self.BASE_URL}/r/{subreddit}/comments.json?{urlencode(params)}"
+            logger.debug(f"Fetching subreddit comments: {url}")
+
+            try:
+                response = await self._client.get_json(url)
+            except Exception as e:
+                logger.error(f"Failed to fetch comments for r/{subreddit}: {e}")
+                break
+
+            # 댓글 추출
+            children = self._parser.parse_listing(response)
+            for child in children:
+                comment = self._parser.parse_comment(child)
+                if comment is not None:
+                    comments.append(comment)
+
+            # 다음 페이지 토큰 확인
+            after = self._parser.get_after_token(response)
+            if not after:
+                break
+
+            # 빈 응답 방어
+            if not children:
+                logger.debug("No more comments available")
+                break
+
+        return comments[:limit]
+
+    def _flatten_comment_tree(
+        self, children: list[dict[str, Any]]
+    ) -> list[Comment]:
+        """중첩된 댓글 트리를 평탄화.
+
+        Args:
+            children: 댓글 children 리스트
+
+        Returns:
+            평탄화된 Comment 리스트
+        """
+        comments: list[Comment] = []
+
+        for child in children:
+            kind = child.get("kind")
+
+            # "more" 타입은 스킵
+            if kind == RedditJSONParser.KIND_MORE:
+                continue
+
+            # 댓글 파싱
+            comment = self._parser.parse_comment(child)
+            if comment is not None:
+                comments.append(comment)
+
+            # replies 처리
+            child_data = child.get("data", {})
+            replies = child_data.get("replies")
+
+            if replies and isinstance(replies, dict):
+                nested_children = self._parser.parse_listing(replies)
+                nested_comments = self._flatten_comment_tree(nested_children)
+                comments.extend(nested_comments)
+
+        return comments
