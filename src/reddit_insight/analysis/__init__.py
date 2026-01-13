@@ -61,6 +61,11 @@ from reddit_insight.analysis.demand_patterns import (
     ENGLISH_PATTERNS,
     KOREAN_PATTERNS,
 )
+from reddit_insight.analysis.demand_detector import (
+    DemandDetector,
+    DemandDetectorConfig,
+    DemandSummary,
+)
 
 __all__ = [
     # Tokenizer
@@ -107,4 +112,8 @@ __all__ = [
     "DemandPatternLibrary",
     "ENGLISH_PATTERNS",
     "KOREAN_PATTERNS",
+    # Demand Detector
+    "DemandDetector",
+    "DemandDetectorConfig",
+    "DemandSummary",
 ]
