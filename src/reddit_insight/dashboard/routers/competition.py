@@ -159,74 +159,6 @@ class CompetitionService:
             alternatives_mentioned=insight.alternatives_mentioned,
         )
 
-    def _run_demo_analysis(self) -> None:
-        """데모 데이터로 분석을 실행한다."""
-        # 데모용 가상 Post 객체 생성을 위한 클래스
-        from dataclasses import dataclass as dc
-        from datetime import datetime
-
-        @dc
-        class DemoPost:
-            id: str
-            title: str
-            selftext: str = ""
-            score: int = 1
-            num_comments: int = 0
-            created_utc: datetime = None
-            subreddit: str = "demo"
-            author: str = "demo_user"
-            url: str = ""
-            permalink: str = ""
-
-            def __post_init__(self):
-                if self.created_utc is None:
-                    self.created_utc = datetime.now()
-
-        demo_posts = [
-            DemoPost(
-                id="1",
-                title="Slack is so slow and keeps crashing",
-                selftext="Really frustrated with Slack lately. It's been slow and crashes constantly. Anyone have alternatives?",
-            ),
-            DemoPost(
-                id="2",
-                title="Switched from Evernote to Notion",
-                selftext="Finally made the switch. Notion is so much better for organizing notes. Evernote was getting too expensive.",
-            ),
-            DemoPost(
-                id="3",
-                title="Trello vs Asana for small teams",
-                selftext="Which one is better for a team of 5? Looking for something simple but effective.",
-            ),
-            DemoPost(
-                id="4",
-                title="Frustrated with Dropbox pricing",
-                selftext="Dropbox is too expensive for what it offers. Google Drive is a better alternative.",
-            ),
-            DemoPost(
-                id="5",
-                title="Zoom alternative needed",
-                selftext="Zoom has terrible audio quality. Microsoft Teams is better but has its own issues.",
-            ),
-            DemoPost(
-                id="6",
-                title="Discord vs Slack for communities",
-                selftext="Discord is great for gaming communities but Slack is better for work.",
-            ),
-            DemoPost(
-                id="7",
-                title="Notion is confusing",
-                selftext="Notion has a steep learning curve. It's confusing for beginners.",
-            ),
-            DemoPost(
-                id="8",
-                title="Recommend Obsidian over Notion",
-                selftext="I recommend Obsidian over Notion for personal knowledge management.",
-            ),
-        ]
-
-        self._cached_report = self._analyzer.analyze_posts(demo_posts)
-
     def get_entities(self, limit: int = 20) -> list[EntityView]:
         """엔티티 목록을 반환한다.
 
@@ -262,9 +194,7 @@ class CompetitionService:
             if result:
                 return result
 
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 캐시된 리포트에서 검색 (mock 데이터 사용 금지)
         if self._cached_report is None:
             return []
 
@@ -284,9 +214,51 @@ class CompetitionService:
         Returns:
             EntityDetail 또는 None (찾지 못한 경우)
         """
-        if self._cached_report is None:
-            self._run_demo_analysis()
+        # 실제 데이터에서 엔티티 상세 정보 가져오기
+        data = get_current_data()
+        if data and data.competition and data.competition.get("insights"):
+            name_lower = name.lower()
+            for insight_data in data.competition["insights"]:
+                entity_name = insight_data.get("entity_name", "").lower()
+                if entity_name == name_lower:
+                    compound = insight_data.get("sentiment_compound", 0)
+                    if compound > 0.05:
+                        sentiment_label = "positive"
+                    elif compound < -0.05:
+                        sentiment_label = "negative"
+                    else:
+                        sentiment_label = "neutral"
 
+                    entity_view = EntityView(
+                        name=insight_data.get("entity_name", "Unknown"),
+                        entity_type=insight_data.get("entity_type", "product"),
+                        mention_count=insight_data.get("mention_count", 1),
+                        sentiment_score=compound,
+                        sentiment_label=sentiment_label,
+                        complaint_count=len(insight_data.get("top_complaints", [])),
+                    )
+
+                    complaint_views = [
+                        ComplaintView(
+                            id=f"complaint_{i:03d}",
+                            entity_name=insight_data.get("entity_name", ""),
+                            complaint_type="general",
+                            text=c.get("text", "") if isinstance(c, dict) else str(c),
+                            severity=c.get("severity", 0.5) if isinstance(c, dict) else 0.5,
+                            keywords=[],
+                        )
+                        for i, c in enumerate(insight_data.get("top_complaints", [])[:5])
+                    ]
+
+                    return EntityDetail(
+                        entity=entity_view,
+                        top_complaints=complaint_views,
+                        switch_to=insight_data.get("switch_to", []),
+                        switch_from=insight_data.get("switch_from", []),
+                        alternatives_mentioned=insight_data.get("alternatives_mentioned", []),
+                    )
+
+        # 캐시된 리포트에서 검색
         if self._cached_report is None:
             return None
 
@@ -326,9 +298,7 @@ class CompetitionService:
             if result:
                 return result
 
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 캐시된 리포트에서 검색 (mock 데이터 사용 금지)
         if self._cached_report is None:
             return []
 
@@ -361,9 +331,7 @@ class CompetitionService:
             if total > 0:
                 return {k: (v / total) * 100 for k, v in counts.items()}
 
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 캐시된 리포트에서 계산 (mock 데이터 사용 금지)
         if self._cached_report is None:
             return {"positive": 0.0, "neutral": 0.0, "negative": 0.0}
 
@@ -390,9 +358,7 @@ class CompetitionService:
         if data and data.competition and data.competition.get("popular_switches"):
             return data.competition["popular_switches"]
 
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 캐시된 리포트에서 검색 (mock 데이터 사용 금지)
         if self._cached_report is None:
             return []
 

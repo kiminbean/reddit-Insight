@@ -204,10 +204,7 @@ class DemandService:
             if result:
                 return result
 
-        # 실제 데이터가 없으면 분석기로 분석 실행
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 실제 데이터가 없으면 빈 결과 반환 (mock 데이터 사용 금지)
         if self._cached_report is None:
             return []
 
@@ -241,9 +238,38 @@ class DemandService:
         Returns:
             DemandDetail 또는 None (찾지 못한 경우)
         """
-        if self._cached_report is None:
-            self._run_demo_analysis()
+        # 실제 데이터에서 수요 상세 정보 가져오기
+        data = get_current_data()
+        if data and data.demands and data.demands.get("top_opportunities"):
+            for i, opp in enumerate(data.demands["top_opportunities"]):
+                opp_id = f"demand_{i:03d}"
+                if opp_id == demand_id:
+                    # 카테고리 추론
+                    inferred_category = "unmet_need"
+                    if opp.get("business_potential") == "high":
+                        inferred_category = "willingness_to_pay"
+                    elif opp.get("business_potential") == "low":
+                        inferred_category = "feature_request"
 
+                    view = DemandView(
+                        id=opp_id,
+                        category=inferred_category,
+                        text=opp.get("representative", "")[:100],
+                        priority_score=opp.get("priority_score", 50),
+                        source_count=opp.get("size", 1),
+                        business_potential=opp.get("business_potential", "medium"),
+                        keywords=None,
+                    )
+                    return DemandDetail(
+                        demand=view,
+                        frequency_score=opp.get("priority_score", 50) * 0.3,
+                        payment_intent_score=opp.get("priority_score", 50) * 0.25,
+                        urgency_score=opp.get("priority_score", 50) * 0.25,
+                        recency_score=opp.get("priority_score", 50) * 0.2,
+                        sample_texts=opp.get("sample_texts", []),
+                    )
+
+        # 캐시된 리포트에서 검색
         if self._cached_report is None:
             return None
 
@@ -264,9 +290,7 @@ class DemandService:
         if data and data.demands and data.demands.get("by_category"):
             return data.demands["by_category"]
 
-        if self._cached_report is None:
-            self._run_demo_analysis()
-
+        # 캐시된 리포트에서 통계 반환
         if self._cached_report is None:
             return {}
 
@@ -290,27 +314,6 @@ class DemandService:
             return []
 
         return self._cached_report.recommendations
-
-    def _run_demo_analysis(self) -> None:
-        """데모 데이터로 분석을 실행한다."""
-        demo_texts = [
-            "I wish there was a better way to organize my notes across devices.",
-            "Looking for a good project management tool that's not too expensive.",
-            "So frustrated with this app's constant crashes. Anyone have alternatives?",
-            "I'd pay good money for a tool that actually syncs properly.",
-            "Does anyone know of a free alternative to Notion?",
-            "Really annoying that there's no dark mode option.",
-            "We need something like Slack but for smaller teams.",
-            "Is there a tool that can automatically categorize emails?",
-            "Frustrated when the app takes forever to load.",
-            "Would be great to have offline support.",
-            "Looking for suggestions on budgeting apps.",
-            "Any recommendations for a password manager?",
-            "Why isn't there an option to export data?",
-            "I'm willing to pay for a premium version with these features.",
-            "Something similar to Figma but open source?",
-        ]
-        self.analyze_texts(demo_texts, top_n=20)
 
 
 # =============================================================================

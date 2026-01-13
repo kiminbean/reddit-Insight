@@ -246,10 +246,8 @@ class InsightService:
 
     def __init__(self) -> None:
         """서비스 초기화."""
-        # 데모용 목 데이터
-        self._mock_insights = self._generate_mock_insights()
-        self._mock_recommendations = self._generate_mock_recommendations()
-        self._mock_opportunities = self._generate_mock_opportunities()
+        # mock 데이터 사용 금지 - 실제 데이터만 사용
+        pass
 
     def get_insights(
         self,
@@ -296,20 +294,8 @@ class InsightService:
             if insights:
                 return insights[:limit]
 
-        # 실제 데이터가 없으면 목 데이터 사용
-        insights = self._mock_insights
-
-        # 유형 필터
-        if insight_type:
-            insights = [i for i in insights if i.insight_type == insight_type]
-
-        # 신뢰도 필터
-        insights = [i for i in insights if i.confidence >= min_confidence]
-
-        # 우선순위 내림차순 정렬
-        insights = sorted(insights, key=lambda x: x.priority, reverse=True)
-
-        return insights[:limit]
+        # 실제 데이터가 없으면 빈 결과 반환 (mock 데이터 사용 금지)
+        return []
 
     def get_insight_detail(self, insight_id: str) -> InsightDetail | None:
         """인사이트 상세 정보를 조회한다.
@@ -320,27 +306,25 @@ class InsightService:
         Returns:
             InsightDetail 또는 None (찾지 못한 경우)
         """
-        # 목 데이터에서 찾기
-        for insight in self._mock_insights:
-            if insight.id == insight_id:
-                return InsightDetail(
-                    id=insight.id,
-                    insight_type=insight.insight_type,
-                    title=insight.title,
-                    confidence=insight.confidence,
-                    priority=insight.priority,
-                    evidence_count=insight.evidence_count,
-                    description=f"Detailed analysis of {insight.title}. This insight was identified through pattern recognition in user discussions and sentiment analysis.",
-                    evidence=[
-                        "High frequency mentions in discussion threads",
-                        "Sentiment score indicates strong user preference",
-                        f"Trend analysis shows {insight.confidence_percent}% growth",
-                        "Competitive analysis reveals market gap",
-                    ],
-                    related_entities=["Company A", "Product B", "Service C"],
-                    related_demands=["Feature X", "Integration Y", "Support Z"],
-                    created_at=datetime.now(UTC),
-                )
+        # 실제 데이터에서 인사이트 찾기
+        data = get_current_data()
+        if data and data.insights:
+            for i, insight_data in enumerate(data.insights):
+                if f"insight_{i:03d}" == insight_id:
+                    confidence = insight_data.get("confidence", 0.7)
+                    return InsightDetail(
+                        id=insight_id,
+                        insight_type=insight_data.get("type", "emerging_trend"),
+                        title=insight_data.get("title", ""),
+                        confidence=confidence,
+                        priority=confidence * 100,
+                        evidence_count=len(insight_data.get("evidence", [])),
+                        description=insight_data.get("description", ""),
+                        evidence=insight_data.get("evidence", []),
+                        related_entities=insight_data.get("related_entities", []),
+                        related_demands=insight_data.get("related_demands", []),
+                        created_at=datetime.now(UTC),
+                    )
         return None
 
     def get_recommendations(self, top_n: int = 10) -> list[RecommendationView]:
@@ -376,7 +360,8 @@ class InsightService:
             if recommendations:
                 return recommendations
 
-        return self._mock_recommendations[:top_n]
+        # 실제 데이터가 없으면 빈 결과 반환 (mock 데이터 사용 금지)
+        return []
 
     def get_opportunity_ranking(self, limit: int = 20) -> list[OpportunityView]:
         """기회 랭킹을 조회한다.
@@ -409,7 +394,8 @@ class InsightService:
             if opportunities:
                 return opportunities
 
-        return self._mock_opportunities[:limit]
+        # 실제 데이터가 없으면 빈 결과 반환 (mock 데이터 사용 금지)
+        return []
 
     def get_insight_types(self) -> list[dict[str, str]]:
         """사용 가능한 인사이트 유형 목록을 반환한다.
@@ -434,19 +420,23 @@ class InsightService:
         Returns:
             스코어 데이터 딕셔너리 또는 None
         """
-        # 목 데이터에서 찾기
-        for opp in self._mock_opportunities:
-            if opp.insight_id == insight_id:
-                return {
-                    "labels": ["Market Size", "Competition", "Urgency", "Trend", "Feasibility"],
-                    "scores": [
-                        opp.market_size_score,
-                        opp.competition_score,
-                        opp.urgency_score,
-                        65.0,  # 트렌드 점수 (목 데이터)
-                        70.0,  # 실현 가능성 점수 (목 데이터)
-                    ],
-                }
+        # 실제 데이터에서 인사이트 찾기
+        data = get_current_data()
+        if data and data.insights:
+            for i, insight_data in enumerate(data.insights):
+                if f"insight_{i:03d}" == insight_id:
+                    confidence = insight_data.get("confidence", 0.7)
+                    base_score = confidence * 100
+                    return {
+                        "labels": ["Confidence", "Relevance", "Impact", "Trend", "Feasibility"],
+                        "scores": [
+                            base_score,
+                            base_score * 0.9,
+                            base_score * 0.85,
+                            base_score * 0.8,
+                            base_score * 0.75,
+                        ],
+                    }
         return None
 
     def get_grade_distribution(self) -> dict[str, int]:
@@ -468,10 +458,7 @@ class InsightService:
             if sum(distribution.values()) > 0:
                 return distribution
 
-        # 실제 데이터가 없으면 목 데이터 사용
-        for opp in self._mock_opportunities:
-            if opp.grade in distribution:
-                distribution[opp.grade] += 1
+        # 실제 데이터가 없으면 빈 분포 반환 (mock 데이터 사용 금지)
         return distribution
 
     # ==========================================================================
