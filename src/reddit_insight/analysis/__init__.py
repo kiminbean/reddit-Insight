@@ -76,6 +76,16 @@ from reddit_insight.analysis.demand_analyzer import (
     PriorityConfig,
     PriorityScore,
 )
+from reddit_insight.analysis.entity_recognition import (
+    EntityMention,
+    EntityPattern,
+    EntityRecognizer,
+    EntityRecognizerConfig,
+    EntityType,
+    PatternEntityExtractor,
+    ProductEntity,
+    ENTITY_PATTERNS,
+)
 
 __all__ = [
     # Tokenizer
@@ -135,4 +145,13 @@ __all__ = [
     "PrioritizedDemand",
     "DemandReport",
     "DemandAnalyzer",
+    # Entity Recognition
+    "EntityType",
+    "ProductEntity",
+    "EntityMention",
+    "EntityPattern",
+    "ENTITY_PATTERNS",
+    "PatternEntityExtractor",
+    "EntityRecognizerConfig",
+    "EntityRecognizer",
 ]
