@@ -30,7 +30,7 @@ None
 - [x] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
 - [x] **Phase 10: Report Export & Polish** - 마크다운 리포트 생성, 통합 테스트
 - [x] **Phase 11: Advanced Analytics** - 고급 분석 기능 (머신러닝 기반 예측)
-- [ ] **Phase 12: Dashboard Data Integration** - DemandService, CompetitionService 실제 데이터 연동
+- [x] **Phase 12: Dashboard Data Integration** - DemandService, CompetitionService 실제 데이터 연동
 - [ ] **Phase 13: Recent Analyses** - 대시보드 홈 분석 기록 표시
 - [ ] **Phase 14: Trend Prediction UI** - 시계열 예측 차트 시각화
 - [ ] **Phase 15: Anomaly Detection UI** - 이상 탐지 결과 시각화
@@ -185,7 +185,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 12-01: Dashboard Data Integration Verification
+- [x] 12-01: Dashboard Data Integration Verification
 
 #### Phase 13: Recent Analyses
 **Goal**: 대시보드 홈에 최근 분석 기록 표시 기능 완성
@@ -268,7 +268,7 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 9. Web Dashboard | 5/5 | Complete | 2026-01-13 |
 | 10. Report Export & Polish | 4/4 | Complete | 2026-01-13 |
 | 11. Advanced Analytics | 4/4 | Complete | 2026-01-14 |
-| 12. Dashboard Data Integration | 0/1 | Not started | - |
+| 12. Dashboard Data Integration | 1/1 | Complete | 2026-01-14 |
 | 13. Recent Analyses | 0/1 | Not started | - |
 | 14. Trend Prediction UI | 0/1 | Not started | - |
 | 15. Anomaly Detection UI | 0/1 | Not started | - |
