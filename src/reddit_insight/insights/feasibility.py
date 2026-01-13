@@ -1341,3 +1341,360 @@ class FeasibilityAnalyzer:
                 lines.append("")
 
         return "\n".join(lines)
+
+
+# =============================================================================
+# INSIGHT REPORT
+# =============================================================================
+
+
+@dataclass
+class InsightReport:
+    """
+    최종 인사이트 리포트.
+
+    분석 전체 결과를 종합한 최종 리포트.
+
+    Attributes:
+        generated_at: 생성 시간
+        analysis_summary: 분석 요약
+        total_insights: 총 인사이트 수
+        total_opportunities: 총 기회 수
+        recommendations: 추천 목록
+        market_overview: 시장 개요
+        key_findings: 핵심 발견 사항
+
+    Example:
+        >>> report = InsightReport(
+        ...     generated_at=datetime.now(UTC),
+        ...     analysis_summary="Market analysis reveals 5 opportunities",
+        ...     total_insights=10,
+        ...     total_opportunities=5,
+        ...     recommendations=[rec1, rec2],
+        ...     market_overview="Growing market with high demand",
+        ...     key_findings=["Finding 1", "Finding 2"]
+        ... )
+    """
+
+    generated_at: datetime
+    analysis_summary: str
+    total_insights: int
+    total_opportunities: int
+    recommendations: list[ActionableRecommendation]
+    market_overview: str
+    key_findings: list[str] = field(default_factory=list)
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return (
+            f"InsightReport(insights={self.total_insights}, "
+            f"opportunities={self.total_opportunities}, "
+            f"recommendations={len(self.recommendations)})"
+        )
+
+    @property
+    def top_recommendation(self) -> ActionableRecommendation | None:
+        """Get the top-ranked recommendation."""
+        if self.recommendations:
+            return self.recommendations[0]
+        return None
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary representation."""
+        return {
+            "generated_at": self.generated_at.isoformat(),
+            "analysis_summary": self.analysis_summary,
+            "total_insights": self.total_insights,
+            "total_opportunities": self.total_opportunities,
+            "recommendations": [r.to_dict() for r in self.recommendations],
+            "market_overview": self.market_overview,
+            "key_findings": self.key_findings,
+        }
+
+
+# =============================================================================
+# INSIGHT REPORT GENERATOR
+# =============================================================================
+
+
+class InsightReportGenerator:
+    """
+    인사이트 리포트 생성기.
+
+    분석 결과를 종합하여 최종 리포트를 생성한다.
+
+    Example:
+        >>> generator = InsightReportGenerator()
+        >>> report = generator.generate(insights, opportunities, recommendations)
+        >>> markdown = generator.to_markdown(report)
+        >>> print(markdown)
+    """
+
+    def generate(
+        self,
+        insights: list["Insight"],
+        opportunities: list["ScoredOpportunity"],
+        recommendations: list[ActionableRecommendation],
+    ) -> InsightReport:
+        """
+        인사이트 리포트 생성.
+
+        Args:
+            insights: 인사이트 목록
+            opportunities: 스코어링된 기회 목록
+            recommendations: 추천 목록
+
+        Returns:
+            최종 인사이트 리포트
+        """
+        # Generate analysis summary
+        analysis_summary = self._generate_summary(insights, opportunities, recommendations)
+
+        # Generate market overview
+        market_overview = self._generate_market_overview(insights, opportunities)
+
+        # Generate key findings
+        key_findings = self._generate_key_findings(insights, opportunities, recommendations)
+
+        return InsightReport(
+            generated_at=datetime.now(UTC),
+            analysis_summary=analysis_summary,
+            total_insights=len(insights),
+            total_opportunities=len(opportunities),
+            recommendations=recommendations,
+            market_overview=market_overview,
+            key_findings=key_findings,
+        )
+
+    def _generate_summary(
+        self,
+        insights: list["Insight"],
+        opportunities: list["ScoredOpportunity"],
+        recommendations: list[ActionableRecommendation],
+    ) -> str:
+        """Generate analysis summary."""
+        from reddit_insight.insights.rules_engine import InsightType
+
+        # Count by insight type
+        type_counts: dict[InsightType, int] = {}
+        for insight in insights:
+            type_counts[insight.insight_type] = type_counts.get(insight.insight_type, 0) + 1
+
+        # Count by grade
+        grade_counts: dict[str, int] = {}
+        for opp in opportunities:
+            grade_counts[opp.score.grade] = grade_counts.get(opp.score.grade, 0) + 1
+
+        # Build summary
+        parts: list[str] = []
+        parts.append(f"Analysis identified {len(insights)} insights across {len(type_counts)} categories.")
+
+        if opportunities:
+            a_count = grade_counts.get("A", 0)
+            b_count = grade_counts.get("B", 0)
+            if a_count > 0 or b_count > 0:
+                parts.append(f"{a_count + b_count} high-quality opportunities (Grade A/B) found.")
+
+        if recommendations:
+            low_risk = sum(1 for r in recommendations if r.feasibility_score.risk_level == "LOW")
+            if low_risk > 0:
+                parts.append(f"{low_risk} recommendations with low execution risk.")
+
+        return " ".join(parts)
+
+    def _generate_market_overview(
+        self,
+        insights: list["Insight"],
+        opportunities: list["ScoredOpportunity"],
+    ) -> str:
+        """Generate market overview."""
+        from reddit_insight.insights.rules_engine import InsightType
+
+        # Analyze market signals
+        gap_count = sum(1 for i in insights if i.insight_type == InsightType.MARKET_GAP)
+        trend_count = sum(1 for i in insights if i.insight_type == InsightType.EMERGING_TREND)
+        weakness_count = sum(1 for i in insights if i.insight_type == InsightType.COMPETITIVE_WEAKNESS)
+
+        parts: list[str] = []
+
+        if gap_count > 0:
+            parts.append(f"Market analysis reveals {gap_count} unaddressed market gaps.")
+
+        if trend_count > 0:
+            parts.append(f"{trend_count} emerging trends identified with growth potential.")
+
+        if weakness_count > 0:
+            parts.append(f"{weakness_count} competitor weaknesses present disruption opportunities.")
+
+        # Calculate average opportunity score
+        if opportunities:
+            avg_score = sum(o.score.total_score for o in opportunities) / len(opportunities)
+            if avg_score >= 70:
+                parts.append("Overall market conditions are highly favorable.")
+            elif avg_score >= 50:
+                parts.append("Market conditions present moderate opportunities.")
+            else:
+                parts.append("Market conditions require careful evaluation.")
+
+        return " ".join(parts) if parts else "Market analysis complete. Review recommendations for details."
+
+    def _generate_key_findings(
+        self,
+        insights: list["Insight"],
+        opportunities: list["ScoredOpportunity"],
+        recommendations: list[ActionableRecommendation],
+    ) -> list[str]:
+        """Generate key findings."""
+        findings: list[str] = []
+
+        # Top opportunity finding
+        if recommendations:
+            top = recommendations[0]
+            findings.append(
+                f"Top opportunity: '{top.insight.title}' with combined score of {top.combined_score:.1f}"
+            )
+
+        # High confidence insights
+        high_confidence = [i for i in insights if i.confidence >= 0.8]
+        if high_confidence:
+            findings.append(
+                f"{len(high_confidence)} insights with high confidence (80%+) identified"
+            )
+
+        # Low risk opportunities
+        low_risk = [r for r in recommendations if r.feasibility_score.risk_level == "LOW"]
+        if low_risk:
+            findings.append(
+                f"{len(low_risk)} opportunities with low execution risk ready for implementation"
+            )
+
+        # Grade A opportunities
+        grade_a = [o for o in opportunities if o.score.grade == "A"]
+        if grade_a:
+            findings.append(
+                f"{len(grade_a)} Grade-A business opportunities identified"
+            )
+
+        # WTP signals
+        wtp_insights = [
+            i for i in insights
+            if any("wtp" in e.summary.lower() or "pay" in e.summary.lower() for e in i.evidence)
+        ]
+        if wtp_insights:
+            findings.append(
+                f"{len(wtp_insights)} opportunities show willingness-to-pay signals"
+            )
+
+        return findings[:7]  # Limit to 7 findings
+
+    def to_markdown(self, report: InsightReport) -> str:
+        """
+        리포트를 마크다운으로 변환.
+
+        Args:
+            report: 인사이트 리포트
+
+        Returns:
+            마크다운 형식 문자열
+        """
+        lines: list[str] = []
+
+        lines.append("# Business Insight Report")
+        lines.append("")
+        lines.append(f"**Generated**: {report.generated_at.strftime('%Y-%m-%d %H:%M UTC')}")
+        lines.append("")
+
+        # Executive Summary
+        lines.append("## Executive Summary")
+        lines.append("")
+        lines.append(report.analysis_summary)
+        lines.append("")
+
+        # Market Overview
+        lines.append("## Market Overview")
+        lines.append("")
+        lines.append(report.market_overview)
+        lines.append("")
+
+        # Key Findings
+        if report.key_findings:
+            lines.append("## Key Findings")
+            lines.append("")
+            for i, finding in enumerate(report.key_findings, 1):
+                lines.append(f"{i}. {finding}")
+            lines.append("")
+
+        # Statistics
+        lines.append("## Analysis Statistics")
+        lines.append("")
+        lines.append(f"- **Total Insights**: {report.total_insights}")
+        lines.append(f"- **Scored Opportunities**: {report.total_opportunities}")
+        lines.append(f"- **Actionable Recommendations**: {len(report.recommendations)}")
+        lines.append("")
+
+        # Top Recommendations Summary
+        if report.recommendations:
+            lines.append("## Top Recommendations")
+            lines.append("")
+            lines.append("| Rank | Title | Combined | Risk | Grade |")
+            lines.append("|------|-------|----------|------|-------|")
+
+            for rec in report.recommendations[:5]:
+                title = (
+                    rec.insight.title[:35] + "..."
+                    if len(rec.insight.title) > 35
+                    else rec.insight.title
+                )
+                lines.append(
+                    f"| {rec.final_rank} | {title} | {rec.combined_score:.1f} | "
+                    f"{rec.feasibility_score.risk_level} | {rec.business_score.grade} |"
+                )
+
+            lines.append("")
+
+        # Detailed Recommendations
+        if report.recommendations:
+            lines.append("## Detailed Analysis")
+            lines.append("")
+
+            for rec in report.recommendations[:3]:  # Top 3 detailed
+                lines.append(f"### #{rec.final_rank}: {rec.insight.title}")
+                lines.append("")
+                lines.append(f"**Type**: {rec.insight.insight_type.value}")
+                lines.append(f"**Combined Score**: {rec.combined_score:.1f}")
+                lines.append(f"**Risk Level**: {rec.feasibility_score.risk_level}")
+                lines.append("")
+
+                lines.append("**Description**:")
+                lines.append(rec.insight.description)
+                lines.append("")
+
+                if rec.action_items:
+                    lines.append("**Recommended Actions**:")
+                    for item in rec.action_items[:3]:
+                        lines.append(f"- {item}")
+                    lines.append("")
+
+                if rec.next_steps:
+                    lines.append("**Next Steps**:")
+                    for step in rec.next_steps[:3]:
+                        lines.append(f"- {step}")
+                    lines.append("")
+
+        # Footer
+        lines.append("---")
+        lines.append("*Report generated by Reddit Insight Analysis System*")
+
+        return "\n".join(lines)
+
+    def to_dict(self, report: InsightReport) -> dict:
+        """
+        리포트를 딕셔너리로 변환.
+
+        Args:
+            report: 인사이트 리포트
+
+        Returns:
+            딕셔너리 형태
+        """
+        return report.to_dict()
