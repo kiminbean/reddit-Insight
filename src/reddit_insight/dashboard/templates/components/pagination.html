@@ -1,0 +1,130 @@
+{#
+    Reusable pagination component for dashboard views.
+
+    Usage:
+    {% include "components/pagination.html" with context %}
+
+    Expected context variables:
+    - current_page: current page number (1-indexed)
+    - total_pages: total number of pages
+    - page_url: base URL for pagination links (query params will be appended)
+    - htmx_target: optional HTMX target element ID for AJAX pagination
+    - total_items: optional total item count to display
+    - items_per_page: optional items per page count
+#}
+
+{% set page = current_page | default(1) %}
+{% set total = total_pages | default(1) %}
+
+{% if total > 1 %}
+<nav class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6" aria-label="Pagination">
+    <div class="hidden sm:block">
+        <p class="text-sm text-gray-700">
+            {% if total_items %}
+            Showing
+            <span class="font-medium">{{ (page - 1) * (items_per_page | default(20)) + 1 }}</span>
+            to
+            <span class="font-medium">{{ [page * (items_per_page | default(20)), total_items] | min }}</span>
+            of
+            <span class="font-medium">{{ total_items }}</span>
+            results
+            {% else %}
+            Page <span class="font-medium">{{ page }}</span> of <span class="font-medium">{{ total }}</span>
+            {% endif %}
+        </p>
+    </div>
+    <div class="flex flex-1 justify-between sm:justify-end">
+        {# Previous Button #}
+        {% if page > 1 %}
+        <a href="{{ page_url }}?page={{ page - 1 }}"
+           {% if htmx_target %}
+           hx-get="{{ page_url }}?page={{ page - 1 }}"
+           hx-target="{{ htmx_target }}"
+           hx-swap="innerHTML"
+           {% endif %}
+           class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0">
+            <svg class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+            </svg>
+            Previous
+        </a>
+        {% else %}
+        <span class="relative inline-flex items-center rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed">
+            <svg class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+            </svg>
+            Previous
+        </span>
+        {% endif %}
+
+        {# Page Numbers (show up to 5 pages) #}
+        <div class="hidden sm:flex sm:items-center sm:gap-1 sm:mx-4">
+            {% set start_page = [1, page - 2] | max %}
+            {% set end_page = [total, page + 2] | min %}
+
+            {% if start_page > 1 %}
+            <a href="{{ page_url }}?page=1"
+               {% if htmx_target %}
+               hx-get="{{ page_url }}?page=1"
+               hx-target="{{ htmx_target }}"
+               hx-swap="innerHTML"
+               {% endif %}
+               class="relative inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 rounded-md">1</a>
+            {% if start_page > 2 %}
+            <span class="px-2 text-gray-500">...</span>
+            {% endif %}
+            {% endif %}
+
+            {% for p in range(start_page, end_page + 1) %}
+            {% if p == page %}
+            <span class="relative inline-flex items-center px-3 py-2 text-sm font-semibold text-white bg-primary-600 rounded-md">{{ p }}</span>
+            {% else %}
+            <a href="{{ page_url }}?page={{ p }}"
+               {% if htmx_target %}
+               hx-get="{{ page_url }}?page={{ p }}"
+               hx-target="{{ htmx_target }}"
+               hx-swap="innerHTML"
+               {% endif %}
+               class="relative inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 rounded-md">{{ p }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if end_page < total %}
+            {% if end_page < total - 1 %}
+            <span class="px-2 text-gray-500">...</span>
+            {% endif %}
+            <a href="{{ page_url }}?page={{ total }}"
+               {% if htmx_target %}
+               hx-get="{{ page_url }}?page={{ total }}"
+               hx-target="{{ htmx_target }}"
+               hx-swap="innerHTML"
+               {% endif %}
+               class="relative inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 rounded-md">{{ total }}</a>
+            {% endif %}
+        </div>
+
+        {# Next Button #}
+        {% if page < total %}
+        <a href="{{ page_url }}?page={{ page + 1 }}"
+           {% if htmx_target %}
+           hx-get="{{ page_url }}?page={{ page + 1 }}"
+           hx-target="{{ htmx_target }}"
+           hx-swap="innerHTML"
+           {% endif %}
+           class="relative ml-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0">
+            Next
+            <svg class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+        </a>
+        {% else %}
+        <span class="relative ml-3 inline-flex items-center rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-400 cursor-not-allowed">
+            Next
+            <svg class="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+        </span>
+        {% endif %}
+    </div>
+</nav>
+{% endif %}

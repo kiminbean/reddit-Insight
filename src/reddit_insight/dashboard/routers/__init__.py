@@ -5,7 +5,8 @@ from reddit_insight.dashboard.routers import (
     dashboard,
     demands,
     insights,
+    search,
     trends,
 )
 
-__all__ = ["competition", "dashboard", "demands", "insights", "trends"]
+__all__ = ["competition", "dashboard", "demands", "insights", "search", "trends"]

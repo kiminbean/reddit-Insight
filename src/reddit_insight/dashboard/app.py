@@ -68,6 +68,7 @@ def create_app() -> FastAPI:
         dashboard,
         demands,
         insights,
+        search,
         trends,
     )
 
@@ -76,6 +77,7 @@ def create_app() -> FastAPI:
     application.include_router(demands.router)
     application.include_router(competition.router)
     application.include_router(insights.router)
+    application.include_router(search.router)
 
     return application
 

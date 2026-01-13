@@ -1,0 +1,106 @@
+{#
+    Reusable filter component for dashboard views.
+
+    Usage:
+    {% include "components/filters.html" with context %}
+
+    Expected context variables:
+    - filter_id: unique ID for the filter form (default: 'filter-form')
+    - filter_action: HTMX target URL for filter submit
+    - filter_target: HTMX target element ID
+    - show_date_range: boolean, show date range filter (default: false)
+    - show_category: boolean, show category filter (default: false)
+    - show_limit: boolean, show limit filter (default: true)
+    - show_score_range: boolean, show score range filter (default: false)
+    - categories: list of {value, label} for category options
+    - filters: current filter values dict
+#}
+
+{% set form_id = filter_id | default('filter-form') %}
+
+<div class="p-6 bg-gray-50 border-b border-gray-200">
+    <form id="{{ form_id }}" class="flex flex-wrap gap-4 items-end">
+
+        {# Date Range Filter #}
+        {% if show_date_range %}
+        <div class="w-40">
+            <label for="{{ form_id }}-days" class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+            <select id="{{ form_id }}-days"
+                    name="days"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                <option value="7" {% if filters.days == 7 %}selected{% endif %}>Last 7 days</option>
+                <option value="14" {% if filters.days == 14 %}selected{% endif %}>Last 14 days</option>
+                <option value="30" {% if filters.days == 30 %}selected{% endif %}>Last 30 days</option>
+            </select>
+        </div>
+        {% endif %}
+
+        {# Category Filter #}
+        {% if show_category and categories %}
+        <div class="w-48">
+            <label for="{{ form_id }}-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select id="{{ form_id }}-category"
+                    name="category"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.value }}" {% if filters.category == cat.value %}selected{% endif %}>{{ cat.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        {# Score Range Filter #}
+        {% if show_score_range %}
+        <div class="w-40">
+            <label for="{{ form_id }}-min-score" class="block text-sm font-medium text-gray-700 mb-1">Min Score</label>
+            <select id="{{ form_id }}-min-score"
+                    name="min_score"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                <option value="0" {% if filters.min_score == 0 %}selected{% endif %}>Any</option>
+                <option value="25" {% if filters.min_score == 25 %}selected{% endif %}>25+</option>
+                <option value="50" {% if filters.min_score == 50 %}selected{% endif %}>50+</option>
+                <option value="75" {% if filters.min_score == 75 %}selected{% endif %}>75+</option>
+            </select>
+        </div>
+        {% endif %}
+
+        {# Limit Filter #}
+        {% if show_limit | default(true) %}
+        <div class="w-32">
+            <label for="{{ form_id }}-limit" class="block text-sm font-medium text-gray-700 mb-1">Show</label>
+            <select id="{{ form_id }}-limit"
+                    name="limit"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border">
+                <option value="10" {% if filters.limit == 10 %}selected{% endif %}>10</option>
+                <option value="20" {% if filters.limit == 20 %}selected{% endif %}>20</option>
+                <option value="50" {% if filters.limit == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if filters.limit == 100 %}selected{% endif %}>100</option>
+            </select>
+        </div>
+        {% endif %}
+
+        {# Apply Button #}
+        <button type="submit"
+                {% if filter_action and filter_target %}
+                hx-get="{{ filter_action }}"
+                hx-target="{{ filter_target }}"
+                hx-include="#{{ form_id }}"
+                {% endif %}
+                class="inline-flex items-center rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+            <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+            </svg>
+            Apply Filter
+        </button>
+
+        {# Reset Button #}
+        <a href="{{ request.path }}"
+           class="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+            <svg class="-ml-0.5 mr-1.5 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 002.17 9.806a.75.75 0 101.481.253 7.5 7.5 0 011.104-.001zm10.49 3.882a7.5 7.5 0 01-12.549 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H.985a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.062-3.616.75.75 0 10-1.481-.253 7.5 7.5 0 01-.966.446z" clip-rule="evenodd" />
+            </svg>
+            Reset
+        </a>
+    </form>
+</div>
