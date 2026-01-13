@@ -1,0 +1,270 @@
+<!-- Anomaly Detection Chart Partial - HTMX로 동적 로드 가능 -->
+<div class="bg-white rounded-lg shadow p-6" id="anomaly-container">
+    <div class="flex justify-between items-center mb-4">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900">
+                Anomaly Detection: {{ keyword }}
+            </h3>
+            <p class="text-sm text-gray-500">
+                {{ analysis_days }}-day analysis using {{ anomaly_result.method }} method
+            </p>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- Method Badge -->
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                {{ anomaly_result.method }}
+            </span>
+            <!-- Close Button -->
+            <button onclick="closeAnomalyChart()"
+                    class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    title="Close">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-xs font-medium text-gray-500 uppercase">Anomalies</div>
+            <div class="text-lg font-semibold {% if anomaly_result.anomaly_count > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                {{ anomaly_result.anomaly_count }}
+            </div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-xs font-medium text-gray-500 uppercase">Total Points</div>
+            <div class="text-lg font-semibold text-gray-900">{{ anomaly_result.total_points }}</div>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <div class="text-xs font-medium text-gray-500 uppercase">Anomaly Rate</div>
+            <div class="text-lg font-semibold {% if anomaly_result.anomaly_rate_percent > 10 %}text-red-600{% elif anomaly_result.anomaly_rate_percent > 5 %}text-yellow-600{% else %}text-green-600{% endif %}">
+                {{ "%.1f"|format(anomaly_result.anomaly_rate_percent) }}%
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Period Selector -->
+    <div class="mb-4">
+        <label for="anomaly-days" class="block text-sm font-medium text-gray-700 mb-1">
+            Analysis Period
+        </label>
+        <select id="anomaly-days"
+                class="block w-full sm:w-32 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border"
+                hx-get="/dashboard/trends/anomalies-partial/{{ keyword }}"
+                hx-target="#anomaly-section"
+                hx-swap="innerHTML"
+                hx-include="[name='anomaly-days']"
+                name="days">
+            <option value="14" {% if analysis_days == 14 %}selected{% endif %}>14 days</option>
+            <option value="30" {% if analysis_days == 30 %}selected{% endif %}>30 days</option>
+            <option value="60" {% if analysis_days == 60 %}selected{% endif %}>60 days</option>
+            <option value="90" {% if analysis_days == 90 %}selected{% endif %}>90 days</option>
+        </select>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="h-80">
+        <canvas id="anomalyChart-{{ keyword | replace(' ', '-') }}"></canvas>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs text-gray-600">
+        <div class="flex items-center">
+            <span class="inline-block w-4 h-0.5 bg-blue-500 mr-2"></span>
+            Normal Data
+        </div>
+        <div class="flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+            Anomaly Point
+        </div>
+    </div>
+
+    <!-- Anomaly Details -->
+    {% if anomaly_result.anomaly_points %}
+    <div class="mt-4 border-t pt-4">
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">Detected Anomalies</h4>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-xs">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-3 py-2 text-left font-medium text-gray-500">Date</th>
+                        <th class="px-3 py-2 text-right font-medium text-gray-500">Value</th>
+                        <th class="px-3 py-2 text-right font-medium text-gray-500">Score</th>
+                        <th class="px-3 py-2 text-right font-medium text-gray-500">Expected</th>
+                        <th class="px-3 py-2 text-right font-medium text-gray-500">Deviation</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for ap in anomaly_result.anomaly_points %}
+                    <tr class="hover:bg-red-50">
+                        <td class="px-3 py-2 text-gray-900">{{ ap.date }}</td>
+                        <td class="px-3 py-2 text-right font-medium text-red-600">{{ "%.1f"|format(ap.value) }}</td>
+                        <td class="px-3 py-2 text-right">{{ "%.2f"|format(ap.score) }}</td>
+                        <td class="px-3 py-2 text-right text-gray-500">
+                            {% if ap.expected_value %}{{ "%.1f"|format(ap.expected_value) }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-3 py-2 text-right {% if ap.deviation and ap.deviation > 0 %}text-green-600{% elif ap.deviation %}text-red-600{% endif %}">
+                            {% if ap.deviation %}{{ "%+.1f"|format(ap.deviation) }}{% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+(function() {
+    // 기존 차트가 있으면 제거
+    const chartId = 'anomalyChart-{{ keyword | replace(" ", "-") }}';
+    const existingChart = Chart.getChart(chartId);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+
+    const ctx = document.getElementById(chartId).getContext('2d');
+
+    // 이상 탐지 데이터 준비
+    const dates = {{ anomaly_result.dates | tojson }};
+    const values = {{ anomaly_result.values | tojson }};
+    const isAnomaly = {{ anomaly_result.is_anomaly | tojson }};
+
+    // 정상 데이터와 이상 데이터 분리
+    const normalData = values.map((v, i) => isAnomaly[i] ? null : v);
+    const anomalyData = values.map((v, i) => isAnomaly[i] ? v : null);
+
+    // 연결선을 위한 전체 데이터
+    const lineData = values.slice();
+
+    const chartData = {
+        labels: dates,
+        datasets: [
+            {
+                label: '{{ keyword }} (Trend)',
+                data: lineData,
+                borderColor: 'rgba(59, 130, 246, 0.3)',
+                backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0,
+                borderWidth: 1,
+            },
+            {
+                label: '{{ keyword }} (Normal)',
+                data: normalData,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgb(59, 130, 246)',
+                fill: false,
+                tension: 0,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                showLine: false,
+            },
+            {
+                label: '{{ keyword }} (Anomaly)',
+                data: anomalyData,
+                borderColor: 'rgb(239, 68, 68)',
+                backgroundColor: 'rgb(239, 68, 68)',
+                fill: false,
+                tension: 0,
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                pointStyle: 'circle',
+                showLine: false,
+            }
+        ]
+    };
+
+    // 이상 포인트 정보
+    const anomalyDetails = [
+        {% for ap in anomaly_result.anomaly_points %}
+        {
+            date: '{{ ap.date }}',
+            value: {{ ap.value }},
+            score: {{ ap.score }},
+            expected: {{ ap.expected_value if ap.expected_value else 'null' }},
+            deviation: {{ ap.deviation if ap.deviation else 'null' }}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) return null; // 트렌드 선은 툴팁에서 숨김
+
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label = label.replace(' (Normal)', '').replace(' (Anomaly)', '');
+                            }
+                            if (context.parsed.y !== null) {
+                                label += ': ' + context.parsed.y.toFixed(1);
+
+                                // 이상 포인트면 추가 정보 표시
+                                if (context.datasetIndex === 2) {
+                                    const dateLabel = context.chart.data.labels[context.dataIndex];
+                                    const detail = anomalyDetails.find(d => d.date === dateLabel);
+                                    if (detail) {
+                                        label += ' (Score: ' + detail.score.toFixed(2) + ')';
+                                    }
+                                }
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    display: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Mentions'
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+})();
+
+// 이상 탐지 차트 닫기 함수
+function closeAnomalyChart() {
+    const container = document.getElementById('anomaly-section');
+    if (container) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+    }
+}
+</script>
