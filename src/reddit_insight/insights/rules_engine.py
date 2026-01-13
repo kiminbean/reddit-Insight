@@ -261,8 +261,18 @@ class AnalysisContext:
     def get_negative_entities(self) -> list[str]:
         """Get entities with negative sentiment."""
         negative = []
-        for name, sentiment in self.entity_sentiments.items():
-            if sentiment.sentiment.compound < -0.3:
+        for name, entity_data in self.entity_sentiments.items():
+            # Handle both EntitySentiment and CompetitiveInsight
+            if hasattr(entity_data, 'sentiment'):
+                # EntitySentiment: has .sentiment.compound
+                compound = entity_data.sentiment.compound
+            elif hasattr(entity_data, 'overall_sentiment'):
+                # CompetitiveInsight: has .overall_sentiment.compound
+                compound = entity_data.overall_sentiment.compound
+            else:
+                continue
+
+            if compound < -0.3:
                 negative.append(name)
         return negative
 
