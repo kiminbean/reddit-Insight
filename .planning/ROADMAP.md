@@ -21,7 +21,7 @@ None
 - [x] **Phase 5: Trend Analysis Engine** - 키워드 추출, 시계열 분석
 - [x] **Phase 6: Demand Discovery** - "이거 있으면 좋겠다" 패턴 탐지
 - [x] **Phase 7: Competitive Analysis** - 제품/서비스 반응 및 불만 분석
-- [ ] **Phase 8: Business Model Insights** - 인사이트 → 실행 가능한 기회 연결
+- [x] **Phase 8: Business Model Insights** - 인사이트 → 실행 가능한 기회 연결
 - [ ] **Phase 9: Web Dashboard** - 인사이트 시각화 대시보드
 - [ ] **Phase 10: Report Export & Polish** - 마크다운 리포트 생성, 통합 테스트
 
@@ -116,9 +116,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: 인사이트 생성 규칙 엔진
-- [ ] 08-02: 비즈니스 기회 스코어링
-- [ ] 08-03: 실행 가능성 분석
+- [x] 08-01: 인사이트 생성 규칙 엔진
+- [x] 08-02: 비즈니스 기회 스코어링
+- [x] 08-03: 실행 가능성 분석
 
 ### Phase 9: Web Dashboard
 **Goal**: 모든 인사이트를 시각화하는 대시보드 구축
@@ -159,6 +159,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Trend Analysis Engine | 4/4 | Complete | 2026-01-13 |
 | 6. Demand Discovery | 3/3 | Complete | 2026-01-13 |
 | 7. Competitive Analysis | 3/3 | Complete | 2026-01-13 |
-| 8. Business Model Insights | 0/3 | Not started | - |
+| 8. Business Model Insights | 3/3 | Complete | 2026-01-13 |
 | 9. Web Dashboard | 0/5 | Not started | - |
 | 10. Report Export & Polish | 0/4 | Not started | - |

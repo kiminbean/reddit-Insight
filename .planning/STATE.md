@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-01-13)
 
 **Core value:** 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
-**Current focus:** Phase 8 — Business Model Insights
+**Current focus:** Phase 9 — Web Dashboard
 
 ## Current Position
 
-Phase: 8 of 10 (Business Model Insights)
+Phase: 9 of 10 (Web Dashboard)
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-01-13 — Phase 7 completed
+Last activity: 2026-01-13 — Phase 8 completed
 
-Progress: ███████░░░ 70%
+Progress: ████████░░ 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 28
 - Average duration: —
 - Total execution time: —
 
@@ -34,9 +34,10 @@ Progress: ███████░░░ 70%
 | 5. Trend Analysis | 4 | — | — |
 | 6. Demand Discovery | 3 | — | — |
 | 7. Competitive Analysis | 3 | — | — |
+| 8. Business Insights | 3 | — | — |
 
 **Recent Trend:**
-- Last 5 plans: 06-02, 06-03, 07-01, 07-02, 07-03
+- Last 5 plans: 07-02, 07-03, 08-01, 08-02, 08-03
 - Trend: —
 
 ## Accumulated Context
@@ -66,6 +67,10 @@ Recent decisions affecting current work:
 - 규칙 기반 감성 분석 (96 positive, 107 negative words + Reddit slang)
 - 불만 추출 (7가지 유형) + 대안 비교 추출 (5가지 유형)
 - CompetitiveAnalyzer로 엔티티별 인사이트 리포트
+- 규칙 기반 인사이트 생성 (5가지 InsightType)
+- 비즈니스 기회 스코어링 (5차원: 시장규모, 경쟁, 긴급성, 트렌드, 실현가능성)
+- 실행 가능성 분석 (5요소: 기술복잡도, 리소스, 시장장벽, 시간가치, 경쟁리스크)
+- InsightReportGenerator로 마크다운 리포트 생성
 
 ### Deferred Issues
 
@@ -78,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-13
-Stopped at: Phase 7 완료, Phase 8 준비
+Stopped at: Phase 8 완료, Phase 9 준비
 Resume file: None
