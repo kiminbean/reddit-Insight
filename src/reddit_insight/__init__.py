@@ -5,6 +5,12 @@
 """
 
 from reddit_insight.config import Settings, get_settings
+from reddit_insight.data_source import (
+    DataSourceError,
+    DataSourceStrategy,
+    SourceStatus,
+    UnifiedDataSource,
+)
 from reddit_insight.logging import get_logger, setup_logging
 
 __version__ = "0.1.0"
@@ -16,4 +22,9 @@ __all__ = [
     # Logging
     "setup_logging",
     "get_logger",
+    # Data Source
+    "UnifiedDataSource",
+    "DataSourceStrategy",
+    "DataSourceError",
+    "SourceStatus",
 ]
