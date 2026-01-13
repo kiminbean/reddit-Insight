@@ -339,3 +339,85 @@ class RedditScraper:
                 comments.extend(nested_comments)
 
         return comments
+
+    # ========== 서브레딧 정보 수집 메서드 ==========
+
+    async def get_subreddit_info(self, name: str) -> SubredditInfo | None:
+        """서브레딧 정보 수집.
+
+        /r/{name}/about.json 엔드포인트를 사용합니다.
+
+        Args:
+            name: 서브레딧 이름
+
+        Returns:
+            SubredditInfo 모델 또는 None (존재하지 않는 경우)
+        """
+        url = f"{self.BASE_URL}/r/{name}/about.json"
+        logger.debug(f"Fetching subreddit info: {url}")
+
+        try:
+            response = await self._client.get_json(url)
+        except Exception as e:
+            logger.error(f"Failed to fetch subreddit info for r/{name}: {e}")
+            return None
+
+        return self._parser.parse_subreddit(response)
+
+    async def search_subreddits(
+        self, query: str, limit: int = 25
+    ) -> list[SubredditInfo]:
+        """서브레딧 검색.
+
+        /subreddits/search.json 엔드포인트를 사용합니다.
+
+        Args:
+            query: 검색어
+            limit: 수집할 결과 수 (기본: 25)
+
+        Returns:
+            SubredditInfo 모델 리스트
+        """
+        subreddits: list[SubredditInfo] = []
+        after: str | None = None
+
+        while len(subreddits) < limit:
+            # 이번 요청에서 가져올 개수 계산
+            remaining = limit - len(subreddits)
+            fetch_count = min(remaining, self.MAX_PER_REQUEST)
+
+            # 파라미터 구성
+            params: dict[str, Any] = {
+                "q": query,
+                "limit": fetch_count,
+            }
+            if after:
+                params["after"] = after
+
+            url = f"{self.BASE_URL}/subreddits/search.json?{urlencode(params)}"
+            logger.debug(f"Searching subreddits: {url}")
+
+            try:
+                response = await self._client.get_json(url)
+            except Exception as e:
+                logger.error(f"Failed to search subreddits for '{query}': {e}")
+                break
+
+            # 서브레딧 추출
+            children = self._parser.parse_listing(response)
+            for child in children:
+                subreddit = self._parser.parse_subreddit(child)
+                if subreddit is not None:
+                    subreddits.append(subreddit)
+
+            # 다음 페이지 토큰 확인
+            after = self._parser.get_after_token(response)
+            if not after:
+                break
+
+            # 빈 응답 방어
+            if not children:
+                logger.debug("No more subreddits available")
+                break
+
+        return subreddits[:limit]
