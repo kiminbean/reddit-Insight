@@ -59,7 +59,7 @@ async def trends_home(
         },
     }
 
-    return templates.TemplateResponse("trends/index.html", context)
+    return templates.TemplateResponse(request, "trends/index.html", context)
 
 
 @router.get("/keywords", response_class=HTMLResponse)
@@ -91,7 +91,7 @@ async def keywords_partial(
         "top_keywords": [kw.__dict__ for kw in top_keywords],
     }
 
-    return templates.TemplateResponse("trends/partials/keyword_list.html", context)
+    return templates.TemplateResponse(request, "trends/partials/keyword_list.html", context)
 
 
 @router.get("/rising", response_class=HTMLResponse)
@@ -121,7 +121,7 @@ async def rising_partial(
         "rising_keywords": [kw.__dict__ for kw in rising_keywords],
     }
 
-    return templates.TemplateResponse("trends/partials/rising_list.html", context)
+    return templates.TemplateResponse(request, "trends/partials/rising_list.html", context)
 
 
 @router.get("/chart-data", response_class=JSONResponse)

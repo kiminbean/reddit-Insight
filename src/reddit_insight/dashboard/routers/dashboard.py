@@ -48,7 +48,7 @@ async def dashboard_home(
         "recent_analyses": recent_analyses,
     }
 
-    return templates.TemplateResponse("dashboard/home.html", context)
+    return templates.TemplateResponse(request, "dashboard/home.html", context)
 
 
 @router.get("/summary", response_class=HTMLResponse)
@@ -74,4 +74,4 @@ async def dashboard_summary(
         "summary": asdict(summary),
     }
 
-    return templates.TemplateResponse("dashboard/partials/summary.html", context)
+    return templates.TemplateResponse(request, "dashboard/partials/summary.html", context)

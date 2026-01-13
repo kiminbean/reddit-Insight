@@ -26,7 +26,7 @@ from reddit_insight.reddit.models import Comment, Post, SubredditInfo
 
 def run_async(coro):
     """비동기 코루틴을 동기적으로 실행하는 헬퍼."""
-    return asyncio.get_event_loop().run_until_complete(coro)
+    return asyncio.run(coro)
 
 
 # ========== Fixtures ==========

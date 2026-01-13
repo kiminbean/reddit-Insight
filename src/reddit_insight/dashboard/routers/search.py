@@ -66,7 +66,7 @@ async def search_home(
         ],
     }
 
-    return templates.TemplateResponse("search/index.html", context)
+    return templates.TemplateResponse(request, "search/index.html", context)
 
 
 @router.get("/suggestions", response_class=HTMLResponse)
@@ -99,7 +99,7 @@ async def search_suggestions(
         "query": q,
     }
 
-    return templates.TemplateResponse("search/partials/suggestions.html", context)
+    return templates.TemplateResponse(request, "search/partials/suggestions.html", context)
 
 
 @router.get("/results", response_class=HTMLResponse)
@@ -134,4 +134,4 @@ async def search_results_partial(
         "results": results,
     }
 
-    return templates.TemplateResponse("search/partials/results.html", context)
+    return templates.TemplateResponse(request, "search/partials/results.html", context)

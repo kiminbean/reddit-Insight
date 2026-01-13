@@ -69,7 +69,7 @@ async def insights_home(
         },
     }
 
-    return templates.TemplateResponse("insights/index.html", context)
+    return templates.TemplateResponse(request, "insights/index.html", context)
 
 
 @router.get("/list", response_class=HTMLResponse)
@@ -105,7 +105,7 @@ async def insights_list_partial(
         "insights": [i.__dict__ for i in insights],
     }
 
-    return templates.TemplateResponse("insights/partials/insight_list.html", context)
+    return templates.TemplateResponse(request, "insights/partials/insight_list.html", context)
 
 
 @router.get("/recommendations", response_class=HTMLResponse)
@@ -133,7 +133,7 @@ async def recommendations_partial(
         "recommendations": [r.__dict__ for r in recommendations],
     }
 
-    return templates.TemplateResponse("insights/partials/recommendation_list.html", context)
+    return templates.TemplateResponse(request, "insights/partials/recommendation_list.html", context)
 
 
 @router.get("/opportunities", response_class=HTMLResponse)
@@ -161,7 +161,7 @@ async def opportunities_partial(
         "opportunities": [o.__dict__ for o in opportunities],
     }
 
-    return templates.TemplateResponse("insights/partials/opportunity_table.html", context)
+    return templates.TemplateResponse(request, "insights/partials/opportunity_table.html", context)
 
 
 @router.get("/{insight_id}", response_class=HTMLResponse)
@@ -199,7 +199,7 @@ async def insight_detail(
         "insight": insight.__dict__,
     }
 
-    return templates.TemplateResponse("insights/detail.html", context)
+    return templates.TemplateResponse(request, "insights/detail.html", context)
 
 
 @router.get("/chart/score-breakdown/{insight_id}", response_class=JSONResponse)

@@ -444,7 +444,7 @@ async def competition_index(
         "total_entities": len(entities),
     }
 
-    return templates.TemplateResponse("competition/index.html", context)
+    return templates.TemplateResponse(request, "competition/index.html", context)
 
 
 @router.get("/entities", response_class=HTMLResponse)
@@ -472,7 +472,7 @@ async def entities_list(
         "entities": [entity_view_to_dict(e) for e in entities],
     }
 
-    return templates.TemplateResponse("competition/partials/entity_list.html", context)
+    return templates.TemplateResponse(request, "competition/partials/entity_list.html", context)
 
 
 @router.get("/entity/{name}", response_class=HTMLResponse)
@@ -509,7 +509,7 @@ async def entity_detail(
         "detail": entity_detail_to_dict(detail),
     }
 
-    return templates.TemplateResponse("competition/entity_detail.html", context)
+    return templates.TemplateResponse(request, "competition/entity_detail.html", context)
 
 
 @router.get("/sentiment-chart", response_class=JSONResponse)
@@ -565,7 +565,7 @@ async def complaints_list(
         "complaints": [complaint_view_to_dict(c) for c in complaints],
     }
 
-    return templates.TemplateResponse("competition/partials/complaint_list.html", context)
+    return templates.TemplateResponse(request, "competition/partials/complaint_list.html", context)
 
 
 @router.get("/switches", response_class=JSONResponse)

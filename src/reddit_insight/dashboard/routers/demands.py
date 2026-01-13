@@ -351,7 +351,7 @@ async def demands_index(
         "total_demands": sum(category_stats.values()) if category_stats else 0,
     }
 
-    return templates.TemplateResponse("demands/index.html", context)
+    return templates.TemplateResponse(request, "demands/index.html", context)
 
 
 @router.get("/list", response_class=HTMLResponse)
@@ -387,7 +387,7 @@ async def demands_list(
         "demands": [demand_view_to_dict(d) for d in demands],
     }
 
-    return templates.TemplateResponse("demands/partials/demand_list.html", context)
+    return templates.TemplateResponse(request, "demands/partials/demand_list.html", context)
 
 
 @router.get("/{demand_id}", response_class=HTMLResponse)
@@ -424,7 +424,7 @@ async def demand_detail(
         "detail": demand_detail_to_dict(detail),
     }
 
-    return templates.TemplateResponse("demands/detail.html", context)
+    return templates.TemplateResponse(request, "demands/detail.html", context)
 
 
 @router.get("/categories/stats", response_class=JSONResponse)
