@@ -1,0 +1,205 @@
+{% if results and results.has_results %}
+<div class="space-y-6">
+    <!-- Results Summary -->
+    <div class="bg-white shadow rounded-lg p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">
+                    Found {{ results.total_count }} results for "{{ results.query }}"
+                </h3>
+            </div>
+            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                {% if results.keywords_count > 0 %}
+                <span class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span>
+                    {{ results.keywords_count }} Keywords
+                </span>
+                {% endif %}
+                {% if results.entities_count > 0 %}
+                <span class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>
+                    {{ results.entities_count }} Entities
+                </span>
+                {% endif %}
+                {% if results.insights_count > 0 %}
+                <span class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1"></span>
+                    {{ results.insights_count }} Insights
+                </span>
+                {% endif %}
+                {% if results.demands_count > 0 %}
+                <span class="flex items-center">
+                    <span class="inline-block w-2 h-2 rounded-full bg-orange-500 mr-1"></span>
+                    {{ results.demands_count }} Demands
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Keywords Results -->
+    {% if results.keywords %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+            <h3 class="text-lg font-medium text-gray-900">Keywords</h3>
+            <span class="ml-2 text-sm text-gray-500">({{ results.keywords_count }})</span>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for keyword in results.keywords %}
+            <div class="px-6 py-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="/dashboard/trends?keyword={{ keyword.keyword }}" class="text-primary-600 hover:text-primary-800 font-medium">
+                            {{ keyword.keyword }}
+                        </a>
+                        <span class="text-sm text-gray-500">{{ keyword.frequency }} mentions</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="{{ keyword.trend_icon }} text-sm font-medium">
+                            {% if keyword.trend == 'up' %}
+                            <svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Rising
+                            {% elif keyword.trend == 'down' %}
+                            <svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Declining
+                            {% else %}
+                            <svg class="inline-block h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            Stable
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Entities Results -->
+    {% if results.entities %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+            <h3 class="text-lg font-medium text-gray-900">Entities</h3>
+            <span class="ml-2 text-sm text-gray-500">({{ results.entities_count }})</span>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for entity in results.entities %}
+            <div class="px-6 py-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="/dashboard/competition?entity={{ entity.name }}" class="text-primary-600 hover:text-primary-800 font-medium">
+                            {{ entity.name }}
+                        </a>
+                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                            {{ entity.type_display }}
+                        </span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="{{ entity.sentiment_color }} text-sm font-medium">
+                            {{ entity.sentiment_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Insights Results -->
+    {% if results.insights %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+            <h3 class="text-lg font-medium text-gray-900">Insights</h3>
+            <span class="ml-2 text-sm text-gray-500">({{ results.insights_count }})</span>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for insight in results.insights %}
+            <div class="px-6 py-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <a href="/dashboard/insights/{{ insight.id }}" class="text-primary-600 hover:text-primary-800 font-medium">
+                            {{ insight.title }}
+                        </a>
+                        <div class="mt-1 flex items-center space-x-4">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ insight.type_color }}">
+                                {{ insight.type_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-sm font-medium text-gray-900">{{ insight.confidence_percent }}%</div>
+                            <div class="text-xs text-gray-500">Confidence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Demands Results -->
+    {% if results.demands %}
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+            <span class="inline-block w-3 h-3 rounded-full bg-orange-500 mr-2"></span>
+            <h3 class="text-lg font-medium text-gray-900">Demands</h3>
+            <span class="ml-2 text-sm text-gray-500">({{ results.demands_count }})</span>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% for demand in results.demands %}
+            <div class="px-6 py-4 hover:bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <a href="/dashboard/demands/{{ demand.id }}" class="text-primary-600 hover:text-primary-800 font-medium">
+                            {{ demand.text }}
+                        </a>
+                        <div class="mt-1 flex items-center space-x-4">
+                            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+                                {{ demand.category_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-sm font-medium {{ demand.priority_color }}">{{ demand.priority_display }}</div>
+                            <div class="text-xs text-gray-500">Priority</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% elif results %}
+<!-- No Results -->
+<div class="bg-white shadow rounded-lg">
+    <div class="px-6 py-12 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="mt-4 text-lg font-medium text-gray-900">No results found</h3>
+        <p class="mt-2 text-sm text-gray-500">
+            We couldn't find anything matching "{{ results.query }}". Try a different search term.
+        </p>
+        <div class="mt-6">
+            <a href="/search" class="text-primary-600 hover:text-primary-500 text-sm font-medium">
+                Clear search
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}

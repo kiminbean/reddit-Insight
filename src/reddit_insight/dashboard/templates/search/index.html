@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0">
+    <!-- Search Form -->
+    <div class="bg-white shadow rounded-lg mb-6">
+        <div class="p-6">
+            <form id="search-form" action="/search" method="get">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <!-- Search Input -->
+                    <div class="flex-grow relative">
+                        <label for="search-input" class="sr-only">Search</label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <input type="text"
+                                   id="search-input"
+                                   name="q"
+                                   value="{{ query }}"
+                                   placeholder="Search keywords, entities, insights, demands..."
+                                   autocomplete="off"
+                                   hx-get="/search/suggestions"
+                                   hx-trigger="keyup changed delay:300ms"
+                                   hx-target="#suggestions-dropdown"
+                                   class="block w-full rounded-md border-0 py-3 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        </div>
+                        <!-- Suggestions Dropdown -->
+                        <div id="suggestions-dropdown" class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md"></div>
+                    </div>
+
+                    <!-- Type Filter -->
+                    <div class="sm:w-48">
+                        <label for="type-select" class="sr-only">Search Type</label>
+                        <select id="type-select"
+                                name="type"
+                                class="block w-full rounded-md border-0 py-3 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6">
+                            {% for search_type_option in search_types %}
+                            <option value="{{ search_type_option.value }}" {% if search_type == search_type_option.value %}selected{% endif %}>{{ search_type_option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Search Button -->
+                    <button type="submit"
+                            class="inline-flex items-center justify-center rounded-md bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                        </svg>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if query %}
+    <!-- Search Results -->
+    <div id="search-results">
+        {% include "search/partials/results.html" %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-6 py-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <h3 class="mt-4 text-lg font-medium text-gray-900">Search your data</h3>
+            <p class="mt-2 text-sm text-gray-500">
+                Enter a search term to find keywords, entities, insights, and demands across all your analyzed data.
+            </p>
+            <div class="mt-6">
+                <div class="text-sm text-gray-500">
+                    <span class="font-medium">Try searching:</span>
+                    <div class="mt-2 flex flex-wrap justify-center gap-2">
+                        <a href="/search?q=productivity" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200">productivity</a>
+                        <a href="/search?q=AI" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200">AI</a>
+                        <a href="/search?q=collaboration" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200">collaboration</a>
+                        <a href="/search?q=privacy" class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200">privacy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Close suggestions dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+        const searchInput = document.getElementById('search-input');
+
+        if (!searchInput.contains(event.target) && !suggestionsDropdown.contains(event.target)) {
+            suggestionsDropdown.innerHTML = '';
+        }
+    });
+
+    // Handle suggestion click
+    document.getElementById('suggestions-dropdown').addEventListener('click', function(event) {
+        if (event.target.classList.contains('suggestion-item')) {
+            document.getElementById('search-input').value = event.target.textContent;
+            document.getElementById('suggestions-dropdown').innerHTML = '';
+            document.getElementById('search-form').submit();
+        }
+    });
+
+    // Keyboard navigation for suggestions
+    document.getElementById('search-input').addEventListener('keydown', function(event) {
+        const suggestionsDropdown = document.getElementById('suggestions-dropdown');
+        const suggestions = suggestionsDropdown.querySelectorAll('.suggestion-item');
+
+        if (suggestions.length === 0) return;
+
+        const currentActive = suggestionsDropdown.querySelector('.suggestion-item.bg-gray-100');
+        let currentIndex = -1;
+
+        suggestions.forEach((suggestion, index) => {
+            if (suggestion === currentActive) {
+                currentIndex = index;
+            }
+        });
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (currentActive) {
+                currentActive.classList.remove('bg-gray-100');
+            }
+            const nextIndex = (currentIndex + 1) % suggestions.length;
+            suggestions[nextIndex].classList.add('bg-gray-100');
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (currentActive) {
+                currentActive.classList.remove('bg-gray-100');
+            }
+            const prevIndex = currentIndex <= 0 ? suggestions.length - 1 : currentIndex - 1;
+            suggestions[prevIndex].classList.add('bg-gray-100');
+        } else if (event.key === 'Enter' && currentActive) {
+            event.preventDefault();
+            document.getElementById('search-input').value = currentActive.textContent;
+            suggestionsDropdown.innerHTML = '';
+            document.getElementById('search-form').submit();
+        }
+    });
+</script>
+{% endblock %}
