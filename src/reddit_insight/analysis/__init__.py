@@ -30,7 +30,21 @@ from reddit_insight.analysis.stopwords import (
     get_default_stopwords,
 )
 from reddit_insight.analysis.tfidf import TFIDFAnalyzer, TFIDFConfig
+from reddit_insight.analysis.time_series import (
+    TimeGranularity,
+    TimePoint,
+    TimeSeries,
+    bucket_timestamp,
+    get_time_delta,
+)
 from reddit_insight.analysis.tokenizer import RedditTokenizer, TokenizerConfig
+from reddit_insight.analysis.trends import (
+    KeywordTrendAnalyzer,
+    KeywordTrendResult,
+    TrendCalculator,
+    TrendDirection,
+    TrendMetrics,
+)
 
 __all__ = [
     # Tokenizer
@@ -51,4 +65,16 @@ __all__ = [
     # TF-IDF
     "TFIDFAnalyzer",
     "TFIDFConfig",
+    # Time Series
+    "TimeSeries",
+    "TimePoint",
+    "TimeGranularity",
+    "bucket_timestamp",
+    "get_time_delta",
+    # Trends
+    "TrendCalculator",
+    "TrendDirection",
+    "TrendMetrics",
+    "KeywordTrendAnalyzer",
+    "KeywordTrendResult",
 ]
