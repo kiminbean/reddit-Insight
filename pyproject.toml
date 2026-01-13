@@ -40,6 +40,9 @@ dependencies = [
     "yake>=0.4.8",
     "scikit-learn>=1.3.0",
     "nltk>=3.8.0",
+    # ML/Statistics dependencies
+    "statsmodels>=0.14.0",
+    "scipy>=1.11.0",
     # Dashboard dependencies
     "fastapi>=0.109.0",
     "uvicorn>=0.25.0",
