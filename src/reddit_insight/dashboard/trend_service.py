@@ -7,6 +7,8 @@ import random
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from reddit_insight.dashboard.data_store import get_current_data
+
 
 @dataclass
 class KeywordTrend:
@@ -89,14 +91,45 @@ class TrendService:
         Returns:
             list[KeywordTrend]: 빈도순으로 정렬된 키워드 트렌드 목록
         """
-        # 샘플 데이터 생성 (추후 실제 분석 모듈 연동)
+        # 실제 데이터 사용 시도
+        data = get_current_data()
+        if data and data.keywords:
+            keywords = []
+            # 트렌드 정보와 매칭
+            trend_map = {t["keyword"]: t for t in data.trends} if data.trends else {}
+
+            for i, kw_data in enumerate(data.keywords[:limit]):
+                keyword = kw_data["keyword"]
+                frequency = int(kw_data.get("frequency", 0) or (100 - i * 3))
+
+                # 트렌드 정보 가져오기
+                trend_info = trend_map.get(keyword, {})
+                direction = trend_info.get("direction", "stable")
+                change_rate = trend_info.get("change_rate", 0)
+
+                if direction == "rising":
+                    trend_direction = "up"
+                elif direction == "falling":
+                    trend_direction = "down"
+                else:
+                    trend_direction = "stable"
+
+                keywords.append(
+                    KeywordTrend(
+                        keyword=keyword,
+                        frequency=frequency,
+                        trend_direction=trend_direction,
+                        change_percent=round(change_rate * 100, 1),
+                    )
+                )
+            return keywords
+
+        # 실제 데이터가 없으면 샘플 데이터 생성
         keywords = []
         for i, kw in enumerate(self._sample_keywords[:limit]):
-            # 순위에 따라 빈도 감소
             base_freq = 1000 - (i * 40)
             frequency = max(base_freq + random.randint(-50, 50), 10)
 
-            # 랜덤 트렌드 방향
             direction_choice = random.random()
             if direction_choice < 0.4:
                 trend_direction = "up"
@@ -133,7 +166,34 @@ class TrendService:
         Returns:
             list[RisingKeyword]: 급상승 점수순으로 정렬된 키워드 목록
         """
-        # 샘플 데이터 생성 (추후 실제 Rising Detector 연동)
+        # 실제 데이터에서 상승 트렌드 키워드 추출
+        data = get_current_data()
+        if data and data.trends:
+            keywords = []
+            rising_trends = [
+                t for t in data.trends
+                if t.get("direction") == "rising"
+            ]
+            # 변화율 기준 정렬
+            rising_trends.sort(key=lambda x: x.get("change_rate", 0), reverse=True)
+
+            for i, trend in enumerate(rising_trends[:limit]):
+                change_rate = trend.get("change_rate", 0)
+                rising_score = min(1.0, max(0.1, change_rate / 10))
+
+                keywords.append(
+                    RisingKeyword(
+                        keyword=trend["keyword"],
+                        rising_score=round(rising_score, 2),
+                        first_seen=None,
+                        growth_rate=round(change_rate * 100, 1),
+                    )
+                )
+
+            if keywords:
+                return keywords
+
+        # 실제 데이터가 없으면 샘플 데이터 생성
         rising_candidates = [
             "claude", "gemini", "copilot", "cursor", "windsurf",
             "bun", "deno", "htmx", "astro", "qwik",

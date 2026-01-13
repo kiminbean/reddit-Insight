@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
 
+from reddit_insight.dashboard.data_store import get_current_data
+
 # =============================================================================
 # VIEW DATA STRUCTURES
 # =============================================================================
@@ -265,6 +267,36 @@ class InsightService:
         Returns:
             InsightView 목록
         """
+        # 실제 데이터에서 인사이트 가져오기
+        data = get_current_data()
+        if data and data.insights:
+            insights = []
+            for i, insight_data in enumerate(data.insights):
+                insights.append(
+                    InsightView(
+                        id=f"insight_{i:03d}",
+                        insight_type=insight_data.get("type", "emerging_trend"),
+                        title=insight_data.get("title", ""),
+                        confidence=insight_data.get("confidence", 0.7),
+                        priority=insight_data.get("confidence", 0.7) * 100,
+                        evidence_count=1,
+                    )
+                )
+
+            # 유형 필터
+            if insight_type:
+                insights = [ins for ins in insights if ins.insight_type == insight_type]
+
+            # 신뢰도 필터
+            insights = [ins for ins in insights if ins.confidence >= min_confidence]
+
+            # 우선순위 내림차순 정렬
+            insights = sorted(insights, key=lambda x: x.priority, reverse=True)
+
+            if insights:
+                return insights[:limit]
+
+        # 실제 데이터가 없으면 목 데이터 사용
         insights = self._mock_insights
 
         # 유형 필터
@@ -320,6 +352,30 @@ class InsightService:
         Returns:
             RecommendationView 목록 (종합 점수 내림차순)
         """
+        # 실제 데이터에서 추천 생성
+        data = get_current_data()
+        if data and data.demands and data.demands.get("top_opportunities"):
+            recommendations = []
+            for i, opp in enumerate(data.demands["top_opportunities"][:top_n]):
+                score = opp.get("priority_score", 50)
+                grade = "A" if score >= 80 else "B" if score >= 60 else "C" if score >= 40 else "D"
+                recommendations.append(
+                    RecommendationView(
+                        rank=i + 1,
+                        insight_id=f"opp_{i:03d}",
+                        insight_title=opp.get("representative", "")[:50],
+                        insight_type="unmet_need",
+                        business_score=score,
+                        feasibility_score=score * 0.8,
+                        final_score=score * 0.9,
+                        grade=grade,
+                        risk_level="LOW" if score >= 70 else "MEDIUM" if score >= 50 else "HIGH",
+                        action_items=data.demands.get("recommendations", [])[:3],
+                    )
+                )
+            if recommendations:
+                return recommendations
+
         return self._mock_recommendations[:top_n]
 
     def get_opportunity_ranking(self, limit: int = 20) -> list[OpportunityView]:
@@ -331,6 +387,28 @@ class InsightService:
         Returns:
             OpportunityView 목록 (종합 점수 내림차순)
         """
+        # 실제 데이터에서 기회 생성
+        data = get_current_data()
+        if data and data.demands and data.demands.get("top_opportunities"):
+            opportunities = []
+            for i, opp in enumerate(data.demands["top_opportunities"][:limit]):
+                score = opp.get("priority_score", 50)
+                grade = "A" if score >= 80 else "B" if score >= 60 else "C" if score >= 40 else "D"
+                opportunities.append(
+                    OpportunityView(
+                        rank=i + 1,
+                        insight_id=f"opp_{i:03d}",
+                        insight_title=opp.get("representative", "")[:50],
+                        market_size_score=score * 0.9,
+                        competition_score=score * 0.7,
+                        urgency_score=score * 0.8,
+                        total_score=score,
+                        grade=grade,
+                    )
+                )
+            if opportunities:
+                return opportunities
+
         return self._mock_opportunities[:limit]
 
     def get_insight_types(self) -> list[dict[str, str]]:
@@ -378,6 +456,19 @@ class InsightService:
             등급별 개수 딕셔너리
         """
         distribution = {"A": 0, "B": 0, "C": 0, "D": 0, "F": 0}
+
+        # 실제 데이터에서 등급 분포 계산
+        data = get_current_data()
+        if data and data.demands and data.demands.get("top_opportunities"):
+            for opp in data.demands["top_opportunities"]:
+                score = opp.get("priority_score", 50)
+                grade = "A" if score >= 80 else "B" if score >= 60 else "C" if score >= 40 else "D" if score >= 20 else "F"
+                if grade in distribution:
+                    distribution[grade] += 1
+            if sum(distribution.values()) > 0:
+                return distribution
+
+        # 실제 데이터가 없으면 목 데이터 사용
         for opp in self._mock_opportunities:
             if opp.grade in distribution:
                 distribution[opp.grade] += 1

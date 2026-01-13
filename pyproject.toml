@@ -44,6 +44,8 @@ dependencies = [
     "fastapi>=0.109.0",
     "uvicorn>=0.25.0",
     "jinja2>=3.1.0",
+    # Scheduler dependencies
+    "apscheduler>=3.10.0",
 ]
 
 [project.optional-dependencies]

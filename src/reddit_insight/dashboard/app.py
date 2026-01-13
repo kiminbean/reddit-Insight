@@ -35,11 +35,21 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Reddit Insight Dashboard...")
 
+    # 데이터베이스 초기화
+    from reddit_insight.dashboard.database import init_db
+    init_db()
+    logger.info("Database initialized")
+
     # 디렉토리 존재 확인
     if not TEMPLATES_DIR.exists():
         logger.warning(f"Templates directory not found: {TEMPLATES_DIR}")
     if not STATIC_DIR.exists():
         logger.warning(f"Static directory not found: {STATIC_DIR}")
+
+    # 스케줄러 시작
+    from reddit_insight.dashboard.scheduler import start_scheduler, stop_scheduler
+    start_scheduler()
+    logger.info("Scheduler started")
 
     logger.info("Dashboard startup complete")
 
@@ -47,6 +57,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down Reddit Insight Dashboard...")
+    stop_scheduler()
     logger.info("Dashboard shutdown complete")
 
 
@@ -73,6 +84,14 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # 요청 로깅 미들웨어 (DB에 기록)
+    from reddit_insight.dashboard.monitoring import RequestLoggingMiddleware
+    application.add_middleware(RequestLoggingMiddleware)
+
+    # Rate Limiting 미들웨어
+    from reddit_insight.dashboard.rate_limit import RateLimitMiddleware
+    application.add_middleware(RateLimitMiddleware)
 
     # 글로벌 예외 핸들러
     @application.exception_handler(Exception)
@@ -134,6 +153,7 @@ def create_app() -> FastAPI:
 
     # 라우터 등록 (지연 임포트로 순환 참조 방지)
     from reddit_insight.dashboard.routers import (
+        api,
         competition,
         dashboard,
         demands,
@@ -148,6 +168,7 @@ def create_app() -> FastAPI:
     application.include_router(competition.router)
     application.include_router(insights.router)
     application.include_router(search.router)
+    application.include_router(api.router)
 
     return application
 

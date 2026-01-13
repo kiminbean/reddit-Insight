@@ -18,6 +18,7 @@ from reddit_insight.analysis.competitive import (
     Complaint,
 )
 from reddit_insight.analysis.sentiment import Sentiment
+from reddit_insight.dashboard.data_store import get_current_data
 
 router = APIRouter(prefix="/dashboard/competition", tags=["competition"])
 
@@ -235,13 +236,39 @@ class CompetitionService:
         Returns:
             EntityView 목록
         """
+        # 실제 데이터에서 엔티티 정보 가져오기
+        data = get_current_data()
+        if data and data.competition and data.competition.get("insights"):
+            result: list[EntityView] = []
+            for insight_data in data.competition["insights"][:limit]:
+                compound = insight_data.get("sentiment_compound", 0)
+                if compound > 0.05:
+                    sentiment_label = "positive"
+                elif compound < -0.05:
+                    sentiment_label = "negative"
+                else:
+                    sentiment_label = "neutral"
+
+                result.append(
+                    EntityView(
+                        name=insight_data.get("entity_name", "Unknown"),
+                        entity_type=insight_data.get("entity_type", "product"),
+                        mention_count=insight_data.get("mention_count", 1),
+                        sentiment_score=compound,
+                        sentiment_label=sentiment_label,
+                        complaint_count=len(insight_data.get("top_complaints", [])),
+                    )
+                )
+            if result:
+                return result
+
         if self._cached_report is None:
             self._run_demo_analysis()
 
         if self._cached_report is None:
             return []
 
-        result: list[EntityView] = []
+        result = []
 
         for insight in self._cached_report.insights[:limit]:
             result.append(self._insight_to_entity_view(insight))
@@ -281,6 +308,24 @@ class CompetitionService:
         Returns:
             ComplaintView 목록
         """
+        # 실제 데이터에서 불만 정보 가져오기
+        data = get_current_data()
+        if data and data.competition and data.competition.get("top_complaints"):
+            result: list[ComplaintView] = []
+            for i, complaint_data in enumerate(data.competition["top_complaints"][:limit]):
+                result.append(
+                    ComplaintView(
+                        id=f"complaint_{i:03d}",
+                        entity_name="",  # 실제 데이터에는 엔티티 정보가 없음
+                        complaint_type="general",
+                        text=complaint_data.get("text", ""),
+                        severity=complaint_data.get("severity", 0.5),
+                        keywords=[],
+                    )
+                )
+            if result:
+                return result
+
         if self._cached_report is None:
             self._run_demo_analysis()
 
@@ -298,6 +343,24 @@ class CompetitionService:
         Returns:
             감성별 비율 딕셔너리 (positive, neutral, negative)
         """
+        # 실제 데이터에서 감성 분포 계산
+        data = get_current_data()
+        if data and data.competition and data.competition.get("insights"):
+            counts = {"positive": 0, "neutral": 0, "negative": 0}
+            total = len(data.competition["insights"])
+
+            for insight_data in data.competition["insights"]:
+                compound = insight_data.get("sentiment_compound", 0)
+                if compound > 0.05:
+                    counts["positive"] += 1
+                elif compound < -0.05:
+                    counts["negative"] += 1
+                else:
+                    counts["neutral"] += 1
+
+            if total > 0:
+                return {k: (v / total) * 100 for k, v in counts.items()}
+
         if self._cached_report is None:
             self._run_demo_analysis()
 
@@ -322,6 +385,11 @@ class CompetitionService:
         Returns:
             전환 정보 목록 (from, to, count)
         """
+        # 실제 데이터에서 전환 정보 가져오기
+        data = get_current_data()
+        if data and data.competition and data.competition.get("popular_switches"):
+            return data.competition["popular_switches"]
+
         if self._cached_report is None:
             self._run_demo_analysis()
 
@@ -339,6 +407,11 @@ class CompetitionService:
         Returns:
             권장사항 목록
         """
+        # 실제 데이터에서 권장사항 가져오기
+        data = get_current_data()
+        if data and data.competition and data.competition.get("recommendations"):
+            return data.competition["recommendations"]
+
         if self._cached_report is None:
             return []
 

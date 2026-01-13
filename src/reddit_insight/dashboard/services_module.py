@@ -6,6 +6,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from reddit_insight.dashboard.data_store import get_analysis_history, get_current_data
+
 
 @dataclass
 class DashboardSummary:
@@ -60,14 +62,24 @@ class DashboardService:
         Returns:
             DashboardSummary: 요약 데이터
         """
-        # 분석 기록에서 집계
+        # 실제 데이터 사용 시도
+        data = get_current_data()
+        if data:
+            return DashboardSummary(
+                total_posts_analyzed=data.post_count,
+                trending_keywords_count=len(data.keywords),
+                demands_found=data.demands.get("total_demands", 0) if data.demands else 0,
+                insights_generated=len(data.insights),
+            )
+
+        # 실제 데이터가 없으면 분석 기록에서 집계
         total_posts = sum(a.post_count for a in self._analyses)
         total_insights = sum(a.insight_count for a in self._analyses)
 
         return DashboardSummary(
             total_posts_analyzed=total_posts,
-            trending_keywords_count=0,  # 추후 트렌드 분석 모듈 연동
-            demands_found=0,  # 추후 수요 분석 모듈 연동
+            trending_keywords_count=0,
+            demands_found=0,
             insights_generated=total_insights,
         )
 
@@ -80,6 +92,23 @@ class DashboardService:
         Returns:
             list[AnalysisRecord]: 최근 분석 기록 목록 (최신순)
         """
+        # 데이터베이스에서 분석 이력 가져오기
+        history = get_analysis_history(limit=limit)
+        if history:
+            return [
+                AnalysisRecord(
+                    id=str(h["id"]),
+                    subreddit=h["subreddit"],
+                    analyzed_at=datetime.fromisoformat(h["analyzed_at"])
+                    if h["analyzed_at"]
+                    else datetime.now(),
+                    post_count=h["post_count"],
+                    insight_count=h["insight_count"],
+                )
+                for h in history
+            ]
+
+        # 데이터베이스가 없으면 내부 캐시 사용
         sorted_analyses = sorted(
             self._analyses,
             key=lambda a: a.analyzed_at,

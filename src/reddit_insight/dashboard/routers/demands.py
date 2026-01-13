@@ -18,6 +18,7 @@ from reddit_insight.analysis.demand_analyzer import (
     PrioritizedDemand,
 )
 from reddit_insight.analysis.demand_patterns import DemandCategory
+from reddit_insight.dashboard.data_store import get_current_data
 
 router = APIRouter(prefix="/dashboard/demands", tags=["demands"])
 
@@ -161,14 +162,56 @@ class DemandService:
         Returns:
             DemandView 목록
         """
+        # 실제 데이터에서 수요 정보 가져오기
+        data = get_current_data()
+        if data and data.demands and data.demands.get("top_opportunities"):
+            result: list[DemandView] = []
+            for i, opp in enumerate(data.demands["top_opportunities"]):
+                priority_score = opp.get("priority_score", 50)
+
+                # 최소 우선순위 필터링
+                if priority_score < min_priority:
+                    continue
+
+                # 카테고리는 실제 데이터에서 지정되지 않으므로 business_potential로 추론
+                inferred_category = "unmet_need"
+                if opp.get("business_potential") == "high":
+                    inferred_category = "willingness_to_pay"
+                elif opp.get("business_potential") == "low":
+                    inferred_category = "feature_request"
+
+                # 카테고리 필터링
+                if category is not None:
+                    cat_value = category.value if isinstance(category, DemandCategory) else category
+                    if inferred_category != cat_value:
+                        continue
+
+                result.append(
+                    DemandView(
+                        id=f"demand_{i:03d}",
+                        category=inferred_category,
+                        text=opp.get("representative", "")[:100],
+                        priority_score=priority_score,
+                        source_count=opp.get("size", 1),
+                        business_potential=opp.get("business_potential", "medium"),
+                        keywords=None,
+                    )
+                )
+
+                if len(result) >= limit:
+                    break
+
+            if result:
+                return result
+
+        # 실제 데이터가 없으면 분석기로 분석 실행
         if self._cached_report is None:
-            # 데모 데이터로 분석 실행
             self._run_demo_analysis()
 
         if self._cached_report is None:
             return []
 
-        result: list[DemandView] = []
+        result = []
 
         for prioritized in self._cached_report.top_opportunities:
             # 최소 우선순위 필터링
@@ -216,6 +259,11 @@ class DemandService:
         Returns:
             카테고리별 수요 수 딕셔너리
         """
+        # 실제 데이터에서 카테고리 통계 가져오기
+        data = get_current_data()
+        if data and data.demands and data.demands.get("by_category"):
+            return data.demands["by_category"]
+
         if self._cached_report is None:
             self._run_demo_analysis()
 
@@ -233,6 +281,11 @@ class DemandService:
         Returns:
             권장사항 목록
         """
+        # 실제 데이터에서 권장사항 가져오기
+        data = get_current_data()
+        if data and data.demands and data.demands.get("recommendations"):
+            return data.demands["recommendations"]
+
         if self._cached_report is None:
             return []
 

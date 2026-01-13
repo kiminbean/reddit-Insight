@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Reddit Insight Dashboard
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reddit-insight-app
+    ports:
+      - "${PORT:-8888}:8888"
+    environment:
+      - DATABASE_URL=postgresql://reddit:reddit123@db:5432/reddit_insight
+      - AUTH_REQUIRED=${AUTH_REQUIRED:-false}
+      - PYTHONPATH=/app/src
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8888/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: reddit-insight-db
+    environment:
+      - POSTGRES_USER=reddit
+      - POSTGRES_PASSWORD=reddit123
+      - POSTGRES_DB=reddit_insight
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reddit -d reddit_insight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Redis for Rate Limiting (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: reddit-insight-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: reddit-insight-network
