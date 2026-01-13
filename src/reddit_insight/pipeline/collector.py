@@ -10,14 +10,10 @@ import logging
 import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
 from reddit_insight.data_source import DataSourceStrategy, UnifiedDataSource
 from reddit_insight.pipeline.data_pipeline import DataPipeline, ProcessingResult
 from reddit_insight.storage.database import Database
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +160,7 @@ class Collector:
         self._pipeline = None
         logger.info("Collector 리소스 해제 완료")
 
-    async def __aenter__(self) -> "Collector":
+    async def __aenter__(self) -> Collector:
         """비동기 컨텍스트 매니저 진입."""
         await self.connect()
         return self

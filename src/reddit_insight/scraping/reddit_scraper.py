@@ -65,7 +65,7 @@ class RedditScraper:
         if self._owns_client:
             await self._client.close()
 
-    async def __aenter__(self) -> "RedditScraper":
+    async def __aenter__(self) -> RedditScraper:
         """비동기 컨텍스트 매니저 진입."""
         return self
 

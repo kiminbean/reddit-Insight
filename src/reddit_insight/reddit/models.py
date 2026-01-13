@@ -7,7 +7,7 @@ PRAW 객체를 Pydantic 모델로 변환하기 위한 데이터 클래스들.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field
 

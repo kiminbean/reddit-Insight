@@ -3,7 +3,6 @@
 비즈니스 인사이트, 추천, 기회 랭킹을 시각화하는 라우터.
 """
 
-from typing import Any
 
 from fastapi import APIRouter, Depends, Path, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse

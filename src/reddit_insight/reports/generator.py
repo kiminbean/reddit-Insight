@@ -128,9 +128,9 @@ class ReportDataCollector:
     """
 
     trend_report: TrendReportData | None = None
-    demand_report: "DemandReport | None" = None
-    competitive_report: "CompetitiveReport | None" = None
-    insight_report: "InsightReport | None" = None
+    demand_report: DemandReport | None = None
+    competitive_report: CompetitiveReport | None = None
+    insight_report: InsightReport | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __repr__(self) -> str:
@@ -305,7 +305,7 @@ class ReportGenerator:
 
     def _prepare_demand_context(
         self,
-        report: "DemandReport",
+        report: DemandReport,
     ) -> dict[str, Any]:
         """
         수요 리포트 컨텍스트 준비.
@@ -365,7 +365,7 @@ class ReportGenerator:
 
     def _prepare_competitive_context(
         self,
-        report: "CompetitiveReport",
+        report: CompetitiveReport,
     ) -> dict[str, Any]:
         """
         경쟁 분석 리포트 컨텍스트 준비.
@@ -436,7 +436,7 @@ class ReportGenerator:
 
     def _prepare_insight_context(
         self,
-        report: "InsightReport",
+        report: InsightReport,
     ) -> dict[str, Any]:
         """
         인사이트 리포트 컨텍스트 준비.
@@ -696,7 +696,7 @@ class ReportGenerator:
 
     def generate_demand_report(
         self,
-        report: "DemandReport",
+        report: DemandReport,
         template_name: str | None = None,
     ) -> str:
         """
@@ -718,7 +718,7 @@ class ReportGenerator:
 
     def generate_competitive_report(
         self,
-        report: "CompetitiveReport",
+        report: CompetitiveReport,
         template_name: str | None = None,
     ) -> str:
         """
@@ -740,7 +740,7 @@ class ReportGenerator:
 
     def generate_insight_report(
         self,
-        report: "InsightReport",
+        report: InsightReport,
         template_name: str | None = None,
     ) -> str:
         """

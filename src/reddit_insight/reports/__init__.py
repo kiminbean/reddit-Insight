@@ -38,34 +38,34 @@ Example:
 from reddit_insight.reports.generator import (
     # Config
     ReportConfig,
-    # Data Classes
-    TrendReportData,
     ReportDataCollector,
     # Generator
     ReportGenerator,
+    # Data Classes
+    TrendReportData,
 )
 from reddit_insight.reports.templates import (
-    # Enums
-    ReportType,
-    # Data Classes
-    ReportTemplate,
-    # Registry
-    TemplateRegistry,
+    COMPETITIVE_REPORT_TEMPLATE,
     # Default Templates
     DEFAULT_TEMPLATES,
-    TREND_REPORT_TEMPLATE,
     DEMAND_REPORT_TEMPLATE,
-    COMPETITIVE_REPORT_TEMPLATE,
-    INSIGHT_REPORT_TEMPLATE,
     FULL_REPORT_TEMPLATE,
-    # Markdown Helpers
-    format_table,
-    format_list,
+    INSIGHT_REPORT_TEMPLATE,
+    TREND_REPORT_TEMPLATE,
+    # Data Classes
+    ReportTemplate,
+    # Enums
+    ReportType,
+    # Registry
+    TemplateRegistry,
     format_badge,
+    format_date,
+    format_list,
     # Data Formatters
     format_percentage,
     format_score,
-    format_date,
+    # Markdown Helpers
+    format_table,
     format_trend,
     # Text Charts
     text_bar,

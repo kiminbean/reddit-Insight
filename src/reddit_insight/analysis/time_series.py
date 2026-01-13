@@ -10,10 +10,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    pass
 
 
 class TimeGranularity(Enum):
@@ -146,7 +142,7 @@ class TimeSeries:
             "end_time": self.end_time.isoformat() if self.end_time else None,
         }
 
-    def to_dataframe(self) -> "pd.DataFrame":
+    def to_dataframe(self) -> pd.DataFrame:
         """
         Convert to pandas DataFrame.
 

@@ -11,16 +11,12 @@ import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING
 
 from reddit_insight.pipeline.collector import (
-    Collector,
     CollectionResult,
+    Collector,
     CollectorConfig,
 )
-
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 

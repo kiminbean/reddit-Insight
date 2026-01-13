@@ -6,9 +6,9 @@ SQLite와 PostgreSQL 모두 지원하도록 설계되었다.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, AsyncIterator
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -19,9 +19,6 @@ from sqlalchemy.ext.asyncio import (
 
 from reddit_insight.config import get_settings
 from reddit_insight.storage.models import Base
-
-if TYPE_CHECKING:
-    pass
 
 
 class Database:
@@ -205,7 +202,7 @@ class Database:
         finally:
             await session.close()
 
-    async def __aenter__(self) -> "Database":
+    async def __aenter__(self) -> Database:
         """비동기 컨텍스트 매니저 진입."""
         await self.connect()
         return self

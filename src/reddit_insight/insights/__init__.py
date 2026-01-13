@@ -44,8 +44,8 @@ from reddit_insight.insights.feasibility import (
     InsightReportGenerator,
 )
 from reddit_insight.insights.rules_engine import (
-    AnalysisContext,
     DEFAULT_RULES,
+    AnalysisContext,
     Insight,
     InsightEvidence,
     InsightRule,

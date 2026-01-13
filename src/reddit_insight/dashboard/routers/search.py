@@ -4,7 +4,6 @@
 키워드, 엔티티, 인사이트, 수요를 통합 검색한다.
 """
 
-from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse

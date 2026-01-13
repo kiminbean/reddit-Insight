@@ -153,7 +153,7 @@ class YAKEExtractor:
 
         return self.extract(combined_text)
 
-    def extract_from_posts(self, posts: list["Post"]) -> list[Keyword]:
+    def extract_from_posts(self, posts: list[Post]) -> list[Keyword]:
         """
         Extract keywords from Reddit Post objects.
 
@@ -238,13 +238,13 @@ class UnifiedKeywordExtractor:
 
     method: KeywordMethod = KeywordMethod.YAKE
     _yake: YAKEExtractor = field(init=False, repr=False)
-    _tfidf: "TFIDFAnalyzer | None" = field(init=False, repr=False, default=None)
+    _tfidf: TFIDFAnalyzer | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self) -> None:
         """Initialize extractors."""
         self._yake = YAKEExtractor()
 
-    def _get_tfidf(self) -> "TFIDFAnalyzer":
+    def _get_tfidf(self) -> TFIDFAnalyzer:
         """Lazy initialization of TF-IDF analyzer."""
         if self._tfidf is None:
             # Import here to avoid circular dependency
@@ -370,7 +370,7 @@ class UnifiedKeywordExtractor:
 
     def extract_from_posts(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         num_keywords: int = 20,
         method: KeywordMethod | None = None,
     ) -> KeywordResult:

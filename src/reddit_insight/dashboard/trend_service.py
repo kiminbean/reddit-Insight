@@ -3,10 +3,9 @@
 트렌드 분석 모듈과 대시보드 UI를 연결하여 키워드 트렌드 데이터를 제공한다.
 """
 
+import random
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Optional
-import random
 
 
 @dataclass
@@ -39,7 +38,7 @@ class RisingKeyword:
 
     keyword: str
     rising_score: float
-    first_seen: Optional[datetime]
+    first_seen: datetime | None
     growth_rate: float
 
 
@@ -198,7 +197,7 @@ class TrendService:
 
 
 # 싱글톤 인스턴스 (추후 의존성 주입으로 변경 가능)
-_trend_service: Optional[TrendService] = None
+_trend_service: TrendService | None = None
 
 
 def get_trend_service() -> TrendService:

@@ -16,16 +16,17 @@ Example:
 from __future__ import annotations
 
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from reddit_insight.analysis.competitive import (
         AlternativeComparison,
-        Complaint,
         CompetitiveReport,
+        Complaint,
     )
     from reddit_insight.analysis.demand_analyzer import (
         DemandReport,
@@ -218,11 +219,11 @@ class AnalysisContext:
         ... )
     """
 
-    demands: list["PrioritizedDemand"] = field(default_factory=list)
-    complaints: list["Complaint"] = field(default_factory=list)
-    entity_sentiments: dict[str, "EntitySentiment"] = field(default_factory=dict)
-    rising_keywords: list["RisingScore"] = field(default_factory=list)
-    alternatives: list["AlternativeComparison"] = field(default_factory=list)
+    demands: list[PrioritizedDemand] = field(default_factory=list)
+    complaints: list[Complaint] = field(default_factory=list)
+    entity_sentiments: dict[str, EntitySentiment] = field(default_factory=dict)
+    rising_keywords: list[RisingScore] = field(default_factory=list)
+    alternatives: list[AlternativeComparison] = field(default_factory=list)
 
     def __repr__(self) -> str:
         """String representation for debugging."""
@@ -250,11 +251,11 @@ class AnalysisContext:
 
     def get_high_priority_demands(
         self, min_score: float = 50.0
-    ) -> list["PrioritizedDemand"]:
+    ) -> list[PrioritizedDemand]:
         """Get demands with priority score above threshold."""
         return [d for d in self.demands if d.priority.total_score >= min_score]
 
-    def get_severe_complaints(self, min_severity: float = 0.7) -> list["Complaint"]:
+    def get_severe_complaints(self, min_severity: float = 0.7) -> list[Complaint]:
         """Get complaints with severity above threshold."""
         return [c for c in self.complaints if c.severity >= min_severity]
 
@@ -276,7 +277,7 @@ class AnalysisContext:
                 negative.append(name)
         return negative
 
-    def get_top_rising_keywords(self, top_n: int = 5) -> list["RisingScore"]:
+    def get_top_rising_keywords(self, top_n: int = 5) -> list[RisingScore]:
         """Get top rising keywords by score."""
         sorted_rising = sorted(
             self.rising_keywords, key=lambda r: r.score, reverse=True
@@ -936,9 +937,9 @@ class RulesEngine:
 
     def build_context(
         self,
-        demand_report: "DemandReport | None" = None,
-        competitive_report: "CompetitiveReport | None" = None,
-        trend_report: "TrendReport | None" = None,
+        demand_report: DemandReport | None = None,
+        competitive_report: CompetitiveReport | None = None,
+        trend_report: TrendReport | None = None,
     ) -> AnalysisContext:
         """
         분석 결과로부터 컨텍스트 구축.

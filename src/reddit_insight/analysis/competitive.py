@@ -27,16 +27,15 @@ if TYPE_CHECKING:
 
 from reddit_insight.analysis.entity_recognition import (
     EntityRecognizer,
-    ProductEntity,
     EntityType,
+    ProductEntity,
 )
 from reddit_insight.analysis.sentiment import (
-    RuleBasedSentimentAnalyzer,
     EntitySentimentAnalyzer,
-    SentimentScore,
+    RuleBasedSentimentAnalyzer,
     Sentiment,
+    SentimentScore,
 )
-
 
 # ============================================================================
 # Complaint Types and Data Structures
@@ -837,7 +836,7 @@ class CompetitiveAnalyzer:
         if self._alternative_extractor is None:
             self._alternative_extractor = AlternativeExtractor()
 
-    def _combine_post_text(self, post: "Post") -> str:
+    def _combine_post_text(self, post: Post) -> str:
         """Combine post title and selftext."""
         parts = [post.title]
         if post.selftext:
@@ -905,7 +904,7 @@ class CompetitiveAnalyzer:
 
         return recommendations
 
-    def analyze_posts(self, posts: list["Post"]) -> CompetitiveReport:
+    def analyze_posts(self, posts: list[Post]) -> CompetitiveReport:
         """
         Analyze posts for competitive insights.
 
@@ -1033,7 +1032,7 @@ class CompetitiveAnalyzer:
         )
 
     def get_entity_insight(
-        self, entity_name: str, posts: list["Post"]
+        self, entity_name: str, posts: list[Post]
     ) -> CompetitiveInsight | None:
         """
         Get insight for a specific entity.

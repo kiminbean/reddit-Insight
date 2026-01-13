@@ -358,7 +358,7 @@ class EntityRecognizer:
 
         # Prefix similarity (important for product names)
         common_prefix = 0
-        for c1, c2 in zip(name1, name2):
+        for c1, c2 in zip(name1, name2, strict=False):
             if c1 == c2:
                 common_prefix += 1
             else:
@@ -455,7 +455,7 @@ class EntityRecognizer:
 
         return entities
 
-    def recognize_in_post(self, post: "Post") -> list[ProductEntity]:
+    def recognize_in_post(self, post: Post) -> list[ProductEntity]:
         """
         Recognize entities in a Reddit Post.
 
@@ -475,7 +475,7 @@ class EntityRecognizer:
         combined_text = " ".join(text_parts)
         return self.recognize(combined_text)
 
-    def recognize_in_posts(self, posts: list["Post"]) -> dict[str, ProductEntity]:
+    def recognize_in_posts(self, posts: list[Post]) -> dict[str, ProductEntity]:
         """
         Recognize and aggregate entities across multiple posts.
 

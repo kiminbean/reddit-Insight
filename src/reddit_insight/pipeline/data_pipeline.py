@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from reddit_insight.data_source import DataSourceStrategy, UnifiedDataSource
 from reddit_insight.pipeline.preprocessor import TextPreprocessor
-from reddit_insight.storage.models import CommentModel, PostModel, SubredditModel
+from reddit_insight.storage.models import SubredditModel
 from reddit_insight.storage.repository import (
     CommentRepository,
     PostRepository,
@@ -46,7 +46,7 @@ class ProcessingResult:
     filtered: int = 0
     errors: int = 0
 
-    def __add__(self, other: "ProcessingResult") -> "ProcessingResult":
+    def __add__(self, other: ProcessingResult) -> ProcessingResult:
         """두 ProcessingResult를 합산."""
         return ProcessingResult(
             total=self.total + other.total,
@@ -111,7 +111,7 @@ class DataPipeline:
         ...     print(f"새 게시물: {result.posts.new}")
     """
 
-    def __init__(self, database: "Database") -> None:
+    def __init__(self, database: Database) -> None:
         """DataPipeline 초기화.
 
         Args:
@@ -127,7 +127,7 @@ class DataPipeline:
 
     async def process_posts(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         subreddit_name: str,
     ) -> ProcessingResult:
         """게시물 처리 및 저장.
@@ -221,7 +221,7 @@ class DataPipeline:
 
     async def process_comments(
         self,
-        comments: list["Comment"],
+        comments: list[Comment],
         post_reddit_id: str,
     ) -> ProcessingResult:
         """댓글 처리 및 저장.
@@ -307,7 +307,7 @@ class DataPipeline:
 
     async def ensure_subreddit(
         self,
-        info: "SubredditInfo",
+        info: SubredditInfo,
     ) -> SubredditModel:
         """서브레딧 정보 저장 또는 업데이트.
 

@@ -83,9 +83,7 @@ class StopwordManager:
         # Common Reddit expressions
         "lol", "lmao", "rofl", "haha", "hahaha",
         "btw", "imo", "imho", "fwiw", "afaik", "iirc",
-        "tbh", "ngl", "smh", "ymmv", "iirc",
-
-        # Formatting artifacts
+        "tbh", "ngl", "smh", "ymmv", # Formatting artifacts
         "nbsp", "amp", "gt", "lt",
     })
 

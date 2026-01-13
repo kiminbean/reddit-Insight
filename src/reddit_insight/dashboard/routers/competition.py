@@ -5,7 +5,7 @@
 
 from dataclasses import dataclass
 from hashlib import md5
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -16,7 +16,6 @@ from reddit_insight.analysis.competitive import (
     CompetitiveInsight,
     CompetitiveReport,
     Complaint,
-    ComplaintType,
 )
 from reddit_insight.analysis.sentiment import Sentiment
 

@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 from reddit_insight.reddit.models import Comment, Post
 
 if TYPE_CHECKING:
-    from praw.models import MoreComments
     from praw.models.comment_forest import CommentForest
 
     from reddit_insight.reddit.client import RedditClient

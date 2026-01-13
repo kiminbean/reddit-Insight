@@ -19,7 +19,7 @@ from enum import Enum
 from typing import Any
 
 try:
-    from jinja2 import Environment, BaseLoader
+    from jinja2 import BaseLoader, Environment
     JINJA2_AVAILABLE = True
 except ImportError:
     JINJA2_AVAILABLE = False

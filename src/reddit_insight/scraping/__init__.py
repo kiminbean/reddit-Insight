@@ -13,9 +13,9 @@ from reddit_insight.scraping.rate_limiter import RateLimiter
 from reddit_insight.scraping.reddit_scraper import RedditScraper
 
 __all__ = [
+    "RateLimiter",
+    "RedditJSONParser",
+    "RedditScraper",
     "ScrapingClient",
     "ScrapingError",
-    "RateLimiter",
-    "RedditScraper",
-    "RedditJSONParser",
 ]

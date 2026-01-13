@@ -214,7 +214,7 @@ class RisingKeywordDetector:
         ...     print(f"{score.keyword}: {score.score:.1f}")
     """
 
-    keyword_extractor: "UnifiedKeywordExtractor | None" = None
+    keyword_extractor: UnifiedKeywordExtractor | None = None
     config: RisingConfig = field(default_factory=RisingConfig)
     _calculator: RisingScoreCalculator = field(init=False, repr=False)
 
@@ -222,7 +222,7 @@ class RisingKeywordDetector:
         """Initialize calculator with config."""
         self._calculator = RisingScoreCalculator(config=self.config)
 
-    def _get_extractor(self) -> "UnifiedKeywordExtractor":
+    def _get_extractor(self) -> UnifiedKeywordExtractor:
         """Lazy initialization of keyword extractor."""
         if self.keyword_extractor is None:
             from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
@@ -232,10 +232,10 @@ class RisingKeywordDetector:
 
     def _filter_by_time(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         start: datetime,
         end: datetime,
-    ) -> list["Post"]:
+    ) -> list[Post]:
         """
         Filter posts by time range.
 
@@ -255,7 +255,7 @@ class RisingKeywordDetector:
 
     def _count_keywords_in_period(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         start: datetime,
         end: datetime,
     ) -> dict[str, int]:
@@ -324,7 +324,7 @@ class RisingKeywordDetector:
 
     def detect_rising(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         top_n: int = 20,
         reference_time: datetime | None = None,
     ) -> list[RisingScore]:
@@ -392,7 +392,7 @@ class RisingKeywordDetector:
 
     def detect_from_database(
         self,
-        database: "Database",
+        database: Database,
         subreddit: str | None = None,
         top_n: int = 20,
     ) -> list[RisingScore]:
@@ -448,7 +448,7 @@ class TrendReport:
     period_end: datetime
     subreddit: str | None
     rising_keywords: list[RisingScore]
-    top_keywords: list["Keyword"]
+    top_keywords: list[Keyword]
     total_posts_analyzed: int
 
     def to_dict(self) -> dict:
@@ -486,7 +486,7 @@ class TrendReporter:
     """
 
     rising_detector: RisingKeywordDetector | None = None
-    keyword_extractor: "UnifiedKeywordExtractor | None" = None
+    keyword_extractor: UnifiedKeywordExtractor | None = None
 
     def _get_detector(self) -> RisingKeywordDetector:
         """Lazy initialization of rising detector."""
@@ -494,7 +494,7 @@ class TrendReporter:
             self.rising_detector = RisingKeywordDetector()
         return self.rising_detector
 
-    def _get_extractor(self) -> "UnifiedKeywordExtractor":
+    def _get_extractor(self) -> UnifiedKeywordExtractor:
         """Lazy initialization of keyword extractor."""
         if self.keyword_extractor is None:
             from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
@@ -504,7 +504,7 @@ class TrendReporter:
 
     def generate_report(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         subreddit: str | None = None,
         num_rising: int = 10,
         num_top: int = 20,

@@ -5,7 +5,7 @@
 
 from dataclasses import dataclass
 from hashlib import md5
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -357,7 +357,7 @@ async def demands_index(
 @router.get("/list", response_class=HTMLResponse)
 async def demands_list(
     request: Request,
-    category: Optional[str] = Query(None, description="카테고리 필터"),
+    category: str | None = Query(None, description="카테고리 필터"),
     min_priority: float = Query(0.0, ge=0.0, le=100.0, description="최소 우선순위"),
     limit: int = Query(20, ge=1, le=100, description="최대 반환 수"),
     service: DemandService = Depends(get_demand_service),

@@ -13,11 +13,11 @@ from reddit_insight.storage.repository import (
 )
 
 __all__ = [
+    "CommentModel",
+    "CommentRepository",
     "Database",
     "PostModel",
-    "CommentModel",
-    "SubredditModel",
     "PostRepository",
-    "CommentRepository",
+    "SubredditModel",
     "SubredditRepository",
 ]

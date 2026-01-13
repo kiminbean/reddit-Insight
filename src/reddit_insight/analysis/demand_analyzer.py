@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING
 
 from reddit_insight.analysis.demand_detector import (
     DemandDetector,
-    DemandDetectorConfig,
 )
 from reddit_insight.analysis.demand_patterns import (
     DemandCategory,

@@ -7,9 +7,9 @@ SQLAlchemy 2.0 스타일의 DeclarativeBase를 사용한다.
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -63,7 +63,7 @@ class SubredditModel(Base, TimestampMixin):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
-    posts: Mapped[list["PostModel"]] = relationship(
+    posts: Mapped[list[PostModel]] = relationship(
         "PostModel", back_populates="subreddit", cascade="all, delete-orphan"
     )
 
@@ -139,8 +139,8 @@ class PostModel(Base, TimestampMixin):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
-    subreddit: Mapped["SubredditModel"] = relationship("SubredditModel", back_populates="posts")
-    comments: Mapped[list["CommentModel"]] = relationship(
+    subreddit: Mapped[SubredditModel] = relationship("SubredditModel", back_populates="posts")
+    comments: Mapped[list[CommentModel]] = relationship(
         "CommentModel", back_populates="post", cascade="all, delete-orphan"
     )
 
@@ -221,7 +221,7 @@ class CommentModel(Base, TimestampMixin):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     # Relationships
-    post: Mapped["PostModel"] = relationship("PostModel", back_populates="comments")
+    post: Mapped[PostModel] = relationship("PostModel", back_populates="comments")
 
     def __repr__(self) -> str:
         body_preview = self.body[:30] if self.body else ""

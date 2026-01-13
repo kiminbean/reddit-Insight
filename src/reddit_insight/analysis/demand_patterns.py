@@ -628,7 +628,7 @@ class DemandPatternLibrary:
         self._compile_patterns()
 
     @classmethod
-    def create_english_library(cls) -> "DemandPatternLibrary":
+    def create_english_library(cls) -> DemandPatternLibrary:
         """
         Create a library with English patterns.
 
@@ -640,7 +640,7 @@ class DemandPatternLibrary:
         return library
 
     @classmethod
-    def create_korean_library(cls) -> "DemandPatternLibrary":
+    def create_korean_library(cls) -> DemandPatternLibrary:
         """
         Create a library with Korean patterns.
 
@@ -652,7 +652,7 @@ class DemandPatternLibrary:
         return library
 
     @classmethod
-    def create_multilingual_library(cls) -> "DemandPatternLibrary":
+    def create_multilingual_library(cls) -> DemandPatternLibrary:
         """
         Create a library with patterns from all supported languages.
 

@@ -3,7 +3,6 @@
 키워드 트렌드와 Rising 키워드를 시각화하는 라우터.
 """
 
-from typing import Any
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse

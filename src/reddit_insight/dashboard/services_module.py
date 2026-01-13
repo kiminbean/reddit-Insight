@@ -3,9 +3,8 @@
 분석 모듈과 대시보드 UI를 연결하여 요약 데이터와 분석 기록을 제공한다.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass
@@ -96,7 +95,7 @@ class DashboardService:
         """
         self._analyses.append(record)
 
-    def get_analysis_by_id(self, analysis_id: str) -> Optional[AnalysisRecord]:
+    def get_analysis_by_id(self, analysis_id: str) -> AnalysisRecord | None:
         """ID로 분석 기록을 조회한다.
 
         Args:
@@ -112,7 +111,7 @@ class DashboardService:
 
 
 # 싱글톤 인스턴스 (추후 의존성 주입으로 변경 가능)
-_dashboard_service: Optional[DashboardService] = None
+_dashboard_service: DashboardService | None = None
 
 
 def get_dashboard_service() -> DashboardService:

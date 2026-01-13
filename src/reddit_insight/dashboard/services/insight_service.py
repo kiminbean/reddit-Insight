@@ -9,7 +9,6 @@ from datetime import UTC, datetime
 from functools import lru_cache
 from typing import Any
 
-
 # =============================================================================
 # VIEW DATA STRUCTURES
 # =============================================================================
@@ -301,10 +300,10 @@ class InsightService:
                     evidence_count=insight.evidence_count,
                     description=f"Detailed analysis of {insight.title}. This insight was identified through pattern recognition in user discussions and sentiment analysis.",
                     evidence=[
-                        f"High frequency mentions in discussion threads",
-                        f"Sentiment score indicates strong user preference",
+                        "High frequency mentions in discussion threads",
+                        "Sentiment score indicates strong user preference",
                         f"Trend analysis shows {insight.confidence_percent}% growth",
-                        f"Competitive analysis reveals market gap",
+                        "Competitive analysis reveals market gap",
                     ],
                     related_entities=["Company A", "Product B", "Service C"],
                     related_demands=["Feature X", "Integration Y", "Support Z"],

@@ -154,12 +154,9 @@ POSITIVE_WORDS: set[str] = {
     # Actions
     "like",
     "liked",
-    "love",
     "loved",
     "prefer",
     "preferred",
-    "enjoy",
-    "enjoyed",
     "appreciate",
     "appreciated",
     # Comparative
@@ -698,7 +695,7 @@ class RuleBasedSentimentAnalyzer:
 
         # Calculate compound score
         # Ranges from -1 (most negative) to 1 (most positive)
-        compound = (pos_sum - neg_sum) / ((pos_sum + neg_sum + alpha))
+        compound = (pos_sum - neg_sum) / (pos_sum + neg_sum + alpha)
 
         # Calculate neutral score (proportion of non-sentiment words)
         total_words = len(word_scores)
@@ -817,7 +814,7 @@ class EntitySentiment:
         mention_count: Number of times this entity was mentioned
     """
 
-    entity: "ProductEntity"
+    entity: ProductEntity
     sentiment: SentimentScore
     context: str
     mention_count: int = 1
@@ -846,7 +843,7 @@ class EntitySentimentAnalyzer:
         ...     print(f"{r.entity.name}: {r.sentiment.sentiment.value}")
     """
 
-    _entity_recognizer: "EntityRecognizer | None" = field(default=None, repr=False)
+    _entity_recognizer: EntityRecognizer | None = field(default=None, repr=False)
     _sentiment_analyzer: RuleBasedSentimentAnalyzer = field(
         default_factory=RuleBasedSentimentAnalyzer, repr=False
     )
@@ -963,7 +960,7 @@ class EntitySentimentAnalyzer:
 
         return results
 
-    def analyze_post(self, post: "Post") -> list[EntitySentiment]:
+    def analyze_post(self, post: Post) -> list[EntitySentiment]:
         """
         Analyze a Reddit Post for entity sentiment.
 
@@ -1058,7 +1055,7 @@ class EntitySentimentAnalyzer:
 
         return result
 
-    def analyze_posts(self, posts: list["Post"]) -> dict[str, EntitySentiment]:
+    def analyze_posts(self, posts: list[Post]) -> dict[str, EntitySentiment]:
         """
         Analyze multiple posts and aggregate entity sentiments.
 

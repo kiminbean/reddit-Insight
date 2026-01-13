@@ -20,7 +20,6 @@ from reddit_insight.analysis.time_series import (
 )
 
 if TYPE_CHECKING:
-    from collections import defaultdict
 
     from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
     from reddit_insight.reddit.models import Post
@@ -416,7 +415,7 @@ class KeywordTrendAnalyzer:
         TrendDirection.RISING
     """
 
-    keyword_extractor: "UnifiedKeywordExtractor | None" = None
+    keyword_extractor: UnifiedKeywordExtractor | None = None
     trend_calculator: TrendCalculator | None = None
 
     def __post_init__(self) -> None:
@@ -424,7 +423,7 @@ class KeywordTrendAnalyzer:
         if self.trend_calculator is None:
             self.trend_calculator = TrendCalculator()
 
-    def _get_extractor(self) -> "UnifiedKeywordExtractor":
+    def _get_extractor(self) -> UnifiedKeywordExtractor:
         """Lazy initialization of keyword extractor."""
         if self.keyword_extractor is None:
             from reddit_insight.analysis.keywords import UnifiedKeywordExtractor
@@ -466,7 +465,7 @@ class KeywordTrendAnalyzer:
 
     def build_keyword_timeseries(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         keyword: str,
         granularity: TimeGranularity = TimeGranularity.DAY,
     ) -> TimeSeries:
@@ -530,7 +529,7 @@ class KeywordTrendAnalyzer:
 
     def build_multiple_timeseries(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         keywords: list[str],
         granularity: TimeGranularity = TimeGranularity.DAY,
     ) -> dict[str, TimeSeries]:
@@ -554,7 +553,7 @@ class KeywordTrendAnalyzer:
 
     def analyze_keyword_trend(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         keyword: str,
         granularity: TimeGranularity = TimeGranularity.DAY,
     ) -> KeywordTrendResult:
@@ -586,7 +585,7 @@ class KeywordTrendAnalyzer:
 
     def analyze_multiple_keywords(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         keywords: list[str],
         granularity: TimeGranularity = TimeGranularity.DAY,
     ) -> list[KeywordTrendResult]:
@@ -609,7 +608,7 @@ class KeywordTrendAnalyzer:
 
     def find_trending_keywords(
         self,
-        posts: list["Post"],
+        posts: list[Post],
         num_keywords: int = 10,
         granularity: TimeGranularity = TimeGranularity.DAY,
     ) -> list[KeywordTrendResult]:

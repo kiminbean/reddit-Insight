@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from reddit_insight.reddit.client import RedditClient
@@ -184,7 +185,7 @@ class UnifiedDataSource:
         """현재 데이터 소스 상태 반환."""
         return self._status
 
-    def _get_api_client(self) -> "RedditClient":
+    def _get_api_client(self) -> RedditClient:
         """API 클라이언트 반환 (lazy initialization).
 
         Returns:
@@ -208,7 +209,7 @@ class UnifiedDataSource:
 
         return self._api_client
 
-    def _get_scraper(self) -> "RedditScraper":
+    def _get_scraper(self) -> RedditScraper:
         """스크래퍼 반환 (lazy initialization).
 
         Returns:
@@ -391,7 +392,7 @@ class UnifiedDataSource:
 
         logger.info("UnifiedDataSource 리소스 정리 완료")
 
-    async def __aenter__(self) -> "UnifiedDataSource":
+    async def __aenter__(self) -> UnifiedDataSource:
         """비동기 컨텍스트 매니저 진입."""
         return self
 
@@ -508,7 +509,7 @@ class UnifiedDataSource:
 
     async def get_hot_posts(
         self, subreddit: str, limit: int = 100
-    ) -> list["Post"]:
+    ) -> list[Post]:
         """Hot 게시물 수집.
 
         Args:
@@ -521,7 +522,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import Post
 
         def api_call() -> list[Post]:
             client = self._get_api_client()
@@ -537,7 +537,7 @@ class UnifiedDataSource:
 
     async def get_new_posts(
         self, subreddit: str, limit: int = 100
-    ) -> list["Post"]:
+    ) -> list[Post]:
         """New 게시물 수집.
 
         Args:
@@ -550,7 +550,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import Post
 
         def api_call() -> list[Post]:
             client = self._get_api_client()
@@ -569,7 +568,7 @@ class UnifiedDataSource:
         subreddit: str,
         time_filter: str = "week",
         limit: int = 100,
-    ) -> list["Post"]:
+    ) -> list[Post]:
         """Top 게시물 수집.
 
         Args:
@@ -583,7 +582,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import Post
 
         def api_call() -> list[Post]:
             client = self._get_api_client()
@@ -601,7 +599,7 @@ class UnifiedDataSource:
 
     async def get_post_comments(
         self, post_id: str, limit: int | None = None
-    ) -> list["Comment"]:
+    ) -> list[Comment]:
         """게시물의 댓글 수집.
 
         Args:
@@ -614,7 +612,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import Comment
 
         def api_call() -> list[Comment]:
             client = self._get_api_client()
@@ -632,7 +629,7 @@ class UnifiedDataSource:
 
     # ========== 서브레딧 정보 수집 메서드 ==========
 
-    async def get_subreddit_info(self, name: str) -> "SubredditInfo | None":
+    async def get_subreddit_info(self, name: str) -> SubredditInfo | None:
         """서브레딧 정보 조회.
 
         Args:
@@ -644,7 +641,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import SubredditInfo
 
         def api_call() -> SubredditInfo | None:
             client = self._get_api_client()
@@ -660,7 +656,7 @@ class UnifiedDataSource:
 
     async def search_subreddits(
         self, query: str, limit: int = 25
-    ) -> list["SubredditInfo"]:
+    ) -> list[SubredditInfo]:
         """서브레딧 검색.
 
         Args:
@@ -673,7 +669,6 @@ class UnifiedDataSource:
         Raises:
             DataSourceError: 모든 소스가 실패한 경우
         """
-        from reddit_insight.reddit.models import SubredditInfo
 
         def api_call() -> list[SubredditInfo]:
             client = self._get_api_client()

@@ -13,7 +13,7 @@ Example:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Protocol
 
@@ -249,8 +249,8 @@ class DimensionCalculator(Protocol):
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -277,8 +277,8 @@ class MarketSizeCalculator:
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -344,8 +344,8 @@ class CompetitionCalculator:
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -416,8 +416,8 @@ class UrgencyCalculator:
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -492,8 +492,8 @@ class TrendCalculator:
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -570,8 +570,8 @@ class FeasibilityCalculator:
 
     def calculate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
         weight: float,
     ) -> DimensionScore:
         """
@@ -668,7 +668,7 @@ class ScoredOpportunity:
         ... )
     """
 
-    insight: "Insight"
+    insight: Insight
     score: BusinessScore
     rank: int = 0
 
@@ -742,8 +742,8 @@ class OpportunityScorer:
 
     def score_insight(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> BusinessScore:
         """
         단일 인사이트 스코어링.
@@ -783,9 +783,9 @@ class OpportunityScorer:
 
     def score_insights(
         self,
-        insights: list["Insight"],
-        context: "AnalysisContext",
-    ) -> list[tuple["Insight", BusinessScore]]:
+        insights: list[Insight],
+        context: AnalysisContext,
+    ) -> list[tuple[Insight, BusinessScore]]:
         """
         여러 인사이트 스코어링 및 정렬.
 
@@ -798,7 +798,7 @@ class OpportunityScorer:
         Returns:
             (인사이트, 점수) 튜플 목록 (점수 내림차순)
         """
-        scored: list[tuple["Insight", BusinessScore]] = []
+        scored: list[tuple[Insight, BusinessScore]] = []
 
         for insight in insights:
             score = self.score_insight(insight, context)
@@ -811,8 +811,8 @@ class OpportunityScorer:
 
     def rank_opportunities(
         self,
-        insights: list["Insight"],
-        context: "AnalysisContext",
+        insights: list[Insight],
+        context: AnalysisContext,
     ) -> list[ScoredOpportunity]:
         """
         인사이트를 랭킹된 기회 목록으로 변환.
@@ -860,7 +860,7 @@ class OpportunityScorer:
 
     def _generate_recommendation(
         self,
-        insight: "Insight",
+        insight: Insight,
         dimensions: list[DimensionScore],
         total_score: float,
         grade: str,

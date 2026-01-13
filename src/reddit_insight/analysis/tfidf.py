@@ -10,7 +10,6 @@ from __future__ import annotations
 import pickle
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.sparse import spmatrix
@@ -18,9 +17,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 from reddit_insight.analysis.keywords import Keyword
 from reddit_insight.analysis.tokenizer import RedditTokenizer
-
-if TYPE_CHECKING:
-    pass
 
 
 @dataclass
@@ -95,7 +91,7 @@ class TFIDFAnalyzer:
         """
         return self._tokenizer.tokenize(text)
 
-    def fit(self, texts: list[str]) -> "TFIDFAnalyzer":
+    def fit(self, texts: list[str]) -> TFIDFAnalyzer:
         """
         Fit the TF-IDF vectorizer on a corpus.
 
@@ -300,7 +296,7 @@ class TFIDFAnalyzer:
                 f,
             )
 
-    def load(self, path: str) -> "TFIDFAnalyzer":
+    def load(self, path: str) -> TFIDFAnalyzer:
         """
         Load a fitted vectorizer from a file.
 

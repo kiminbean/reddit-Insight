@@ -252,8 +252,8 @@ class FactorEvaluator(Protocol):
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         요소 평가 수행.
@@ -298,8 +298,8 @@ class TechnicalComplexityEvaluator:
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         기술적 복잡도 평가.
@@ -409,8 +409,8 @@ class ResourceRequirementEvaluator:
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         리소스 요구량 평가.
@@ -516,8 +516,8 @@ class MarketBarrierEvaluator:
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         시장 진입 장벽 평가.
@@ -627,8 +627,8 @@ class TimeToValueEvaluator:
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         가치 실현 시간 평가.
@@ -742,8 +742,8 @@ class CompetitionRiskEvaluator:
 
     def evaluate(
         self,
-        insight: "Insight",
-        context: "AnalysisContext",
+        insight: Insight,
+        context: AnalysisContext,
     ) -> FactorAssessment:
         """
         경쟁 리스크 평가.
@@ -868,8 +868,8 @@ class ActionableRecommendation:
         ... )
     """
 
-    insight: "Insight"
-    business_score: "BusinessScore"
+    insight: Insight
+    business_score: BusinessScore
     feasibility_score: FeasibilityScore
     final_rank: int
     action_items: list[str] = field(default_factory=list)
@@ -960,9 +960,9 @@ class FeasibilityAnalyzer:
 
     def analyze(
         self,
-        insight: "Insight",
-        business_score: "BusinessScore",
-        context: "AnalysisContext",
+        insight: Insight,
+        business_score: BusinessScore,
+        context: AnalysisContext,
     ) -> FeasibilityScore:
         """
         단일 기회의 실행 가능성 분석.
@@ -1007,9 +1007,9 @@ class FeasibilityAnalyzer:
 
     def analyze_opportunities(
         self,
-        scored_opportunities: list["ScoredOpportunity"],
-        context: "AnalysisContext",
-    ) -> list[tuple["ScoredOpportunity", FeasibilityScore]]:
+        scored_opportunities: list[ScoredOpportunity],
+        context: AnalysisContext,
+    ) -> list[tuple[ScoredOpportunity, FeasibilityScore]]:
         """
         여러 기회의 실행 가능성 분석 및 정렬.
 
@@ -1020,7 +1020,7 @@ class FeasibilityAnalyzer:
         Returns:
             (기회, 실행 가능성 점수) 튜플 목록 (combined score 내림차순)
         """
-        results: list[tuple["ScoredOpportunity", FeasibilityScore]] = []
+        results: list[tuple[ScoredOpportunity, FeasibilityScore]] = []
 
         for opportunity in scored_opportunities:
             feasibility = self.analyze(
@@ -1040,8 +1040,8 @@ class FeasibilityAnalyzer:
 
     def generate_recommendations(
         self,
-        opportunities: list["ScoredOpportunity"],
-        context: "AnalysisContext",
+        opportunities: list[ScoredOpportunity],
+        context: AnalysisContext,
         top_n: int = 5,
     ) -> list[ActionableRecommendation]:
         """
@@ -1104,7 +1104,7 @@ class FeasibilityAnalyzer:
 
     def _generate_recommendation(
         self,
-        insight: "Insight",
+        insight: Insight,
         factors: list[FactorAssessment],
         total_score: float,
         risk_level: str,
@@ -1150,7 +1150,7 @@ class FeasibilityAnalyzer:
 
     def _generate_action_items(
         self,
-        insight: "Insight",
+        insight: Insight,
         feasibility: FeasibilityScore,
     ) -> list[str]:
         """
@@ -1210,7 +1210,7 @@ class FeasibilityAnalyzer:
 
     def _generate_next_steps(
         self,
-        insight: "Insight",
+        insight: Insight,
         feasibility: FeasibilityScore,
     ) -> list[str]:
         """
@@ -1432,8 +1432,8 @@ class InsightReportGenerator:
 
     def generate(
         self,
-        insights: list["Insight"],
-        opportunities: list["ScoredOpportunity"],
+        insights: list[Insight],
+        opportunities: list[ScoredOpportunity],
         recommendations: list[ActionableRecommendation],
     ) -> InsightReport:
         """
@@ -1468,8 +1468,8 @@ class InsightReportGenerator:
 
     def _generate_summary(
         self,
-        insights: list["Insight"],
-        opportunities: list["ScoredOpportunity"],
+        insights: list[Insight],
+        opportunities: list[ScoredOpportunity],
         recommendations: list[ActionableRecommendation],
     ) -> str:
         """Generate analysis summary."""
@@ -1504,8 +1504,8 @@ class InsightReportGenerator:
 
     def _generate_market_overview(
         self,
-        insights: list["Insight"],
-        opportunities: list["ScoredOpportunity"],
+        insights: list[Insight],
+        opportunities: list[ScoredOpportunity],
     ) -> str:
         """Generate market overview."""
         from reddit_insight.insights.rules_engine import InsightType
@@ -1540,8 +1540,8 @@ class InsightReportGenerator:
 
     def _generate_key_findings(
         self,
-        insights: list["Insight"],
-        opportunities: list["ScoredOpportunity"],
+        insights: list[Insight],
+        opportunities: list[ScoredOpportunity],
         recommendations: list[ActionableRecommendation],
     ) -> list[str]:
         """Generate key findings."""

@@ -16,6 +16,54 @@ Example:
     >>> print(result.keywords[0].keyword)
 """
 
+from reddit_insight.analysis.competitive import (
+    ALTERNATIVE_PATTERNS,
+    COMPLAINT_PATTERNS,
+    AlternativeComparison,
+    AlternativeExtractor,
+    ComparisonType,
+    CompetitiveAnalyzer,
+    CompetitiveInsight,
+    CompetitiveReport,
+    Complaint,
+    ComplaintExtractor,
+    ComplaintType,
+    to_dict,
+    to_markdown,
+)
+from reddit_insight.analysis.demand_analyzer import (
+    DemandAnalyzer,
+    DemandCluster,
+    DemandClusterer,
+    DemandReport,
+    PrioritizedDemand,
+    PriorityCalculator,
+    PriorityConfig,
+    PriorityScore,
+)
+from reddit_insight.analysis.demand_detector import (
+    DemandDetector,
+    DemandDetectorConfig,
+    DemandSummary,
+)
+from reddit_insight.analysis.demand_patterns import (
+    ENGLISH_PATTERNS,
+    KOREAN_PATTERNS,
+    DemandCategory,
+    DemandMatch,
+    DemandPattern,
+    DemandPatternLibrary,
+)
+from reddit_insight.analysis.entity_recognition import (
+    ENTITY_PATTERNS,
+    EntityMention,
+    EntityPattern,
+    EntityRecognizer,
+    EntityRecognizerConfig,
+    EntityType,
+    PatternEntityExtractor,
+    ProductEntity,
+)
 from reddit_insight.analysis.keywords import (
     Keyword,
     KeywordExtractorConfig,
@@ -23,6 +71,29 @@ from reddit_insight.analysis.keywords import (
     KeywordResult,
     UnifiedKeywordExtractor,
     YAKEExtractor,
+)
+from reddit_insight.analysis.rising import (
+    RisingConfig,
+    RisingKeywordDetector,
+    RisingScore,
+    RisingScoreCalculator,
+    TrendReport,
+    TrendReporter,
+)
+from reddit_insight.analysis.sentiment import (
+    DIMINISHERS,
+    INTENSIFIERS,
+    NEGATIVE_EMOTICONS,
+    NEGATIVE_WORDS,
+    NEGATORS,
+    POSITIVE_EMOTICONS,
+    POSITIVE_WORDS,
+    EntitySentiment,
+    EntitySentimentAnalyzer,
+    RuleBasedSentimentAnalyzer,
+    Sentiment,
+    SentimentAnalyzerConfig,
+    SentimentScore,
 )
 from reddit_insight.analysis.stopwords import (
     StopwordManager,
@@ -44,77 +115,6 @@ from reddit_insight.analysis.trends import (
     TrendCalculator,
     TrendDirection,
     TrendMetrics,
-)
-from reddit_insight.analysis.rising import (
-    RisingConfig,
-    RisingKeywordDetector,
-    RisingScore,
-    RisingScoreCalculator,
-    TrendReport,
-    TrendReporter,
-)
-from reddit_insight.analysis.demand_patterns import (
-    DemandCategory,
-    DemandMatch,
-    DemandPattern,
-    DemandPatternLibrary,
-    ENGLISH_PATTERNS,
-    KOREAN_PATTERNS,
-)
-from reddit_insight.analysis.demand_detector import (
-    DemandDetector,
-    DemandDetectorConfig,
-    DemandSummary,
-)
-from reddit_insight.analysis.demand_analyzer import (
-    DemandAnalyzer,
-    DemandCluster,
-    DemandClusterer,
-    DemandReport,
-    PrioritizedDemand,
-    PriorityCalculator,
-    PriorityConfig,
-    PriorityScore,
-)
-from reddit_insight.analysis.entity_recognition import (
-    EntityMention,
-    EntityPattern,
-    EntityRecognizer,
-    EntityRecognizerConfig,
-    EntityType,
-    PatternEntityExtractor,
-    ProductEntity,
-    ENTITY_PATTERNS,
-)
-from reddit_insight.analysis.sentiment import (
-    DIMINISHERS,
-    INTENSIFIERS,
-    NEGATORS,
-    NEGATIVE_EMOTICONS,
-    NEGATIVE_WORDS,
-    POSITIVE_EMOTICONS,
-    POSITIVE_WORDS,
-    EntitySentiment,
-    EntitySentimentAnalyzer,
-    RuleBasedSentimentAnalyzer,
-    Sentiment,
-    SentimentAnalyzerConfig,
-    SentimentScore,
-)
-from reddit_insight.analysis.competitive import (
-    AlternativeComparison,
-    AlternativeExtractor,
-    ALTERNATIVE_PATTERNS,
-    Complaint,
-    ComplaintExtractor,
-    COMPLAINT_PATTERNS,
-    ComplaintType,
-    ComparisonType,
-    CompetitiveAnalyzer,
-    CompetitiveInsight,
-    CompetitiveReport,
-    to_markdown,
-    to_dict,
 )
 
 __all__ = [
