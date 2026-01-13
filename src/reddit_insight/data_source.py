@@ -412,3 +412,277 @@ class UnifiedDataSource:
             f"api_failures={self._status.api_failure_count}, "
             f"scraping_failures={self._status.scraping_failure_count})"
         )
+
+    # ========== 내부 헬퍼 메서드 ==========
+
+    async def _execute_with_fallback(
+        self,
+        api_func: Callable[[], Any],
+        scraping_coro: Callable[[], Any],
+        operation_name: str = "operation",
+    ) -> Any:
+        """전략에 따라 API 또는 스크래핑 실행 (폴백 지원).
+
+        Args:
+            api_func: API 호출 함수 (동기)
+            scraping_coro: 스크래핑 코루틴 함수 (비동기)
+            operation_name: 작업 이름 (로깅용)
+
+        Returns:
+            수집된 데이터
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        primary_error: Exception | None = None
+        fallback_error: Exception | None = None
+
+        # 전략에 따라 실행 순서 결정
+        if self._should_use_api():
+            # API 먼저 시도
+            try:
+                logger.debug(f"API로 {operation_name} 수행")
+                client = self._get_api_client()
+                # API는 동기이므로 to_thread로 래핑
+                result = await asyncio.to_thread(api_func)
+                self._record_api_success()
+                return result
+            except Exception as e:
+                primary_error = e
+                self._record_api_failure(e)
+                logger.warning(f"API {operation_name} 실패: {e}")
+
+                # 폴백 시도
+                if self._should_fallback_to_scraping(e):
+                    try:
+                        logger.info(f"스크래핑으로 {operation_name} 폴백")
+                        result = await scraping_coro()
+                        self._record_scraping_success()
+                        return result
+                    except Exception as fallback_e:
+                        fallback_error = fallback_e
+                        self._record_scraping_failure(fallback_e)
+                        logger.error(f"스크래핑 {operation_name}도 실패: {fallback_e}")
+
+        elif self._should_use_scraping():
+            # 스크래핑 먼저 시도
+            try:
+                logger.debug(f"스크래핑으로 {operation_name} 수행")
+                result = await scraping_coro()
+                self._record_scraping_success()
+                return result
+            except Exception as e:
+                primary_error = e
+                self._record_scraping_failure(e)
+                logger.warning(f"스크래핑 {operation_name} 실패: {e}")
+
+                # 폴백 시도
+                if self._should_fallback_to_api(e):
+                    try:
+                        logger.info(f"API로 {operation_name} 폴백")
+                        client = self._get_api_client()
+                        result = await asyncio.to_thread(api_func)
+                        self._record_api_success()
+                        return result
+                    except Exception as fallback_e:
+                        fallback_error = fallback_e
+                        self._record_api_failure(fallback_e)
+                        logger.error(f"API {operation_name}도 실패: {fallback_e}")
+        else:
+            # 둘 다 사용할 수 없는 상황
+            raise DataSourceError(
+                f"데이터 소스를 사용할 수 없습니다: "
+                f"API 실패={self._status.api_failure_count}, "
+                f"스크래핑 실패={self._status.scraping_failure_count}"
+            )
+
+        # 모든 시도 실패
+        error_msg = f"{operation_name} 실패"
+        if primary_error:
+            error_msg += f" (primary: {primary_error})"
+        if fallback_error:
+            error_msg += f" (fallback: {fallback_error})"
+        raise DataSourceError(error_msg)
+
+    # ========== 게시물 수집 메서드 ==========
+
+    async def get_hot_posts(
+        self, subreddit: str, limit: int = 100
+    ) -> list["Post"]:
+        """Hot 게시물 수집.
+
+        Args:
+            subreddit: 서브레딧 이름
+            limit: 수집할 게시물 수 (기본: 100)
+
+        Returns:
+            Post 모델 리스트
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import Post
+
+        def api_call() -> list[Post]:
+            client = self._get_api_client()
+            return client.posts.get_hot(subreddit, limit=limit)
+
+        async def scraping_call() -> list[Post]:
+            scraper = self._get_scraper()
+            return await scraper.get_hot(subreddit, limit=limit)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"r/{subreddit} hot 수집"
+        )
+
+    async def get_new_posts(
+        self, subreddit: str, limit: int = 100
+    ) -> list["Post"]:
+        """New 게시물 수집.
+
+        Args:
+            subreddit: 서브레딧 이름
+            limit: 수집할 게시물 수 (기본: 100)
+
+        Returns:
+            Post 모델 리스트
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import Post
+
+        def api_call() -> list[Post]:
+            client = self._get_api_client()
+            return client.posts.get_new(subreddit, limit=limit)
+
+        async def scraping_call() -> list[Post]:
+            scraper = self._get_scraper()
+            return await scraper.get_new(subreddit, limit=limit)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"r/{subreddit} new 수집"
+        )
+
+    async def get_top_posts(
+        self,
+        subreddit: str,
+        time_filter: str = "week",
+        limit: int = 100,
+    ) -> list["Post"]:
+        """Top 게시물 수집.
+
+        Args:
+            subreddit: 서브레딧 이름
+            time_filter: 기간 필터 (hour, day, week, month, year, all)
+            limit: 수집할 게시물 수 (기본: 100)
+
+        Returns:
+            Post 모델 리스트
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import Post
+
+        def api_call() -> list[Post]:
+            client = self._get_api_client()
+            return client.posts.get_top(subreddit, time_filter=time_filter, limit=limit)
+
+        async def scraping_call() -> list[Post]:
+            scraper = self._get_scraper()
+            return await scraper.get_top(subreddit, time_filter=time_filter, limit=limit)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"r/{subreddit} top({time_filter}) 수집"
+        )
+
+    # ========== 댓글 수집 메서드 ==========
+
+    async def get_post_comments(
+        self, post_id: str, limit: int | None = None
+    ) -> list["Comment"]:
+        """게시물의 댓글 수집.
+
+        Args:
+            post_id: 게시물 ID
+            limit: 최대 수집 개수. None이면 모든 댓글 수집 (스크래핑은 500 제한)
+
+        Returns:
+            Comment 모델 리스트
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import Comment
+
+        def api_call() -> list[Comment]:
+            client = self._get_api_client()
+            return client.comments.get_post_comments(post_id, limit=limit)
+
+        async def scraping_call() -> list[Comment]:
+            scraper = self._get_scraper()
+            # 스크래핑은 limit=None을 500으로 처리
+            effective_limit = limit if limit is not None else 500
+            return await scraper.get_post_comments(post_id, limit=effective_limit)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"post/{post_id} 댓글 수집"
+        )
+
+    # ========== 서브레딧 정보 수집 메서드 ==========
+
+    async def get_subreddit_info(self, name: str) -> "SubredditInfo | None":
+        """서브레딧 정보 조회.
+
+        Args:
+            name: 서브레딧 이름
+
+        Returns:
+            SubredditInfo 모델 또는 None (존재하지 않는 경우)
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import SubredditInfo
+
+        def api_call() -> SubredditInfo | None:
+            client = self._get_api_client()
+            return client.subreddits.get_info(name)
+
+        async def scraping_call() -> SubredditInfo | None:
+            scraper = self._get_scraper()
+            return await scraper.get_subreddit_info(name)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"r/{name} 정보 조회"
+        )
+
+    async def search_subreddits(
+        self, query: str, limit: int = 25
+    ) -> list["SubredditInfo"]:
+        """서브레딧 검색.
+
+        Args:
+            query: 검색어
+            limit: 최대 결과 수 (기본: 25)
+
+        Returns:
+            SubredditInfo 모델 리스트
+
+        Raises:
+            DataSourceError: 모든 소스가 실패한 경우
+        """
+        from reddit_insight.reddit.models import SubredditInfo
+
+        def api_call() -> list[SubredditInfo]:
+            client = self._get_api_client()
+            return client.subreddits.search(query, limit=limit)
+
+        async def scraping_call() -> list[SubredditInfo]:
+            scraper = self._get_scraper()
+            return await scraper.search_subreddits(query, limit=limit)
+
+        return await self._execute_with_fallback(
+            api_call, scraping_call, f"서브레딧 검색 '{query}'"
+        )
