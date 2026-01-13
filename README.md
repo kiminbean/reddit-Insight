@@ -266,6 +266,101 @@ mypy src/
 ruff format src/ tests/
 ```
 
+## Docker 배포
+
+### Docker Compose (권장)
+
+```bash
+# 환경 변수 설정
+cp .env.example .env
+# .env 파일 편집하여 필요한 값 설정
+
+# 컨테이너 시작
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f
+```
+
+### Docker 단독 실행
+
+```bash
+# 이미지 빌드
+docker build -t reddit-insight .
+
+# 컨테이너 실행
+docker run -d -p 8888:8888 \
+  -e SECRET_KEY=your-secret-key \
+  -v $(pwd)/data:/app/data \
+  reddit-insight
+```
+
+브라우저에서 http://localhost:8888 접속
+
+## 인증 및 API 키
+
+### API 키 생성
+
+```bash
+# CLI로 API 키 생성
+reddit-insight api-key create --name "My App" --rate-limit 1000
+
+# 또는 대시보드에서 생성
+# http://localhost:8888/dashboard/settings/api-keys
+```
+
+### API 키 사용
+
+```bash
+# 헤더에 API 키 포함
+curl -H "X-API-Key: your-api-key" http://localhost:8888/api/v1/analyze
+```
+
+## 환경 변수
+
+| 변수 | 설명 | 기본값 |
+|------|------|--------|
+| `SECRET_KEY` | JWT 서명 키 | (필수) |
+| `DATABASE_URL` | 데이터베이스 URL | `sqlite:///./data/reddit_insight.db` |
+| `REDDIT_CLIENT_ID` | Reddit API Client ID | - |
+| `REDDIT_CLIENT_SECRET` | Reddit API Secret | - |
+| `RATE_LIMIT_PER_MINUTE` | 분당 요청 제한 | `100` |
+| `LOG_LEVEL` | 로그 레벨 | `INFO` |
+| `ALLOWED_ORIGINS` | CORS 허용 도메인 | `*` |
+
+## 스케줄된 분석
+
+자동 분석 작업을 설정할 수 있습니다:
+
+```bash
+# CLI로 스케줄 추가
+reddit-insight schedule add python --interval 6h
+
+# 스케줄 목록 확인
+reddit-insight schedule list
+
+# 또는 대시보드에서 관리
+# http://localhost:8888/dashboard/settings/scheduler
+```
+
+## 모니터링
+
+### 헬스 체크
+
+```bash
+curl http://localhost:8888/health
+```
+
+### 요청 통계
+
+```bash
+# CLI로 통계 확인
+python -m reddit_insight.dashboard.monitoring stats 24
+
+# 오류 로그 확인
+python -m reddit_insight.dashboard.monitoring errors 50
+```
+
 ## 기술 스택
 
 - **Python 3.11+**: 코어 언어
@@ -277,6 +372,8 @@ ruff format src/ tests/
 - **scikit-learn**: ML 분석
 - **YAKE**: 키워드 추출
 - **NLTK**: 텍스트 처리
+- **APScheduler**: 스케줄 작업
+- **Docker**: 컨테이너 배포
 
 ## 라이선스
 
