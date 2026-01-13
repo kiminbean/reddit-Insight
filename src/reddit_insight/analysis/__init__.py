@@ -66,6 +66,16 @@ from reddit_insight.analysis.demand_detector import (
     DemandDetectorConfig,
     DemandSummary,
 )
+from reddit_insight.analysis.demand_analyzer import (
+    DemandAnalyzer,
+    DemandCluster,
+    DemandClusterer,
+    DemandReport,
+    PrioritizedDemand,
+    PriorityCalculator,
+    PriorityConfig,
+    PriorityScore,
+)
 
 __all__ = [
     # Tokenizer
@@ -116,4 +126,13 @@ __all__ = [
     "DemandDetector",
     "DemandDetectorConfig",
     "DemandSummary",
+    # Demand Analyzer
+    "DemandCluster",
+    "DemandClusterer",
+    "PriorityScore",
+    "PriorityConfig",
+    "PriorityCalculator",
+    "PrioritizedDemand",
+    "DemandReport",
+    "DemandAnalyzer",
 ]
