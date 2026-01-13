@@ -53,6 +53,9 @@ dev = [
 #     "sentence-transformers",
 # ]
 
+[project.scripts]
+reddit-insight = "reddit_insight.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/ibkim/reddit-insight"
 Repository = "https://github.com/ibkim/reddit-insight"
