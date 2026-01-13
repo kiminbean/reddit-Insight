@@ -1,0 +1,122 @@
+[
+  {
+    "id": "post001",
+    "title": "Looking for a good Python IDE recommendation",
+    "selftext": "I need a Python IDE for data science work. Currently using VS Code but wondering if there's something better for ML workflows. What do you recommend?",
+    "author": "ml_developer",
+    "subreddit": "learnpython",
+    "score": 245,
+    "num_comments": 87,
+    "created_utc": "2024-01-15T10:30:00Z",
+    "url": "https://reddit.com/r/learnpython/comments/post001/",
+    "permalink": "/r/learnpython/comments/post001/looking_for_python_ide/"
+  },
+  {
+    "id": "post002",
+    "title": "Why is Pandas so slow with large datasets?",
+    "selftext": "I'm working with a 10GB CSV file and Pandas is incredibly slow. Takes forever to load. Is there any alternative? I wish there was a faster solution.",
+    "author": "data_engineer",
+    "subreddit": "datascience",
+    "score": 523,
+    "num_comments": 156,
+    "created_utc": "2024-01-16T14:20:00Z",
+    "url": "https://reddit.com/r/datascience/comments/post002/",
+    "permalink": "/r/datascience/comments/post002/pandas_slow_large_datasets/"
+  },
+  {
+    "id": "post003",
+    "title": "Switched from TensorFlow to PyTorch - best decision ever",
+    "selftext": "After years of using TensorFlow, I finally made the switch to PyTorch. The debugging experience is so much better. Dynamic graphs make prototyping a breeze.",
+    "author": "deep_learner",
+    "subreddit": "MachineLearning",
+    "score": 1245,
+    "num_comments": 312,
+    "created_utc": "2024-01-17T09:15:00Z",
+    "url": "https://reddit.com/r/MachineLearning/comments/post003/",
+    "permalink": "/r/MachineLearning/comments/post003/tensorflow_to_pytorch/"
+  },
+  {
+    "id": "post004",
+    "title": "How to handle missing values in time series data?",
+    "selftext": "I have a lot of missing values in my sensor data. What's the best approach? Interpolation? Forward fill? I need help understanding the best practices.",
+    "author": "sensor_analyst",
+    "subreddit": "datascience",
+    "score": 189,
+    "num_comments": 45,
+    "created_utc": "2024-01-18T11:45:00Z",
+    "url": "https://reddit.com/r/datascience/comments/post004/",
+    "permalink": "/r/datascience/comments/post004/missing_values_time_series/"
+  },
+  {
+    "id": "post005",
+    "title": "Frustrating experience with AWS SageMaker pricing",
+    "selftext": "Just got my AWS bill and it's way higher than expected. SageMaker notebooks were running when I thought they were stopped. The interface is confusing and there should be better cost alerts.",
+    "author": "cloud_user",
+    "subreddit": "aws",
+    "score": 678,
+    "num_comments": 234,
+    "created_utc": "2024-01-19T16:00:00Z",
+    "url": "https://reddit.com/r/aws/comments/post005/",
+    "permalink": "/r/aws/comments/post005/sagemaker_pricing_frustrating/"
+  },
+  {
+    "id": "post006",
+    "title": "Is there a tool for automated ML model monitoring?",
+    "selftext": "Looking for something to monitor model drift and performance in production. Manual monitoring is not scalable anymore. Any recommendations?",
+    "author": "mlops_engineer",
+    "subreddit": "mlops",
+    "score": 342,
+    "num_comments": 89,
+    "created_utc": "2024-01-20T08:30:00Z",
+    "url": "https://reddit.com/r/mlops/comments/post006/",
+    "permalink": "/r/mlops/comments/post006/automated_ml_monitoring/"
+  },
+  {
+    "id": "post007",
+    "title": "Polars vs Pandas performance comparison",
+    "selftext": "I ran benchmarks comparing Polars and Pandas on various operations. Polars is 10x faster on aggregations. Here are my results...",
+    "author": "benchmark_guy",
+    "subreddit": "Python",
+    "score": 892,
+    "num_comments": 178,
+    "created_utc": "2024-01-21T13:15:00Z",
+    "url": "https://reddit.com/r/Python/comments/post007/",
+    "permalink": "/r/Python/comments/post007/polars_vs_pandas/"
+  },
+  {
+    "id": "post008",
+    "title": "Need help with gradient descent convergence",
+    "selftext": "My neural network loss isn't decreasing. I've tried different learning rates but nothing works. What could be wrong?",
+    "author": "nn_beginner",
+    "subreddit": "learnmachinelearning",
+    "score": 156,
+    "num_comments": 67,
+    "created_utc": "2024-01-22T10:00:00Z",
+    "url": "https://reddit.com/r/learnmachinelearning/comments/post008/",
+    "permalink": "/r/learnmachinelearning/comments/post008/gradient_descent_help/"
+  },
+  {
+    "id": "post009",
+    "title": "Best practices for feature engineering in production",
+    "selftext": "What are the industry best practices for feature engineering? How do you manage feature stores? Looking for practical advice.",
+    "author": "feature_engineer",
+    "subreddit": "mlops",
+    "score": 445,
+    "num_comments": 123,
+    "created_utc": "2024-01-23T15:45:00Z",
+    "url": "https://reddit.com/r/mlops/comments/post009/",
+    "permalink": "/r/mlops/comments/post009/feature_engineering_production/"
+  },
+  {
+    "id": "post010",
+    "title": "Scikit-learn vs XGBoost for tabular data",
+    "selftext": "Should I use scikit-learn's RandomForest or switch to XGBoost? I hear XGBoost is much better. What's your experience?",
+    "author": "tabular_ml",
+    "subreddit": "MachineLearning",
+    "score": 367,
+    "num_comments": 145,
+    "created_utc": "2024-01-24T09:30:00Z",
+    "url": "https://reddit.com/r/MachineLearning/comments/post010/",
+    "permalink": "/r/MachineLearning/comments/post010/sklearn_vs_xgboost/"
+  }
+]

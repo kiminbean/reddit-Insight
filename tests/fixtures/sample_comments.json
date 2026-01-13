@@ -1,0 +1,152 @@
+[
+  {
+    "id": "comment001",
+    "body": "I highly recommend PyCharm for data science. The debugger is excellent and it has great Jupyter notebook support.",
+    "author": "pycharm_fan",
+    "subreddit": "learnpython",
+    "score": 89,
+    "created_utc": "2024-01-15T11:00:00Z",
+    "parent_id": "t3_post001",
+    "post_id": "post001"
+  },
+  {
+    "id": "comment002",
+    "body": "Try Polars instead. It's way faster than Pandas and has a similar API.",
+    "author": "polars_advocate",
+    "subreddit": "datascience",
+    "score": 234,
+    "created_utc": "2024-01-16T15:00:00Z",
+    "parent_id": "t3_post002",
+    "post_id": "post002"
+  },
+  {
+    "id": "comment003",
+    "body": "Dask is another option for large datasets. It parallelizes Pandas operations nicely.",
+    "author": "dask_user",
+    "subreddit": "datascience",
+    "score": 156,
+    "created_utc": "2024-01-16T15:30:00Z",
+    "parent_id": "t3_post002",
+    "post_id": "post002"
+  },
+  {
+    "id": "comment004",
+    "body": "I wish Pandas had native lazy evaluation. Polars does this well.",
+    "author": "lazy_data_guy",
+    "subreddit": "datascience",
+    "score": 78,
+    "created_utc": "2024-01-16T16:00:00Z",
+    "parent_id": "t1_comment002",
+    "post_id": "post002"
+  },
+  {
+    "id": "comment005",
+    "body": "Same experience here. TensorFlow's eager mode still doesn't match PyTorch's debugging experience.",
+    "author": "tf_refugee",
+    "subreddit": "MachineLearning",
+    "score": 345,
+    "created_utc": "2024-01-17T10:00:00Z",
+    "parent_id": "t3_post003",
+    "post_id": "post003"
+  },
+  {
+    "id": "comment006",
+    "body": "The problem with TensorFlow is the complexity of the API. Too many ways to do the same thing.",
+    "author": "frustrated_developer",
+    "subreddit": "MachineLearning",
+    "score": 267,
+    "created_utc": "2024-01-17T10:30:00Z",
+    "parent_id": "t3_post003",
+    "post_id": "post003"
+  },
+  {
+    "id": "comment007",
+    "body": "For missing values in time series, try linear interpolation first. Works well for sensor data.",
+    "author": "ts_expert",
+    "subreddit": "datascience",
+    "score": 67,
+    "created_utc": "2024-01-18T12:00:00Z",
+    "parent_id": "t3_post004",
+    "post_id": "post004"
+  },
+  {
+    "id": "comment008",
+    "body": "AWS billing is terrible. I need a tool to monitor costs in real-time.",
+    "author": "cost_conscious",
+    "subreddit": "aws",
+    "score": 189,
+    "created_utc": "2024-01-19T16:30:00Z",
+    "parent_id": "t3_post005",
+    "post_id": "post005"
+  },
+  {
+    "id": "comment009",
+    "body": "I recommend checking out MLflow or Weights & Biases for model monitoring.",
+    "author": "mlflow_user",
+    "subreddit": "mlops",
+    "score": 123,
+    "created_utc": "2024-01-20T09:00:00Z",
+    "parent_id": "t3_post006",
+    "post_id": "post006"
+  },
+  {
+    "id": "comment010",
+    "body": "Great benchmarks! I switched to Polars last month and never looked back.",
+    "author": "converted_user",
+    "subreddit": "Python",
+    "score": 156,
+    "created_utc": "2024-01-21T14:00:00Z",
+    "parent_id": "t3_post007",
+    "post_id": "post007"
+  },
+  {
+    "id": "comment011",
+    "body": "Check your data normalization. That's usually the culprit for non-converging networks.",
+    "author": "nn_expert",
+    "subreddit": "learnmachinelearning",
+    "score": 89,
+    "created_utc": "2024-01-22T10:30:00Z",
+    "parent_id": "t3_post008",
+    "post_id": "post008"
+  },
+  {
+    "id": "comment012",
+    "body": "Feast is a good open-source feature store. Works well with various ML platforms.",
+    "author": "feast_advocate",
+    "subreddit": "mlops",
+    "score": 78,
+    "created_utc": "2024-01-23T16:00:00Z",
+    "parent_id": "t3_post009",
+    "post_id": "post009"
+  },
+  {
+    "id": "comment013",
+    "body": "XGBoost is definitely better for most tabular problems. Faster training too.",
+    "author": "xgboost_fan",
+    "subreddit": "MachineLearning",
+    "score": 134,
+    "created_utc": "2024-01-24T10:00:00Z",
+    "parent_id": "t3_post010",
+    "post_id": "post010"
+  },
+  {
+    "id": "comment014",
+    "body": "LightGBM is even better than XGBoost in my experience. Faster and lower memory.",
+    "author": "lightgbm_user",
+    "subreddit": "MachineLearning",
+    "score": 112,
+    "created_utc": "2024-01-24T10:30:00Z",
+    "parent_id": "t1_comment013",
+    "post_id": "post010"
+  },
+  {
+    "id": "comment015",
+    "body": "CatBoost handles categorical features natively. Worth trying if you have many categorical columns.",
+    "author": "catboost_advocate",
+    "subreddit": "MachineLearning",
+    "score": 98,
+    "created_utc": "2024-01-24T11:00:00Z",
+    "parent_id": "t3_post010",
+    "post_id": "post010"
+  }
+]

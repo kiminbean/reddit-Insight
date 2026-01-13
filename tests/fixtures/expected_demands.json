@@ -1,0 +1,43 @@
+{
+  "description": "Expected demand analysis results for sample posts/comments",
+  "demand_categories": {
+    "question": {
+      "patterns": ["looking for", "how to", "what's the best", "need help"],
+      "expected_count": 4
+    },
+    "feature_request": {
+      "patterns": ["wish there was", "should have", "need a tool"],
+      "expected_count": 3
+    },
+    "pain_point": {
+      "patterns": ["frustrating", "slow", "confusing", "terrible"],
+      "expected_count": 3
+    },
+    "comparison": {
+      "patterns": ["vs", "better than", "switched from", "alternative"],
+      "expected_count": 5
+    }
+  },
+  "prioritized_demands": [
+    {
+      "text": "faster data processing solution",
+      "category": "pain_point",
+      "priority_score": 0.9,
+      "related_products": ["pandas", "polars", "dask"]
+    },
+    {
+      "text": "automated model monitoring tool",
+      "category": "feature_request",
+      "priority_score": 0.85,
+      "related_products": ["mlflow", "wandb"]
+    },
+    {
+      "text": "better cost monitoring for cloud",
+      "category": "pain_point",
+      "priority_score": 0.8,
+      "related_products": ["aws", "sagemaker"]
+    }
+  ],
+  "expected_total_demands": 10,
+  "min_priority_score": 0.5
+}

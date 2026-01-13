@@ -1,0 +1,54 @@
+{
+  "description": "Expected trend analysis results for sample posts/comments",
+  "top_keywords": [
+    {
+      "keyword": "pytorch",
+      "score": 0.85,
+      "frequency": 15,
+      "trend_direction": "rising"
+    },
+    {
+      "keyword": "polars",
+      "score": 0.82,
+      "frequency": 12,
+      "trend_direction": "rising"
+    },
+    {
+      "keyword": "pandas",
+      "score": 0.78,
+      "frequency": 18,
+      "trend_direction": "stable"
+    },
+    {
+      "keyword": "tensorflow",
+      "score": 0.65,
+      "frequency": 8,
+      "trend_direction": "declining"
+    },
+    {
+      "keyword": "xgboost",
+      "score": 0.72,
+      "frequency": 10,
+      "trend_direction": "rising"
+    }
+  ],
+  "rising_keywords": [
+    {
+      "keyword": "polars",
+      "growth_rate": 2.5,
+      "confidence": 0.9
+    },
+    {
+      "keyword": "pytorch",
+      "growth_rate": 1.8,
+      "confidence": 0.85
+    },
+    {
+      "keyword": "lightgbm",
+      "growth_rate": 1.5,
+      "confidence": 0.75
+    }
+  ],
+  "expected_trend_count": 5,
+  "min_confidence": 0.5
+}
