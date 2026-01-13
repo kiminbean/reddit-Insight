@@ -22,6 +22,9 @@ from reddit_insight.reddit.auth import (
 if TYPE_CHECKING:
     from praw.models import Subreddit
 
+    from reddit_insight.reddit.collectors import CommentCollector, PostCollector
+    from reddit_insight.reddit.models import Comment, Post
+
 logger = logging.getLogger(__name__)
 
 
@@ -57,6 +60,9 @@ class RedditClient:
             client_secret=self._settings.reddit_client_secret,
             user_agent=self._settings.reddit_user_agent or DEFAULT_USER_AGENT,
         )
+        # 수집기 인스턴스 (lazy initialization)
+        self._post_collector: PostCollector | None = None
+        self._comment_collector: CommentCollector | None = None
 
     @property
     def is_connected(self) -> bool:
@@ -87,6 +93,32 @@ class RedditClient:
     def auth(self) -> RedditAuth:
         """인증 정보 반환."""
         return self._auth
+
+    @property
+    def posts(self) -> PostCollector:
+        """게시물 수집기 반환 (lazy initialization).
+
+        Returns:
+            PostCollector: 게시물 수집기 인스턴스
+        """
+        if self._post_collector is None:
+            from reddit_insight.reddit.collectors import PostCollector
+
+            self._post_collector = PostCollector(self)
+        return self._post_collector
+
+    @property
+    def comments(self) -> CommentCollector:
+        """댓글 수집기 반환 (lazy initialization).
+
+        Returns:
+            CommentCollector: 댓글 수집기 인스턴스
+        """
+        if self._comment_collector is None:
+            from reddit_insight.reddit.collectors import CommentCollector
+
+            self._comment_collector = CommentCollector(self)
+        return self._comment_collector
 
     def connect(self, *, read_only: bool | None = None) -> None:
         """Reddit API에 연결.
@@ -186,6 +218,34 @@ class RedditClient:
         """
         reddit = self._ensure_connected()
         return list(reddit.subreddits.search(query, limit=limit))
+
+    def get_hot_posts(self, subreddit: str, limit: int = 100) -> list[Post]:
+        """서브레딧의 hot 게시물 수집 (편의 메서드).
+
+        Args:
+            subreddit: 서브레딧 이름
+            limit: 최대 수집 개수 (기본: 100)
+
+        Returns:
+            list[Post]: 수집된 게시물 목록
+        """
+        return self.posts.get_hot(subreddit, limit=limit)
+
+    def get_post_comments(
+        self,
+        post_id: str,
+        limit: int | None = None,
+    ) -> list[Comment]:
+        """게시물의 댓글 수집 (편의 메서드).
+
+        Args:
+            post_id: 게시물 ID
+            limit: 최대 수집 개수. None이면 모든 댓글 수집
+
+        Returns:
+            list[Comment]: 수집된 댓글 목록
+        """
+        return self.comments.get_post_comments(post_id, limit=limit)
 
     def close(self) -> None:
         """연결 종료.
