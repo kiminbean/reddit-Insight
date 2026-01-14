@@ -158,6 +158,13 @@
                     </svg>
                     AI Analysis
                 </a>
+                <a href="/dashboard/live"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Live' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />
+                    </svg>
+                    Live
+                </a>
                 <hr class="my-2 border-gray-200 dark:border-gray-700">
                 <a href="/search"
                    class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Search' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
@@ -230,6 +237,10 @@
                             <a href="/dashboard/llm"
                                class="{% if page_title == 'AI Analysis' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 AI
+                            </a>
+                            <a href="/dashboard/live"
+                               class="{% if page_title == 'Live' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
+                                Live
                             </a>
                             <a href="/search"
                                class="{% if page_title == 'Search' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
