@@ -8,7 +8,7 @@ Reddit 데이터 수집부터 비즈니스 인사이트 도출까지의 전체 �
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) (Phases 1-11) — SHIPPED 2026-01-14
 - ✅ [v1.1 Dashboard & ML Integration](milestones/v1.1-ROADMAP.md) (Phases 12-19) — SHIPPED 2026-01-14
-- 🚧 **v2.0 Full Platform** — Phases 20-31 (in progress)
+- ✅ [v2.0 Full Platform](milestones/v2.0-ROADMAP.md) (Phases 20-31) — SHIPPED 2026-01-14
 
 ## Domain Expertise
 

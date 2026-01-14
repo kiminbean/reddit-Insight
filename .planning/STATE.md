@@ -111,6 +111,7 @@ Resume file: None
 - Phase 12-19 계획 작성 완료: 각 phase에 1개 plan 배정
 - **v1.1 SHIPPED** (2026-01-14): Archived to milestones/v1.1-ROADMAP.md
 - **Milestone v2.0 created** (2026-01-14): Full Platform, 12 phases (Phase 20-31)
+- **v2.0 SHIPPED** (2026-01-14): Archived to milestones/v2.0-ROADMAP.md
 
 ## Shipped Milestones
 
@@ -118,3 +119,4 @@ Resume file: None
 |---------|------|--------|-------|------|
 | v1.0 | MVP | 1-11 | 37 | 2026-01-14 |
 | v1.1 | Dashboard & ML Integration | 12-19 | 8 | 2026-01-14 |
+| v2.0 | Full Platform | 20-31 | 12 | 2026-01-14 |

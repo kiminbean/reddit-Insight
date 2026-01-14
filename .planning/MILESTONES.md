@@ -1,5 +1,35 @@
 # Project Milestones: Reddit Insight
 
+## v2.0 Full Platform (Shipped: 2026-01-14)
+
+**Delivered:** LLM 기반 고급 분석, 실시간 모니터링, 멀티 서브레딧 비교, 알림 시스템을 포함한 프로덕션 레벨 완전한 플랫폼.
+
+**Phases completed:** 20-31 (12 plans total)
+
+**Key accomplishments:**
+
+- LLM 분석 인프라: Claude/OpenAI API 통합, 프롬프트 템플릿 시스템, Rate Limiting, 캐싱
+- 실시간 모니터링: SSE 스트리밍, 라이브 대시보드, 서브레딧 활동 추적
+- 알림 시스템: AlertManager, Email/Webhook/Slack/Discord Notifiers
+- 멀티 서브레딧 비교: ComparisonAnalyzer, Jaccard 유사도, 키워드 오버랩 분석
+- PDF/Excel 내보내기: WeasyPrint PDF, openpyxl Excel 생성
+- 성능 최적화: CacheService, 페이지네이션, 지연 로딩, WCAG 접근성
+- Final Testing: 881 테스트 (856 passed), E2E + Performance 벤치마크
+
+**Stats:**
+
+- 12 phases, 12 plans
+- 47+ commits
+- 43,021 lines of Python (src)
+- 16,318 lines of Python (tests)
+- 881 tests total
+
+**Git range:** `feat(20-01)` → `docs(31-01)`
+
+**What's next:** v3.0 또는 프로덕션 배포
+
+---
+
 ## v1.1 Dashboard & ML Integration (Shipped: 2026-01-14)
 
 **Delivered:** 대시보드와 ML 분석 모듈(TrendPredictor, AnomalyDetector, TopicModeler, TextClusterer)을 완전히 통합하여 시각적 분석 경험을 제공한다.
