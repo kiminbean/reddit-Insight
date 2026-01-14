@@ -348,6 +348,103 @@ async def download_report(
     )
 
 
+@router.get("/report/download/pdf")
+async def download_report_pdf(
+    subreddit: str | None = Query(default=None, description="서브레딧 이름"),
+    service: ReportService = Depends(get_report_service),
+) -> Response:
+    """PDF 보고서를 다운로드한다.
+
+    Args:
+        subreddit: 서브레딧 이름
+        service: ReportService 인스턴스
+
+    Returns:
+        Response: PDF 파일 다운로드
+    """
+    report = service.generate_report(subreddit)
+
+    if not report:
+        return JSONResponse(
+            content={"error": "No data available for report generation"},
+            status_code=404,
+        )
+
+    # PDF 생성
+    try:
+        from reddit_insight.reports.pdf_generator import PDFGenerator
+
+        generator = PDFGenerator()
+        pdf_bytes = generator.generate(report)
+    except ImportError:
+        return JSONResponse(
+            content={
+                "error": "PDF generation not available. "
+                "WeasyPrint requires system libraries (pango, cairo)."
+            },
+            status_code=503,
+        )
+
+    # 파일명 생성
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    filename = f"business_report_{subreddit or 'all'}_{timestamp}.pdf"
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+        },
+    )
+
+
+@router.get("/report/download/excel")
+async def download_report_excel(
+    subreddit: str | None = Query(default=None, description="서브레딧 이름"),
+    service: ReportService = Depends(get_report_service),
+) -> Response:
+    """Excel 보고서를 다운로드한다.
+
+    Args:
+        subreddit: 서브레딧 이름
+        service: ReportService 인스턴스
+
+    Returns:
+        Response: Excel 파일 다운로드
+    """
+    report = service.generate_report(subreddit)
+
+    if not report:
+        return JSONResponse(
+            content={"error": "No data available for report generation"},
+            status_code=404,
+        )
+
+    # Excel 생성
+    try:
+        from reddit_insight.reports.excel_generator import ExcelGenerator
+
+        generator = ExcelGenerator()
+        excel_bytes = generator.generate(report)
+    except ImportError:
+        return JSONResponse(
+            content={"error": "Excel generation not available. Please install openpyxl."},
+            status_code=503,
+        )
+
+    # 파일명 생성
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    filename = f"business_report_{subreddit or 'all'}_{timestamp}.xlsx"
+
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+        },
+    )
+
+
 @router.get("/report/preview", response_class=HTMLResponse)
 async def preview_report(
     request: Request,
