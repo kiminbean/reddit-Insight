@@ -44,7 +44,7 @@ None
 - [x] **Phase 22: Dashboard Performance** - 캐싱, 페이지네이션, 지연 로딩
 - [x] **Phase 23: UX Improvements** - 내비게이션, 시각화, 접근성
 - [x] **Phase 24: Report Export Enhancement** - PDF/Excel 내보내기, 새 템플릿
-- [ ] **Phase 25: Analysis Accuracy** - 키워드 추출 개선, 감성 분석 튜닝
+- [x] **Phase 25: Analysis Accuracy** - 키워드 추출 개선, 감성 분석 튜닝
 - [ ] **Phase 26: LLM Infrastructure** - API 통합 설정, 프롬프트 엔지니어링
 - [ ] **Phase 27: LLM Analysis Features** - 시맨틱 요약, AI 카테고리화
 - [ ] **Phase 28: Multi-subreddit Comparison** - 크로스 서브레딧 벤치마킹
@@ -324,7 +324,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 25-01: 키워드 추출 개선, 감성 분석 튜닝
+- [x] 25-01: 키워드 추출 개선, 감성 분석 튜닝
 
 #### Phase 26: LLM Infrastructure
 **Goal**: LLM API 통합 설정, 프롬프트 엔지니어링

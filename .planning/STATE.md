@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-13)
 
 ## Current Position
 
-Phase: 24 of 31 (Report Export Enhancement)
-Plan: 24-01 COMPLETE
-Status: Phase complete, ready for Phase 25
-Last activity: 2026-01-14 — 24-01 complete (PDF/Excel export)
+Phase: 25 of 31 (Analysis Accuracy Improvements)
+Plan: 25-01 COMPLETE
+Status: Phase complete, ready for Phase 26
+Last activity: 2026-01-14 — 25-01 complete (keyword, sentiment, entity improvements)
 
-Progress: █████░░░░░░░ 42% (5/12 v2.0 phases)
+Progress: █████░░░░░░░ 50% (6/12 v2.0 phases)
 
 ## Performance Metrics
 
@@ -40,7 +40,7 @@ Progress: █████░░░░░░░ 42% (5/12 v2.0 phases)
 | 11. Advanced Analytics | 4 | — | — |
 
 **Recent Trend:**
-- Last 5 plans: 20-01, 21-01, 22-01, 23-01, 24-01 (COMPLETE)
+- Last 5 plans: 21-01, 22-01, 23-01, 24-01, 25-01 (COMPLETE)
 - Trend: —
 
 ## Accumulated Context
@@ -67,7 +67,7 @@ Recent decisions affecting current work:
 - 5가지 수요 카테고리 (FEATURE_REQUEST, PAIN_POINT, SEARCH_QUERY, WILLINGNESS_TO_PAY, ALTERNATIVE_SEEKING)
 - 우선순위 점수 = 빈도(30%) + 구매의향(30%) + 긴급도(20%) + 최신성(20%)
 - 패턴 기반 엔티티 인식 (제품/서비스/브랜드/기술)
-- 규칙 기반 감성 분석 (96 positive, 107 negative words + Reddit slang)
+- 규칙 기반 감성 분석 (186+ positive, 237+ negative words + Reddit slang)
 - 불만 추출 (7가지 유형) + 대안 비교 추출 (5가지 유형)
 - CompetitiveAnalyzer로 엔티티별 인사이트 리포트
 - 규칙 기반 인사이트 생성 (5가지 InsightType)
@@ -101,7 +101,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Phase 24-01 complete
+Stopped at: Phase 25-01 complete
 Resume file: None
 
 ### Roadmap Evolution
