@@ -4,10 +4,10 @@
 
 Reddit 데이터 수집부터 비즈니스 인사이트 도출까지의 전체 파이프라인을 구축한다. 먼저 데이터 수집 인프라(API + 스크래핑)를 구축하고, 분석 엔진(트렌드, 수요, 경쟁)을 순차적으로 개발한 후, 이를 비즈니스 모델로 연결하는 인사이트 레이어를 추가한다. 최종적으로 웹 대시보드와 리포트 기능으로 결과를 제공한다.
 
-## Milestones
+## Completed Milestones
 
-- ✅ **v1.0 MVP** - Phases 1-11 (shipped 2026-01-14)
-- ✅ **v1.1 Dashboard & ML Integration** - Phases 12-19 (shipped 2026-01-14)
+- ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) (Phases 1-11) — SHIPPED 2026-01-14
+- ✅ [v1.1 Dashboard & ML Integration](milestones/v1.1-ROADMAP.md) (Phases 12-19) — SHIPPED 2026-01-14
 
 ## Domain Expertise
 

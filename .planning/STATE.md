@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-13)
 
 **Core value:** 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
-**Current focus:** Phase 19 - Integration Testing (v1.1)
+**Current focus:** Ready for next milestone
 
 ## Current Position
 
-Phase: 19 of 19 (Integration Testing) - COMPLETE
-Plan: 19-01 done
-Status: **v1.1 MILESTONE COMPLETE**
-Last activity: 2026-01-14 — Phase 19 completed (E2E testing, performance optimization, documentation)
+Phase: — (No active milestone)
+Plan: —
+Status: **v1.1 SHIPPED** — Awaiting next milestone
+Last activity: 2026-01-14 — v1.1 milestone archived
 
-Progress: ██████████████████ 100% (19/19 phases complete)
+Progress: v1.0 + v1.1 COMPLETE (19 phases, 45 plans)
 
 ## Performance Metrics
 
@@ -101,7 +101,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: v1.1 Milestone completed - All 19 phases done
+Stopped at: v1.1 milestone archived, ready for next milestone
 Resume file: None
 
 ### Roadmap Evolution
@@ -109,3 +109,11 @@ Resume file: None
 - Phase 11 added: Advanced Analytics - 고급 분석 기능 (머신러닝 기반 예측)
 - Milestone v1.1 created: Dashboard & ML Integration, 8 phases (Phase 12-19)
 - Phase 12-19 계획 작성 완료: 각 phase에 1개 plan 배정
+- **v1.1 SHIPPED** (2026-01-14): Archived to milestones/v1.1-ROADMAP.md
+
+## Shipped Milestones
+
+| Version | Name | Phases | Plans | Date |
+|---------|------|--------|-------|------|
+| v1.0 | MVP | 1-11 | 37 | 2026-01-14 |
+| v1.1 | Dashboard & ML Integration | 12-19 | 8 | 2026-01-14 |
