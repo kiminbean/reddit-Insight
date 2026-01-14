@@ -4,6 +4,12 @@ Entity recognition module for product/service identification.
 Provides entity recognition for Reddit text analysis to identify products,
 services, brands, and technologies mentioned in discussions.
 
+Enhanced features:
+- 20+ context patterns for product/service detection
+- Product name aliases and normalization
+- Improved confidence scoring based on context strength
+- Multi-word entity support
+
 Example:
     >>> from reddit_insight.analysis.entity_recognition import EntityRecognizer
     >>> recognizer = EntityRecognizer()
@@ -113,6 +119,139 @@ class EntityPattern:
     weight: float = 1.0
 
 
+# ============================================================================
+# Product/Service Name Aliases (for normalization)
+# ============================================================================
+
+PRODUCT_ALIASES: dict[str, str] = {
+    # Common misspellings and variations
+    "vscode": "VS Code",
+    "vs code": "VS Code",
+    "visual studio code": "VS Code",
+    "visualstudiocode": "VS Code",
+    "chatgpt": "ChatGPT",
+    "chat gpt": "ChatGPT",
+    "openai": "OpenAI",
+    "open ai": "OpenAI",
+    "midjourney": "Midjourney",
+    "mid journey": "Midjourney",
+    "dalle": "DALL-E",
+    "dall-e": "DALL-E",
+    "dall e": "DALL-E",
+    "github copilot": "GitHub Copilot",
+    "copilot": "GitHub Copilot",
+    "claude": "Claude",
+    "anthropic": "Anthropic",
+    # Social platforms
+    "tiktok": "TikTok",
+    "tik tok": "TikTok",
+    "youtube": "YouTube",
+    "you tube": "YouTube",
+    "yt": "YouTube",
+    "instagram": "Instagram",
+    "insta": "Instagram",
+    "ig": "Instagram",
+    "facebook": "Facebook",
+    "fb": "Facebook",
+    "twitter": "Twitter",
+    "x": "Twitter",
+    "whatsapp": "WhatsApp",
+    "linkedin": "LinkedIn",
+    "reddit": "Reddit",
+    # Productivity tools
+    "notion": "Notion",
+    "obsidian": "Obsidian",
+    "roam": "Roam",
+    "evernote": "Evernote",
+    "onenote": "OneNote",
+    "one note": "OneNote",
+    "todoist": "Todoist",
+    "asana": "Asana",
+    "trello": "Trello",
+    "jira": "Jira",
+    "monday": "Monday.com",
+    "monday.com": "Monday.com",
+    "clickup": "ClickUp",
+    "click up": "ClickUp",
+    # Communication
+    "slack": "Slack",
+    "discord": "Discord",
+    "zoom": "Zoom",
+    "teams": "Microsoft Teams",
+    "ms teams": "Microsoft Teams",
+    "microsoft teams": "Microsoft Teams",
+    "google meet": "Google Meet",
+    "meet": "Google Meet",
+    "telegram": "Telegram",
+    "signal": "Signal",
+    # Design tools
+    "figma": "Figma",
+    "canva": "Canva",
+    "photoshop": "Photoshop",
+    "illustrator": "Illustrator",
+    "sketch": "Sketch",
+    "invision": "InVision",
+    # Cloud/Dev
+    "aws": "AWS",
+    "amazon web services": "AWS",
+    "azure": "Azure",
+    "gcp": "Google Cloud",
+    "google cloud": "Google Cloud",
+    "heroku": "Heroku",
+    "vercel": "Vercel",
+    "netlify": "Netlify",
+    "digitalocean": "DigitalOcean",
+    "digital ocean": "DigitalOcean",
+    # Programming languages/frameworks
+    "python": "Python",
+    "javascript": "JavaScript",
+    "js": "JavaScript",
+    "typescript": "TypeScript",
+    "ts": "TypeScript",
+    "react": "React",
+    "reactjs": "React",
+    "react.js": "React",
+    "vue": "Vue.js",
+    "vuejs": "Vue.js",
+    "vue.js": "Vue.js",
+    "angular": "Angular",
+    "svelte": "Svelte",
+    "nextjs": "Next.js",
+    "next.js": "Next.js",
+    "next": "Next.js",
+    "node": "Node.js",
+    "nodejs": "Node.js",
+    "node.js": "Node.js",
+    "django": "Django",
+    "flask": "Flask",
+    "fastapi": "FastAPI",
+    "fast api": "FastAPI",
+    "rails": "Ruby on Rails",
+    "ruby on rails": "Ruby on Rails",
+    "ror": "Ruby on Rails",
+    # Databases
+    "postgres": "PostgreSQL",
+    "postgresql": "PostgreSQL",
+    "mysql": "MySQL",
+    "mongodb": "MongoDB",
+    "mongo": "MongoDB",
+    "redis": "Redis",
+    "sqlite": "SQLite",
+    "dynamodb": "DynamoDB",
+    "dynamo": "DynamoDB",
+    # Other tools
+    "docker": "Docker",
+    "kubernetes": "Kubernetes",
+    "k8s": "Kubernetes",
+    "terraform": "Terraform",
+    "ansible": "Ansible",
+    "git": "Git",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+}
+
+
 # Predefined entity extraction patterns
 # Note: Patterns use case-insensitive matching for context words,
 # but entity capture groups require Capital letters for proper noun detection
@@ -121,42 +260,120 @@ ENTITY_PATTERNS: list[EntityPattern] = [
     # Only captures single capitalized word to avoid matching common words
     EntityPattern(
         pattern_id="usage_context",
-        regex=r"(?i)(?:using|use|tried|switched to|moved to)\s+([A-Z][a-zA-Z0-9]+)",
+        regex=r"(?i)(?:using|use|tried|switched to|moved to|migrated to)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.9,
+    ),
+    # Usage variants - "I've been using X", "started using X"
+    EntityPattern(
+        pattern_id="usage_extended",
+        regex=r"(?i)(?:been using|started using|start using|stopped using|quit using)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
         entity_type=EntityType.PRODUCT,
         weight=0.9,
     ),
     # Opinion patterns - "X is great", "X was terrible"
     EntityPattern(
         pattern_id="opinion_context",
-        regex=r"([A-Z][a-zA-Z0-9]+)\s+(?:is|was|has been)\s+(?:great|good|bad|terrible|amazing|awful|excellent|poor|better|worse|best|worst)",
+        regex=r"([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)\s+(?:is|was|has been|seems|looks|feels)\s+(?:great|good|bad|terrible|amazing|awful|excellent|poor|better|worse|best|worst|awesome|fantastic|horrible|decent|solid|trash|garbage|fire|mid)",
         entity_type=EntityType.PRODUCT,
         weight=0.85,
     ),
     # Recommendation patterns - "recommend X", "suggesting X"
     EntityPattern(
         pattern_id="recommendation",
-        regex=r"(?i)(?:recommend|recommending|suggest|suggesting)\s+([A-Z][a-zA-Z0-9]+)",
+        regex=r"(?i)(?:recommend|recommending|suggest|suggesting|check out|try|give)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
         entity_type=EntityType.PRODUCT,
         weight=0.8,
+    ),
+    # Preference patterns - "I prefer X", "love using X"
+    EntityPattern(
+        pattern_id="preference",
+        regex=r"(?i)(?:i prefer|prefer|love|hate|dislike|enjoy)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.85,
+    ),
+    # Alternative seeking - "alternative to X", "X alternative"
+    EntityPattern(
+        pattern_id="alternative_seeking",
+        regex=r"(?i)(?:alternative to|alternatives to|replacement for|instead of|like)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.85,
     ),
     # Brand patterns - "by X", "from X", "made by X"
     EntityPattern(
         pattern_id="brand_attribution",
-        regex=r"(?i)(?:by|from|made by)\s+([A-Z][a-zA-Z0-9]+)",
+        regex=r"(?i)(?:by|from|made by|developed by|created by|built by)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
         entity_type=EntityType.BRAND,
         weight=0.75,
     ),
     # Technology patterns - "built with X", "powered by X"
     EntityPattern(
         pattern_id="technology_stack",
-        regex=r"(?i)(?:built with|powered by)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        regex=r"(?i)(?:built with|powered by|written in|developed with|coded in|uses)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
         entity_type=EntityType.TECHNOLOGY,
         weight=0.85,
     ),
     # Comparison patterns - "X vs Y", "X or Y"
     EntityPattern(
-        pattern_id="comparison",
-        regex=r"([A-Z][a-zA-Z0-9]+)\s+(?:vs\.?|versus)\s+([A-Z][a-zA-Z0-9]+)",
+        pattern_id="comparison_vs",
+        regex=r"([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)\s+(?:vs\.?|versus)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.85,
+    ),
+    # Better/worse comparison - "X is better than Y"
+    EntityPattern(
+        pattern_id="comparison_better",
+        regex=r"([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)\s+(?:is|was)\s+(?:better|worse|faster|slower|cheaper|more expensive)\s+than\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.85,
+    ),
+    # Migration patterns - "from X to Y"
+    EntityPattern(
+        pattern_id="migration",
+        regex=r"(?i)(?:from|left)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)\s+(?:to|for)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.9,
+    ),
+    # Integration patterns - "X with Y", "integrates with X"
+    EntityPattern(
+        pattern_id="integration",
+        regex=r"(?i)(?:integrates? with|works with|connects to|syncs? with)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.SERVICE,
+        weight=0.75,
+    ),
+    # Learning patterns - "learning X", "started X"
+    EntityPattern(
+        pattern_id="learning",
+        regex=r"(?i)(?:learning|studying|mastering|getting into)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.TECHNOLOGY,
+        weight=0.7,
+    ),
+    # Subscription patterns - "subscribed to X", "paying for X"
+    EntityPattern(
+        pattern_id="subscription",
+        regex=r"(?i)(?:subscribed to|subscribe to|paying for|pay for|bought|purchased)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.SERVICE,
+        weight=0.85,
+    ),
+    # Cancellation patterns - "cancelled X", "unsubscribed from X"
+    # Require capital letter at start to avoid matching "my"
+    EntityPattern(
+        pattern_id="cancellation",
+        regex=r"(?i)(?:cancell?ed|unsubscribed from|stopped paying for|ditched)\s+(?:my\s+)?([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.SERVICE,
+        weight=0.85,
+    ),
+    # Experience patterns - "experience with X", "X experience"
+    EntityPattern(
+        pattern_id="experience",
+        regex=r"(?i)(?:experience with|experiences? using|my time with)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
+        entity_type=EntityType.PRODUCT,
+        weight=0.75,
+    ),
+    # Review patterns - "review of X", "X review"
+    EntityPattern(
+        pattern_id="review",
+        regex=r"(?i)(?:review of|review:?|reviewing)\s+([A-Z][a-zA-Z0-9]+(?:\.[a-zA-Z]+)?)",
         entity_type=EntityType.PRODUCT,
         weight=0.7,
     ),
@@ -191,6 +408,8 @@ class PatternEntityExtractor:
         """
         Normalize entity name for comparison.
 
+        Applies alias resolution for common product name variations.
+
         Args:
             name: Raw entity name
 
@@ -200,7 +419,30 @@ class PatternEntityExtractor:
         # Lowercase, strip whitespace, collapse multiple spaces
         normalized = name.strip().lower()
         normalized = re.sub(r"\s+", " ", normalized)
+
+        # Check if there's a known alias
+        if normalized in PRODUCT_ALIASES:
+            return PRODUCT_ALIASES[normalized].lower()
+
         return normalized
+
+    def _get_canonical_name(self, name: str) -> str:
+        """
+        Get the canonical (display) name for an entity.
+
+        Args:
+            name: Raw entity name
+
+        Returns:
+            Canonical name (proper capitalization from aliases, or original)
+        """
+        normalized = name.strip().lower()
+
+        # Check if there's a known alias for proper capitalization
+        if normalized in PRODUCT_ALIASES:
+            return PRODUCT_ALIASES[normalized]
+
+        return name
 
     def _extract_sentence(self, text: str, start: int, end: int) -> str:
         """
@@ -261,9 +503,10 @@ class PatternEntityExtractor:
                         continue
                     seen_positions.add(position_key)
 
-                    # Create entity
+                    # Create entity with canonical name
+                    canonical_name = self._get_canonical_name(entity_text)
                     entity = ProductEntity(
-                        name=entity_text,
+                        name=canonical_name,
                         normalized_name=self._normalize_name(entity_text),
                         entity_type=pattern.entity_type,
                         confidence=pattern.weight,
