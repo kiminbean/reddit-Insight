@@ -75,6 +75,13 @@ from reddit_insight.dashboard.services.topic_service import (
     TopicView,
     get_topic_service,
 )
+
+# 라이브 스트리밍 서비스
+from reddit_insight.dashboard.services.live_service import (
+    LiveService,
+    get_live_service,
+    reset_live_service,
+)
 from reddit_insight.dashboard.services_module import (
     AnalysisRecord,
     DashboardService,
@@ -139,4 +146,8 @@ __all__ = [
     "TopicView",
     "TopicKeywordView",
     "get_topic_service",
+    # Live service
+    "LiveService",
+    "get_live_service",
+    "reset_live_service",
 ]
