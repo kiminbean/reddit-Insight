@@ -58,6 +58,13 @@
     {% block head %}{% endblock %}
 </head>
 <body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- Skip to Main Content Link (Accessibility) -->
+    <a href="#main-content"
+       class="skip-link sr-only-focusable absolute left-0 top-0 z-[100] bg-primary-600 text-white px-4 py-2 focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-primary-400"
+       data-skip-link>
+        Skip to main content
+    </a>
+
     <div class="min-h-full">
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu-overlay"
@@ -294,14 +301,14 @@
         {% endblock %}
 
         <!-- Main Content -->
-        <main>
+        <main id="main-content" role="main" tabindex="-1">
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                 {% block content %}{% endblock %}
             </div>
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto transition-colors">
+        <footer role="contentinfo" class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto transition-colors">
             <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                 <p class="text-center text-sm text-gray-500 dark:text-gray-400">
                     Reddit Insight Dashboard - Discover business opportunities from Reddit trends

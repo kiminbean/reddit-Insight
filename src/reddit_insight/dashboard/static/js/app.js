@@ -250,9 +250,28 @@
                 if (target) {
                     target.setAttribute('tabindex', '-1');
                     target.focus();
+                    // Remove tabindex after blur to maintain normal tab order
+                    target.addEventListener('blur', function() {
+                        this.removeAttribute('tabindex');
+                    }, { once: true });
                 }
             });
         }
+
+        // Detect keyboard vs mouse navigation
+        var isKeyboardUser = false;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                isKeyboardUser = true;
+                document.body.classList.add('keyboard-navigation');
+            }
+        });
+
+        document.addEventListener('mousedown', function() {
+            isKeyboardUser = false;
+            document.body.classList.remove('keyboard-navigation');
+        });
 
         // Focus trap for modals
         document.addEventListener('keydown', function(e) {
@@ -273,6 +292,46 @@
                         firstElement.focus();
                     }
                 }
+            }
+        });
+
+        // Announce page changes for screen readers
+        initLiveRegion();
+    }
+
+    /**
+     * Initialize live region for screen reader announcements
+     */
+    function initLiveRegion() {
+        // Create a live region for dynamic announcements
+        var liveRegion = document.getElementById('sr-live-region');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'sr-live-region';
+            liveRegion.className = 'sr-only';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(liveRegion);
+        }
+
+        // Announce function for screen readers
+        window.announceToScreenReader = function(message, priority) {
+            if (!liveRegion) return;
+
+            liveRegion.setAttribute('aria-live', priority === 'assertive' ? 'assertive' : 'polite');
+            liveRegion.textContent = '';
+
+            // Force announcement by changing content after a brief delay
+            setTimeout(function() {
+                liveRegion.textContent = message;
+            }, 100);
+        };
+
+        // Listen for HTMX content loads to announce navigation
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            var pageTitle = document.title.split(' | ')[0];
+            if (pageTitle) {
+                window.announceToScreenReader('Page loaded: ' + pageTitle);
             }
         });
     }
@@ -506,7 +565,12 @@
         showNotification: showNotification,
         fetchChartData: fetchChartData,
         initChart: initChart,
-        updateChartTheme: updateChartTheme
+        updateChartTheme: updateChartTheme,
+        announceToScreenReader: function(message, priority) {
+            if (window.announceToScreenReader) {
+                window.announceToScreenReader(message, priority);
+            }
+        }
     };
 
 })();
