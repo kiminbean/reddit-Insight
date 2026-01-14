@@ -5,6 +5,12 @@ Provides keyword extraction for Reddit text analysis using multiple methods:
 - YAKE: Statistical method for single documents (no training required)
 - TF-IDF: Corpus-based method for identifying important terms
 - Combined: Merges results from multiple methods
+
+Enhanced features:
+- Reddit-specific stopword filtering
+- URL and mention removal
+- n-gram (bigram, trigram) keyword support
+- Minimum length and validity filtering
 """
 
 from __future__ import annotations
@@ -15,6 +21,12 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 import yake
+
+from reddit_insight.analysis.stopwords import (
+    StopwordManager,
+    clean_reddit_text,
+    is_valid_keyword,
+)
 
 if TYPE_CHECKING:
     from reddit_insight.reddit.models import Post
@@ -47,16 +59,22 @@ class KeywordExtractorConfig:
     Configuration for keyword extraction.
 
     Attributes:
-        max_ngram_size: Maximum size of n-grams to consider
+        max_ngram_size: Maximum size of n-grams to consider (1-3)
         deduplication_threshold: Threshold for removing similar keywords (0-1)
         num_keywords: Number of keywords to extract
         language: Language code for the text
+        min_keyword_length: Minimum character length for keywords
+        clean_reddit_text: Whether to clean Reddit-specific patterns (URLs, mentions)
+        filter_stopwords: Whether to filter Reddit stopwords from keywords
     """
 
     max_ngram_size: int = 3
     deduplication_threshold: float = 0.9
     num_keywords: int = 20
     language: str = "en"
+    min_keyword_length: int = 3
+    clean_reddit_text: bool = True
+    filter_stopwords: bool = True
 
 
 @dataclass
@@ -67,6 +85,12 @@ class YAKEExtractor:
     YAKE uses statistical features to identify keywords without
     requiring any training or external resources.
 
+    Enhanced with:
+    - Reddit text cleaning (URL, mention removal)
+    - Reddit stopword filtering
+    - Minimum length validation
+    - n-gram support (bigram, trigram)
+
     Example:
         >>> extractor = YAKEExtractor()
         >>> keywords = extractor.extract("Python is great for machine learning")
@@ -76,16 +100,22 @@ class YAKEExtractor:
 
     config: KeywordExtractorConfig = field(default_factory=KeywordExtractorConfig)
     _yake_extractor: yake.KeywordExtractor = field(init=False, repr=False)
+    _stopword_manager: StopwordManager = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Initialize YAKE extractor with configuration."""
+        # Build custom stopwords list for YAKE
+        self._stopword_manager = StopwordManager()
+        stopwords = list(self._stopword_manager.get_stopwords())
+
         self._yake_extractor = yake.KeywordExtractor(
             lan=self.config.language,
             n=self.config.max_ngram_size,
             dedupLim=self.config.deduplication_threshold,
             dedupFunc="seqm",  # Sequential matching for deduplication
-            top=self.config.num_keywords,
+            top=self.config.num_keywords * 2,  # Extract more to allow filtering
             features=None,  # Use default features
+            stopwords=stopwords if self.config.filter_stopwords else None,
         )
 
     def _normalize_score(self, yake_score: float) -> float:
@@ -104,9 +134,61 @@ class YAKEExtractor:
         # Avoid division by zero and ensure bounded output
         return 1.0 / (1.0 + yake_score)
 
+    def _preprocess_text(self, text: str) -> str:
+        """
+        Preprocess text before keyword extraction.
+
+        Cleans Reddit-specific patterns if enabled in config.
+
+        Args:
+            text: Input text
+
+        Returns:
+            Preprocessed text
+        """
+        if self.config.clean_reddit_text:
+            return clean_reddit_text(text)
+        return text
+
+    def _is_valid_keyword(self, keyword: str) -> bool:
+        """
+        Check if a keyword is valid according to config settings.
+
+        Args:
+            keyword: Keyword to validate
+
+        Returns:
+            True if keyword is valid
+        """
+        # For n-grams, check each word in the phrase
+        words = keyword.split()
+
+        # Must have at least one valid word
+        if not words:
+            return False
+
+        # Check minimum length (for single words) or phrase validity
+        if len(words) == 1:
+            return is_valid_keyword(keyword, self.config.min_keyword_length)
+
+        # For n-grams, ensure at least one content word is valid
+        # and the total phrase length meets minimum
+        if len(keyword) < self.config.min_keyword_length:
+            return False
+
+        # At least one word must not be a stopword
+        valid_content_words = [
+            w for w in words
+            if is_valid_keyword(w, min_length=2)  # Slightly relaxed for n-grams
+        ]
+
+        return len(valid_content_words) > 0
+
     def extract(self, text: str) -> list[Keyword]:
         """
         Extract keywords from a single text.
+
+        Applies Reddit text cleaning and stopword filtering based on config.
 
         Args:
             text: Input text to extract keywords from
@@ -117,27 +199,40 @@ class YAKEExtractor:
         if not text or not text.strip():
             return []
 
-        # YAKE returns list of (keyword, score) tuples
-        raw_keywords = self._yake_extractor.extract_keywords(text)
+        # Preprocess text
+        processed_text = self._preprocess_text(text)
 
-        keywords = [
-            Keyword(
-                keyword=kw,
-                score=self._normalize_score(score),
+        if not processed_text or not processed_text.strip():
+            return []
+
+        # YAKE returns list of (keyword, score) tuples
+        raw_keywords = self._yake_extractor.extract_keywords(processed_text)
+
+        keywords = []
+        for kw, score in raw_keywords:
+            # Apply validation filter
+            if self.config.filter_stopwords and not self._is_valid_keyword(kw):
+                continue
+
+            keywords.append(
+                Keyword(
+                    keyword=kw,
+                    score=self._normalize_score(score),
+                )
             )
-            for kw, score in raw_keywords
-        ]
 
         # Sort by normalized score (highest first)
         keywords.sort(key=lambda k: k.score, reverse=True)
 
-        return keywords
+        # Limit to configured number
+        return keywords[:self.config.num_keywords]
 
     def extract_from_texts(self, texts: list[str]) -> list[Keyword]:
         """
         Extract keywords from multiple texts combined.
 
-        Joins all texts and extracts keywords from the combined corpus.
+        Preprocesses each text individually, then joins and extracts
+        keywords from the combined corpus.
 
         Args:
             texts: List of input texts
@@ -148,10 +243,37 @@ class YAKEExtractor:
         if not texts:
             return []
 
-        # Combine texts with paragraph separators
-        combined_text = "\n\n".join(text for text in texts if text and text.strip())
+        # Preprocess each text individually
+        processed_texts = []
+        for text in texts:
+            if text and text.strip():
+                processed = self._preprocess_text(text)
+                if processed and processed.strip():
+                    processed_texts.append(processed)
 
-        return self.extract(combined_text)
+        if not processed_texts:
+            return []
+
+        # Combine texts with paragraph separators
+        combined_text = "\n\n".join(processed_texts)
+
+        # Extract (preprocessing already done)
+        raw_keywords = self._yake_extractor.extract_keywords(combined_text)
+
+        keywords = []
+        for kw, score in raw_keywords:
+            if self.config.filter_stopwords and not self._is_valid_keyword(kw):
+                continue
+
+            keywords.append(
+                Keyword(
+                    keyword=kw,
+                    score=self._normalize_score(score),
+                )
+            )
+
+        keywords.sort(key=lambda k: k.score, reverse=True)
+        return keywords[:self.config.num_keywords]
 
     def extract_from_posts(self, posts: list[Post]) -> list[Keyword]:
         """
