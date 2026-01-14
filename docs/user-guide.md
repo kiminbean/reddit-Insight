@@ -9,8 +9,9 @@ Reddit Insight 사용자 가이드입니다.
 3. [CLI 사용법](#cli-사용법)
 4. [대시보드 사용법](#대시보드-사용법)
 5. [ML 분석 기능](#ml-분석-기능)
-6. [리포트 생성](#리포트-생성)
-7. [FAQ 및 트러블슈팅](#faq-및-트러블슈팅)
+6. [v2.0 새 기능](#v20-새-기능)
+7. [리포트 생성](#리포트-생성)
+8. [FAQ 및 트러블슈팅](#faq-및-트러블슈팅)
 
 ---
 
@@ -570,6 +571,92 @@ http://localhost:8000/dashboard/trends/anomalies/python?days=30&method=auto
 - 클러스터별 대표 키워드
 - 클러스터별 대표 문서
 - Silhouette Score (품질 지표)
+
+---
+
+## v2.0 새 기능
+
+v2.0에서 추가된 새로운 기능들입니다. 자세한 내용은 [v2.0 Features Guide](./v2-features.md)를 참조하세요.
+
+### LLM 분석 (AI Analysis)
+
+Claude 또는 OpenAI API를 활용한 고급 AI 분석 기능:
+
+- **AI 요약**: 게시물 핵심 내용 자동 요약
+- **카테고리화**: 텍스트 자동 분류
+- **심층 감성 분석**: 뉘앙스 포함 상세 분석
+- **인사이트 생성**: 비즈니스 기회 해석
+
+**접속**: `/dashboard/llm`
+
+**설정**:
+```bash
+# .env
+ANTHROPIC_API_KEY=sk-ant-xxxxx  # Claude API
+# 또는
+OPENAI_API_KEY=sk-xxxxx         # OpenAI API
+```
+
+---
+
+### 멀티 서브레딧 비교
+
+여러 서브레딧을 동시에 비교 분석:
+
+- **크로스 트렌드 비교**: 키워드 트렌드 비교
+- **벤치마킹**: 활동량, 감성, 키워드 비교
+- **유사도 분석**: 서브레딧 간 토픽 유사도
+
+**접속**: `/dashboard/comparison`
+
+**제한**: 최소 2개, 최대 5개 서브레딧
+
+---
+
+### 실시간 모니터링
+
+SSE 기반 실시간 모니터링:
+
+- **실시간 게시물 스트림**: 새 게시물 즉시 알림
+- **활동량 모니터링**: 실시간 추적
+- **다중 서브레딧**: 여러 서브레딧 동시 모니터링
+
+**접속**: `/dashboard/live`
+
+---
+
+### 알림 시스템
+
+조건 기반 알림 설정:
+
+- **키워드 급등 알림**: 특정 키워드 급증 시 알림
+- **활동량 임계값**: 설정 임계값 초과 시 알림
+- **다양한 채널**: 콘솔, Email, Webhook
+
+**접속**: `/dashboard/alerts`
+
+**설정**:
+```bash
+# .env (Email 알림)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# Webhook 알림
+ALERT_WEBHOOK_URL=https://your-server.com/webhook
+```
+
+---
+
+### PDF/Excel 내보내기
+
+분석 결과 내보내기:
+
+- **PDF 리포트**: 전문적인 보고서
+- **Excel**: 데이터 분석용 파일
+
+**접속**: 각 분석 페이지의 Export 버튼
 
 ---
 
