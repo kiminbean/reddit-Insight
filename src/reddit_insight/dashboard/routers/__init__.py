@@ -2,6 +2,7 @@
 
 from reddit_insight.dashboard.routers import (
     clusters,
+    comparison,
     competition,
     dashboard,
     demands,
@@ -13,6 +14,7 @@ from reddit_insight.dashboard.routers import (
 
 __all__ = [
     "clusters",
+    "comparison",
     "competition",
     "dashboard",
     "demands",
