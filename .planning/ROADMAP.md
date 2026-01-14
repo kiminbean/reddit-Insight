@@ -274,105 +274,105 @@ Plans:
 **Goal**: v1.1에서 발생한 기술 부채 해결 - E2E 테스트 수정, 코드 리팩토링
 **Depends on**: Phase 19 (v1.1 complete)
 **Research**: Unlikely (internal patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 20-01: TBD (run /gsd:plan-phase 20 to break down)
+- [ ] 20-01: E2E 테스트 수정 및 리팩토링
 
 #### Phase 21: Documentation
 **Goal**: API 문서, 아키텍처 문서, 사용자 가이드 작성
 **Depends on**: Phase 20
 **Research**: Unlikely (established patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 21-01: TBD
+- [ ] 21-01: API 문서, 아키텍처 문서, 사용자 가이드
 
 #### Phase 22: Dashboard Performance
 **Goal**: 캐싱, 페이지네이션, 지연 로딩으로 대시보드 성능 최적화
 **Depends on**: Phase 21
 **Research**: Unlikely (internal patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 22-01: TBD
+- [ ] 22-01: 캐싱, 페이지네이션, 지연 로딩
 
 #### Phase 23: UX Improvements
 **Goal**: 내비게이션, 시각화, 접근성 개선
 **Depends on**: Phase 22
 **Research**: Unlikely (internal patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 23-01: TBD
+- [ ] 23-01: 내비게이션, 시각화, 접근성 개선
 
 #### Phase 24: Report Export Enhancement
 **Goal**: PDF/Excel 내보내기, 새 리포트 템플릿
 **Depends on**: Phase 23
 **Research**: Likely (PDF generation libraries)
 **Research topics**: Python PDF 생성 (reportlab, weasyprint), Excel 생성 (openpyxl)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 24-01: TBD
+- [ ] 24-01: PDF/Excel 내보내기 기능
 
 #### Phase 25: Analysis Accuracy
 **Goal**: 키워드 추출 개선, 감성 분석 튜닝
 **Depends on**: Phase 24
 **Research**: Likely (NLP improvements)
 **Research topics**: KeyBERT, 감성 분석 모델 fine-tuning
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 25-01: TBD
+- [ ] 25-01: 키워드 추출 개선, 감성 분석 튜닝
 
 #### Phase 26: LLM Infrastructure
 **Goal**: LLM API 통합 설정, 프롬프트 엔지니어링
 **Depends on**: Phase 25
 **Research**: Likely (external API)
 **Research topics**: Anthropic Claude API, OpenAI API, rate limiting, caching strategies
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 26-01: TBD
+- [ ] 26-01: LLM 클라이언트, 프롬프트, Rate Limiting
 
 #### Phase 27: LLM Analysis Features
 **Goal**: 시맨틱 요약, AI 카테고리화 기능 구현
 **Depends on**: Phase 26
 **Research**: Unlikely (uses Phase 26 infrastructure)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 27-01: TBD
+- [ ] 27-01: LLMAnalyzer, LLMService, UI
 
 #### Phase 28: Multi-subreddit Comparison
 **Goal**: 크로스 서브레딧 분석 및 벤치마킹
 **Depends on**: Phase 27
 **Research**: Unlikely (internal patterns)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 28-01: TBD
+- [ ] 28-01: ComparisonAnalyzer, ComparisonService, UI
 
 #### Phase 29: Real-time Monitoring
-**Goal**: WebSocket/폴링, 라이브 대시보드 구현
+**Goal**: SSE 기반 라이브 대시보드 구현
 **Depends on**: Phase 28
 **Research**: Likely (real-time architecture)
-**Research topics**: FastAPI WebSocket, Server-Sent Events, polling strategies
-**Plans**: TBD
+**Research topics**: Server-Sent Events, FastAPI StreamingResponse
+**Plans**: 1 plan
 
 Plans:
-- [ ] 29-01: TBD
+- [ ] 29-01: SubredditMonitor, SSE 스트림, 라이브 UI
 
 #### Phase 30: Alerts & Notifications
 **Goal**: 이메일/웹훅 알림, 임계값 트리거 시스템
 **Depends on**: Phase 29
 **Research**: Likely (external services)
-**Research topics**: Email integration (SMTP, SendGrid), Webhook patterns
-**Plans**: TBD
+**Research topics**: SMTP 이메일, Webhook (Slack, Discord)
+**Plans**: 1 plan
 
 Plans:
-- [ ] 30-01: TBD
+- [ ] 30-01: AlertManager, Notifiers, 알림 설정 UI
 
 #### Phase 31: Final Polish & Testing
 **Goal**: 최종 E2E 테스트, 성능 최적화, 문서 업데이트
@@ -409,15 +409,15 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 17. Text Clustering UI | v1.1 | 1/1 | Complete | 2026-01-14 |
 | 18. Dashboard Polish | v1.1 | 1/1 | Complete | 2026-01-14 |
 | 19. Integration Testing | v1.1 | 1/1 | Complete | 2026-01-14 |
-| 20. Tech Debt Cleanup | v2.0 | 0/? | Not started | - |
-| 21. Documentation | v2.0 | 0/? | Not started | - |
-| 22. Dashboard Performance | v2.0 | 0/? | Not started | - |
-| 23. UX Improvements | v2.0 | 0/? | Not started | - |
-| 24. Report Export Enhancement | v2.0 | 0/? | Not started | - |
-| 25. Analysis Accuracy | v2.0 | 0/? | Not started | - |
-| 26. LLM Infrastructure | v2.0 | 0/? | Not started | - |
-| 27. LLM Analysis Features | v2.0 | 0/? | Not started | - |
-| 28. Multi-subreddit Comparison | v2.0 | 0/? | Not started | - |
-| 29. Real-time Monitoring | v2.0 | 0/? | Not started | - |
-| 30. Alerts & Notifications | v2.0 | 0/? | Not started | - |
+| 20. Tech Debt Cleanup | v2.0 | 0/1 | Not started | - |
+| 21. Documentation | v2.0 | 0/1 | Not started | - |
+| 22. Dashboard Performance | v2.0 | 0/1 | Not started | - |
+| 23. UX Improvements | v2.0 | 0/1 | Not started | - |
+| 24. Report Export Enhancement | v2.0 | 0/1 | Not started | - |
+| 25. Analysis Accuracy | v2.0 | 0/1 | Not started | - |
+| 26. LLM Infrastructure | v2.0 | 0/1 | Not started | - |
+| 27. LLM Analysis Features | v2.0 | 0/1 | Not started | - |
+| 28. Multi-subreddit Comparison | v2.0 | 0/1 | Not started | - |
+| 29. Real-time Monitoring | v2.0 | 0/1 | Not started | - |
+| 30. Alerts & Notifications | v2.0 | 0/1 | Not started | - |
 | 31. Final Polish & Testing | v2.0 | 0/? | Not started | - |
