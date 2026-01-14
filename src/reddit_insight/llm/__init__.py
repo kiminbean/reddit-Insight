@@ -13,6 +13,13 @@ from reddit_insight.llm.client import (
 )
 from reddit_insight.llm.rate_limiter import RateLimiter
 from reddit_insight.llm.cache import LLMCache
+from reddit_insight.llm.analyzer import (
+    LLMAnalyzer,
+    CategoryResult,
+    DeepSentimentResult,
+    SentimentAspect,
+    Insight,
+)
 
 __all__ = [
     # Client
@@ -25,6 +32,12 @@ __all__ = [
     # Rate Limiting & Caching
     "RateLimiter",
     "LLMCache",
+    # Analyzer
+    "LLMAnalyzer",
+    "CategoryResult",
+    "DeepSentimentResult",
+    "SentimentAspect",
+    "Insight",
 ]
 
 
