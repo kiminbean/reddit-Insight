@@ -1,0 +1,154 @@
+<!-- Deep Sentiment Analysis Result Partial -->
+{% if error %}
+<div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+        </div>
+    </div>
+</div>
+{% elif result %}
+<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <!-- Sentiment Header -->
+    <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <!-- Sentiment Icon -->
+                {% if result.sentiment == 'positive' %}
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                    </svg>
+                </div>
+                {% elif result.sentiment == 'negative' %}
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                    </svg>
+                </div>
+                {% else %}
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75l-2.489-2.489m0 0a3.375 3.375 0 10-4.773-4.773 3.375 3.375 0 004.774 4.774zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                {% endif %}
+                <div>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white capitalize">
+                        {{ result.sentiment }} Sentiment
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Score: {{ (result.score * 100) | round(1) }}%
+                        {% if result.is_opinion %}(Opinion){% else %}(Fact){% endif %}
+                    </p>
+                </div>
+            </div>
+            <!-- Sentiment Score Bar -->
+            <div class="w-24">
+                <div class="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                    {% set score_percent = ((result.score + 1) / 2 * 100) | round %}
+                    <div class="h-full
+                        {% if result.sentiment == 'positive' %}bg-green-500
+                        {% elif result.sentiment == 'negative' %}bg-red-500
+                        {% else %}bg-gray-400{% endif %}"
+                        style="width: {{ score_percent }}%">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 space-y-4">
+        <!-- Text Preview -->
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                Analyzed Text
+            </p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/30 rounded p-2">
+                {{ text_preview }}
+            </p>
+        </div>
+
+        <!-- Emotions -->
+        {% if result.emotions %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                Detected Emotions
+            </p>
+            <div class="flex flex-wrap gap-2">
+                {% for emotion in result.emotions %}
+                <span class="inline-flex items-center rounded-full bg-purple-100 dark:bg-purple-900 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:text-purple-300 capitalize">
+                    {{ emotion }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Aspect-based Sentiment -->
+        {% if result.factors %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                Aspect Analysis
+            </p>
+            <div class="space-y-2">
+                {% for factor in result.factors %}
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-700 dark:text-gray-300 capitalize">{{ factor.aspect }}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium
+                            {% if factor.sentiment == 'positive' %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300
+                            {% elif factor.sentiment == 'negative' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300
+                            {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                            {{ factor.sentiment }}
+                        </span>
+                    </div>
+                </div>
+                {% if factor.reason %}
+                <p class="text-xs text-gray-500 dark:text-gray-400 ml-4">{{ factor.reason }}</p>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- User Needs -->
+        {% if result.user_needs %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                User Needs
+            </p>
+            <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                {% for need in result.user_needs %}
+                <li>{{ need }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Pain Points -->
+        {% if result.pain_points %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+                Pain Points
+            </p>
+            <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400 space-y-1">
+                {% for point in result.pain_points %}
+                <li>{{ point }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="rounded-md bg-gray-50 dark:bg-gray-700/50 p-4 text-center">
+    <p class="text-sm text-gray-500 dark:text-gray-400">No sentiment analysis result.</p>
+</div>
+{% endif %}

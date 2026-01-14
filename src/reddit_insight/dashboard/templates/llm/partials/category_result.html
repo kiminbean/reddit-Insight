@@ -1,0 +1,77 @@
+<!-- AI Categorization Result Partial -->
+{% if error %}
+<div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+        </div>
+    </div>
+</div>
+{% elif result %}
+<div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <!-- Category Badge -->
+    <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+            <span class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-900 px-3 py-1 text-sm font-medium text-primary-700 dark:text-primary-300">
+                {{ result.category }}
+            </span>
+            <span class="text-sm font-medium
+                {% if result.confidence >= 80 %}text-green-600 dark:text-green-400
+                {% elif result.confidence >= 60 %}text-yellow-600 dark:text-yellow-400
+                {% else %}text-red-600 dark:text-red-400{% endif %}">
+                {{ result.confidence | round(1) }}% confidence
+            </span>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 space-y-3">
+        <!-- Text Preview -->
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                Input Text
+            </p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/30 rounded p-2">
+                {{ text_preview }}
+            </p>
+        </div>
+
+        <!-- Reason -->
+        {% if result.reason %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                Reasoning
+            </p>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+                {{ result.reason }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Secondary Categories -->
+        {% if result.secondary %}
+        <div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                Alternative Categories
+            </p>
+            <div class="flex flex-wrap gap-2">
+                {% for sec in result.secondary %}
+                <span class="inline-flex items-center rounded bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs text-gray-600 dark:text-gray-400">
+                    {{ sec.category }} ({{ sec.confidence }}%)
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="rounded-md bg-gray-50 dark:bg-gray-700/50 p-4 text-center">
+    <p class="text-sm text-gray-500 dark:text-gray-400">No categorization result.</p>
+</div>
+{% endif %}

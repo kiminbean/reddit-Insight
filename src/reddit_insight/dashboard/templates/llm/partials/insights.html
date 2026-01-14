@@ -1,0 +1,94 @@
+<!-- AI Insights Result Partial -->
+{% if error %}
+<div class="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+            </svg>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ error }}</p>
+        </div>
+    </div>
+</div>
+{% elif insights and insights | length > 0 %}
+<div class="space-y-4">
+    {% for insight in insights %}
+    <div class="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Insight Header -->
+        <div class="bg-gray-50 dark:bg-gray-700/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ insight.title }}
+                </h4>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                    {% if insight.priority == 'high' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300
+                    {% elif insight.priority == 'medium' %}bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300
+                    {% else %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300{% endif %}">
+                    {{ insight.priority | capitalize }} Priority
+                </span>
+            </div>
+        </div>
+
+        <!-- Insight Content -->
+        <div class="p-4 space-y-3">
+            <!-- Finding -->
+            {% if insight.finding %}
+            <div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                    Finding
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">{{ insight.finding }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Meaning -->
+            {% if insight.meaning %}
+            <div>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                    </svg>
+                    Business Meaning
+                </p>
+                <p class="text-sm text-gray-700 dark:text-gray-300">{{ insight.meaning }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Recommendation -->
+            {% if insight.recommendation %}
+            <div class="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-3">
+                <p class="text-xs font-medium text-primary-700 dark:text-primary-300 uppercase tracking-wide mb-1">
+                    <svg class="w-3.5 h-3.5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Recommended Action
+                </p>
+                <p class="text-sm text-primary-800 dark:text-primary-200">{{ insight.recommendation }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Summary -->
+    <div class="text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+            Generated {{ insights | length }} insight(s) for r/{{ subreddit }}
+        </p>
+    </div>
+</div>
+{% else %}
+<div class="rounded-md bg-gray-50 dark:bg-gray-700/50 p-4 text-center">
+    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+    </svg>
+    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        No insights generated. Make sure there is enough analysis data available.
+    </p>
+</div>
+{% endif %}

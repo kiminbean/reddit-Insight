@@ -159,6 +159,7 @@ def create_app() -> FastAPI:
         dashboard,
         demands,
         insights,
+        llm,
         search,
         topics,
         trends,
@@ -171,6 +172,7 @@ def create_app() -> FastAPI:
     application.include_router(insights.router)
     application.include_router(topics.router)
     application.include_router(clusters.router)
+    application.include_router(llm.router)
     application.include_router(search.router)
     application.include_router(api.router)
 
