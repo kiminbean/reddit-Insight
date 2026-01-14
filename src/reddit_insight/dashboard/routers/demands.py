@@ -19,6 +19,7 @@ from reddit_insight.analysis.demand_analyzer import (
 )
 from reddit_insight.analysis.demand_patterns import DemandCategory
 from reddit_insight.dashboard.data_store import get_current_data
+from reddit_insight.dashboard.pagination import paginate
 
 router = APIRouter(prefix="/dashboard/demands", tags=["demands"])
 
@@ -497,3 +498,46 @@ async def category_stats(
     """
     stats = service.get_category_stats()
     return JSONResponse(content=stats)
+
+
+# =============================================================================
+# PAGINATED API ENDPOINTS
+# =============================================================================
+
+
+@router.get("/api/list", response_class=JSONResponse)
+async def get_demands_paginated(
+    category: str | None = Query(None, description="카테고리 필터"),
+    min_priority: float = Query(0.0, ge=0.0, le=100.0, description="최소 우선순위"),
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    per_page: int = Query(default=20, ge=1, le=100, description="페이지당 항목 수"),
+    service: DemandService = Depends(get_demand_service),
+) -> JSONResponse:
+    """페이지네이션된 수요 목록을 JSON으로 반환한다.
+
+    Args:
+        category: 카테고리 필터
+        min_priority: 최소 우선순위 점수
+        page: 페이지 번호 (1-indexed)
+        per_page: 페이지당 항목 수
+        service: DemandService 인스턴스
+
+    Returns:
+        JSONResponse: 페이지네이션된 수요 목록
+        {
+            "items": [...],
+            "meta": { "total": N, "page": 1, "per_page": 20, "pages": M }
+        }
+    """
+    # 모든 수요 가져오기 (최대 200개)
+    all_demands = service.get_demands(
+        category=category,
+        min_priority=min_priority,
+        limit=200,
+    )
+
+    # 페이지네이션 적용
+    paginated = paginate(all_demands, page=page, per_page=per_page)
+
+    # 응답 생성
+    return JSONResponse(content=paginated.to_dict(item_converter=demand_view_to_dict))

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
+from reddit_insight.dashboard.pagination import paginate
 from reddit_insight.dashboard.services.anomaly_service import (
     AnomalyService,
     get_anomaly_service,
@@ -360,3 +361,76 @@ async def anomalies_partial(
     }
 
     return templates.TemplateResponse(request, "trends/partials/anomaly_chart.html", context)
+
+
+# =============================================================================
+# PAGINATED API ENDPOINTS
+# =============================================================================
+
+
+@router.get("/api/keywords", response_class=JSONResponse)
+async def get_keywords_paginated(
+    subreddit: str | None = Query(default=None, description="필터링할 서브레딧"),
+    days: int = Query(default=7, ge=1, le=30, description="분석 기간(일)"),
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    per_page: int = Query(default=20, ge=1, le=100, description="페이지당 항목 수"),
+    service: TrendService = Depends(get_trend_service),
+) -> JSONResponse:
+    """페이지네이션된 키워드 목록을 JSON으로 반환한다.
+
+    Args:
+        subreddit: 필터링할 서브레딧
+        days: 분석 기간
+        page: 페이지 번호 (1-indexed)
+        per_page: 페이지당 항목 수
+        service: TrendService 인스턴스
+
+    Returns:
+        JSONResponse: 페이지네이션된 키워드 목록
+        {
+            "items": [...],
+            "meta": { "total": N, "page": 1, "per_page": 20, "pages": M }
+        }
+    """
+    # 모든 키워드 가져오기 (최대 200개)
+    all_keywords = service.get_top_keywords(subreddit=subreddit, days=days, limit=200)
+
+    # 페이지네이션 적용
+    paginated = paginate(all_keywords, page=page, per_page=per_page)
+
+    # 응답 생성
+    return JSONResponse(content=paginated.to_dict(item_converter=lambda kw: kw.__dict__))
+
+
+@router.get("/api/rising", response_class=JSONResponse)
+async def get_rising_paginated(
+    subreddit: str | None = Query(default=None, description="필터링할 서브레딧"),
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    per_page: int = Query(default=20, ge=1, le=100, description="페이지당 항목 수"),
+    service: TrendService = Depends(get_trend_service),
+) -> JSONResponse:
+    """페이지네이션된 급상승 키워드 목록을 JSON으로 반환한다.
+
+    Args:
+        subreddit: 필터링할 서브레딧
+        page: 페이지 번호 (1-indexed)
+        per_page: 페이지당 항목 수
+        service: TrendService 인스턴스
+
+    Returns:
+        JSONResponse: 페이지네이션된 급상승 키워드 목록
+    """
+    # 모든 급상승 키워드 가져오기
+    all_rising = service.get_rising_keywords(subreddit=subreddit, limit=100)
+
+    # 페이지네이션 적용
+    paginated = paginate(all_rising, page=page, per_page=per_page)
+
+    # datetime 변환 함수
+    def convert_rising(kw):
+        data = kw.__dict__.copy()
+        if data.get("first_seen"):
+            data["first_seen"] = data["first_seen"].isoformat()
+        return data
+
+    return JSONResponse(content=paginated.to_dict(item_converter=convert_rising))

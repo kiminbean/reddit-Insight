@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Path, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 
+from reddit_insight.dashboard.pagination import paginate
 from reddit_insight.dashboard.services.insight_service import (
     InsightService,
     get_insight_service,
@@ -435,3 +436,72 @@ async def get_report_json(
     }
 
     return JSONResponse(content=report_dict)
+
+
+# =============================================================================
+# PAGINATED API ENDPOINTS
+# =============================================================================
+
+
+@router.get("/api/list", response_class=JSONResponse)
+async def get_insights_paginated(
+    insight_type: str | None = Query(default=None, description="인사이트 유형 필터"),
+    min_confidence: float = Query(default=0.0, ge=0.0, le=1.0, description="최소 신뢰도"),
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    per_page: int = Query(default=20, ge=1, le=100, description="페이지당 항목 수"),
+    service: InsightService = Depends(get_insight_service),
+) -> JSONResponse:
+    """페이지네이션된 인사이트 목록을 JSON으로 반환한다.
+
+    Args:
+        insight_type: 필터링할 인사이트 유형 (None이면 전체)
+        min_confidence: 최소 신뢰도 필터
+        page: 페이지 번호 (1-indexed)
+        per_page: 페이지당 항목 수
+        service: InsightService 인스턴스
+
+    Returns:
+        JSONResponse: 페이지네이션된 인사이트 목록
+        {
+            "items": [...],
+            "meta": { "total": N, "page": 1, "per_page": 20, "pages": M }
+        }
+    """
+    # 모든 인사이트 가져오기 (최대 200개)
+    all_insights = service.get_insights(
+        insight_type=insight_type,
+        min_confidence=min_confidence,
+        limit=200,
+    )
+
+    # 페이지네이션 적용
+    paginated = paginate(all_insights, page=page, per_page=per_page)
+
+    # 응답 생성
+    return JSONResponse(content=paginated.to_dict(item_converter=lambda i: i.__dict__))
+
+
+@router.get("/api/opportunities", response_class=JSONResponse)
+async def get_opportunities_paginated(
+    page: int = Query(default=1, ge=1, description="페이지 번호"),
+    per_page: int = Query(default=20, ge=1, le=100, description="페이지당 항목 수"),
+    service: InsightService = Depends(get_insight_service),
+) -> JSONResponse:
+    """페이지네이션된 기회 랭킹을 JSON으로 반환한다.
+
+    Args:
+        page: 페이지 번호 (1-indexed)
+        per_page: 페이지당 항목 수
+        service: InsightService 인스턴스
+
+    Returns:
+        JSONResponse: 페이지네이션된 기회 랭킹
+    """
+    # 모든 기회 가져오기 (최대 100개)
+    all_opportunities = service.get_opportunity_ranking(limit=100)
+
+    # 페이지네이션 적용
+    paginated = paginate(all_opportunities, page=page, per_page=per_page)
+
+    # 응답 생성
+    return JSONResponse(content=paginated.to_dict(item_converter=lambda o: o.__dict__))
