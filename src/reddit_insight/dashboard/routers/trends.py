@@ -402,6 +402,40 @@ async def get_keywords_paginated(
     return JSONResponse(content=paginated.to_dict(item_converter=lambda kw: kw.__dict__))
 
 
+@router.get("/chart/{keyword}", response_class=HTMLResponse)
+async def keyword_chart_partial(
+    request: Request,
+    keyword: str,
+    days: int = Query(default=7, ge=1, le=30, description="분석 기간(일)"),
+    service: TrendService = Depends(get_trend_service),
+) -> HTMLResponse:
+    """키워드 차트를 HTMX partial로 반환한다.
+
+    지연 로딩(lazy loading)을 위해 hx-trigger="revealed"와 함께 사용한다.
+
+    Args:
+        request: FastAPI Request 객체
+        keyword: 차트를 표시할 키워드
+        days: 분석 기간
+        service: TrendService 인스턴스
+
+    Returns:
+        HTMLResponse: 차트 HTML partial
+    """
+    templates = get_templates(request)
+
+    timeline = service.get_keyword_timeline(keyword=keyword, days=days)
+
+    context = {
+        "request": request,
+        "keyword": keyword,
+        "timeline": [{"date": str(p.date), "count": p.count} for p in timeline],
+        "days": days,
+    }
+
+    return templates.TemplateResponse(request, "trends/partials/chart_lazy.html", context)
+
+
 @router.get("/api/rising", response_class=JSONResponse)
 async def get_rising_paginated(
     subreddit: str | None = Query(default=None, description="필터링할 서브레딧"),

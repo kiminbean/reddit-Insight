@@ -1,0 +1,76 @@
+{# Lazy-loaded Chart Partial
+   This template is loaded via HTMX when the chart enters the viewport.
+   Usage: hx-get="/dashboard/trends/chart/{keyword}" hx-trigger="revealed"
+#}
+
+<div class="chart-container">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ keyword }}</h4>
+    <canvas id="lazy-chart-{{ keyword | replace(' ', '-') }}" class="h-48"></canvas>
+</div>
+
+<script>
+(function() {
+    const ctx = document.getElementById('lazy-chart-{{ keyword | replace(" ", "-") }}').getContext('2d');
+
+    const timelineData = {{ timeline | tojson }};
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timelineData.map(p => p.date),
+            datasets: [{
+                label: '{{ keyword }}',
+                data: timelineData.map(p => p.count),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7,
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                y: {
+                    display: true,
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.2)'
+                    },
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+})();
+</script>
