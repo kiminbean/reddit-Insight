@@ -1,0 +1,81 @@
+{# Breadcrumb Navigation Component
+
+   Usage:
+   {% from "components/breadcrumb.html" import breadcrumb %}
+   {{ breadcrumb([
+       {"label": "Home", "url": "/dashboard"},
+       {"label": "Trends", "url": "/dashboard/trends"},
+       {"label": "Keyword: AI"}  // Last item has no URL (current page)
+   ]) }}
+#}
+
+{% macro breadcrumb(items) %}
+<nav aria-label="Breadcrumb" class="mb-4">
+    <ol class="flex flex-wrap items-center space-x-1 sm:space-x-2 text-sm" role="list">
+        {# Home icon always first #}
+        <li class="flex items-center">
+            <a href="/dashboard"
+               class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded"
+               aria-label="Dashboard home">
+                <svg class="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </li>
+        {% for item in items %}
+        <li class="flex items-center">
+            {# Separator #}
+            <svg class="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+            {% if loop.last %}
+            {# Current page - not a link #}
+            <span class="font-medium text-gray-700 dark:text-gray-200 truncate max-w-[200px] sm:max-w-[300px]" aria-current="page">
+                {{ item.label }}
+            </span>
+            {% else %}
+            {# Link to parent page #}
+            <a href="{{ item.url }}"
+               class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors truncate max-w-[150px] sm:max-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded">
+                {{ item.label }}
+            </a>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</nav>
+{% endmacro %}
+
+{# Simpler version for inline use #}
+{% macro breadcrumb_simple(parent_label, parent_url, current_label) %}
+<nav aria-label="Breadcrumb" class="mb-4">
+    <ol class="flex items-center space-x-2 text-sm" role="list">
+        <li class="flex items-center">
+            <a href="/dashboard"
+               class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded"
+               aria-label="Dashboard home">
+                <svg class="h-4 w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </li>
+        <li class="flex items-center">
+            <svg class="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+            <a href="{{ parent_url }}"
+               class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded">
+                {{ parent_label }}
+            </a>
+        </li>
+        <li class="flex items-center">
+            <svg class="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-gray-600 mx-1" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+            </svg>
+            <span class="font-medium text-gray-700 dark:text-gray-200 truncate max-w-[200px] sm:max-w-[300px]" aria-current="page">
+                {{ current_label }}
+            </span>
+        </li>
+    </ol>
+</nav>
+{% endmacro %}
