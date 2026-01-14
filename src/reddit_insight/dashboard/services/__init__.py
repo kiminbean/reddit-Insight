@@ -40,6 +40,17 @@ from reddit_insight.dashboard.services.insight_service import (
     get_insight_service,
 )
 
+# LLM 서비스
+from reddit_insight.dashboard.services.llm_service import (
+    LLMCategoryView,
+    LLMInsightView,
+    LLMSentimentView,
+    LLMService,
+    LLMSummaryView,
+    get_llm_service,
+    reset_llm_service,
+)
+
 # 예측 서비스
 from reddit_insight.dashboard.services.prediction_service import (
     PredictionService,
@@ -95,6 +106,14 @@ __all__ = [
     "RecommendationView",
     "OpportunityView",
     "get_insight_service",
+    # LLM service
+    "LLMService",
+    "LLMSummaryView",
+    "LLMCategoryView",
+    "LLMSentimentView",
+    "LLMInsightView",
+    "get_llm_service",
+    "reset_llm_service",
     # Prediction service
     "PredictionService",
     "PredictionView",
