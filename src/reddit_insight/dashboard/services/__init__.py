@@ -9,6 +9,18 @@ from reddit_insight.dashboard.services.anomaly_service import (
     get_anomaly_service,
 )
 
+# 캐시 서비스
+from reddit_insight.dashboard.services.cache_service import (
+    CacheService,
+    get_cache_service,
+    hash_texts,
+    make_analysis_key,
+    make_anomaly_key,
+    make_prediction_key,
+    make_topics_key,
+    reset_cache_service,
+)
+
 # 클러스터링 서비스
 from reddit_insight.dashboard.services.cluster_service import (
     ClusterAnalysisView,
@@ -61,6 +73,15 @@ __all__ = [
     "AnomalyView",
     "AnomalyPointView",
     "get_anomaly_service",
+    # Cache service
+    "CacheService",
+    "get_cache_service",
+    "reset_cache_service",
+    "make_analysis_key",
+    "make_prediction_key",
+    "make_topics_key",
+    "make_anomaly_key",
+    "hash_texts",
     # Cluster service
     "ClusterService",
     "ClusterAnalysisView",
