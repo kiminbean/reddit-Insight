@@ -46,7 +46,7 @@ None
 - [x] **Phase 24: Report Export Enhancement** - PDF/Excel 내보내기, 새 템플릿
 - [x] **Phase 25: Analysis Accuracy** - 키워드 추출 개선, 감성 분석 튜닝
 - [x] **Phase 26: LLM Infrastructure** - API 통합 설정, 프롬프트 엔지니어링
-- [ ] **Phase 27: LLM Analysis Features** - 시맨틱 요약, AI 카테고리화
+- [x] **Phase 27: LLM Analysis Features** - 시맨틱 요약, AI 카테고리화
 - [ ] **Phase 28: Multi-subreddit Comparison** - 크로스 서브레딧 벤치마킹
 - [ ] **Phase 29: Real-time Monitoring** - WebSocket/폴링, 라이브 대시보드
 - [ ] **Phase 30: Alerts & Notifications** - 이메일/웹훅 알림, 임계값 트리거
@@ -343,7 +343,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 27-01: LLMAnalyzer, LLMService, UI
+- [x] 27-01: LLMAnalyzer, LLMService, UI
 
 #### Phase 28: Multi-subreddit Comparison
 **Goal**: 크로스 서브레딧 분석 및 벤치마킹
