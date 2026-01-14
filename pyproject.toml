@@ -49,6 +49,9 @@ dependencies = [
     "jinja2>=3.1.0",
     # Scheduler dependencies
     "apscheduler>=3.10.0",
+    # Report export dependencies
+    "weasyprint>=60.0",
+    "openpyxl>=3.1.0",
 ]
 
 [project.optional-dependencies]
