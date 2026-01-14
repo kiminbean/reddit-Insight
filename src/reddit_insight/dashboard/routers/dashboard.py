@@ -123,8 +123,21 @@ async def analysis_detail(
     """
     templates = get_templates(request)
 
-    # DB에서 분석 결과 로드
-    analysis_data = load_analysis_by_id(analysis_id)
+    # DB에서 분석 결과 로드 (연결 오류 처리)
+    try:
+        analysis_data = load_analysis_by_id(analysis_id)
+    except (ConnectionError, OSError) as e:
+        # 데이터베이스 연결 오류 시 500 상태로 에러 페이지 렌더링
+        context = {
+            "request": request,
+            "page_title": "Service Unavailable",
+            "analysis": None,
+            "analysis_id": analysis_id,
+            "error_message": f"Unable to load analysis data. Please try again later. (Error: {type(e).__name__})",
+        }
+        return templates.TemplateResponse(
+            request, "dashboard/analysis_detail.html", context, status_code=500
+        )
 
     if analysis_data is None:
         # 404 상태로 에러 페이지 렌더링
