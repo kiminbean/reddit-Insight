@@ -101,6 +101,42 @@ class Settings(BaseSettings):
         description="LLM 응답 캐시 TTL (초, 기본 24시간)",
     )
 
+    # Alert & Notification
+    smtp_host: str | None = Field(
+        default=None,
+        description="SMTP 서버 호스트 (이메일 알림용)",
+    )
+    smtp_port: int = Field(
+        default=587,
+        description="SMTP 서버 포트",
+    )
+    smtp_username: str | None = Field(
+        default=None,
+        description="SMTP 인증 사용자명",
+    )
+    smtp_password: str | None = Field(
+        default=None,
+        description="SMTP 인증 비밀번호",
+    )
+    smtp_from_addr: str | None = Field(
+        default=None,
+        description="발신자 이메일 주소",
+    )
+    alert_webhook_url: str | None = Field(
+        default=None,
+        description="기본 웹훅 URL (Slack, Discord 등)",
+    )
+    alert_email_recipients: str | None = Field(
+        default=None,
+        description="알림 이메일 수신자 목록 (쉼표로 구분)",
+    )
+
+    def get_alert_email_recipients(self) -> list[str]:
+        """알림 이메일 수신자 목록을 반환한다."""
+        if not self.alert_email_recipients:
+            return []
+        return [addr.strip() for addr in self.alert_email_recipients.split(",") if addr.strip()]
+
 
 @lru_cache
 def get_settings() -> Settings:
