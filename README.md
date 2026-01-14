@@ -1,10 +1,17 @@
 # Reddit Insight
 
+![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg)
+![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg)
+
 Reddit 데이터 수집 및 분석 도구 - 키워드 기반 게시물 수집, 트렌드 분석, 수요 발견, 경쟁 분석, 비즈니스 인사이트 추출
 
 ## 개요
 
 Reddit Insight는 Reddit 커뮤니티의 데이터를 수집하고 분석하여 비즈니스 인사이트를 추출하는 종합 분석 도구입니다. 트렌드 분석, 수요 패턴 발견, 경쟁사 분석을 통해 실행 가능한 비즈니스 기회를 식별합니다.
+
+**핵심 가치**: 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
 
 ## 주요 기능
 
@@ -44,6 +51,12 @@ Reddit Insight는 Reddit 커뮤니티의 데이터를 수집하고 분석하여 
 - ML 분석 결과 인터랙티브 차트
 - 마크다운 리포트 생성
 - CLI 기반 분석 결과 출력
+
+### v2.0 신규 기능
+- API 키 인증 및 Rate Limiting
+- 백그라운드 분석 작업
+- 실시간 분석 상태 추적
+- 종합 문서화 (API, 아키텍처, 사용자 가이드)
 
 ## 설치
 
@@ -129,6 +142,16 @@ reddit-insight dashboard start --reload
 - **클러스터링**: `/dashboard/clusters` - 유사 문서 자동 그룹화
 
 자세한 사용법은 [대시보드 가이드](docs/dashboard-guide.md)를 참조하세요.
+
+## 문서
+
+| 문서 | 설명 |
+|------|------|
+| [사용자 가이드](docs/user-guide.md) | 설치부터 사용까지 전체 가이드 |
+| [API 레퍼런스](docs/api-reference.md) | REST API 엔드포인트 상세 문서 |
+| [아키텍처](docs/architecture.md) | 시스템 설계 및 컴포넌트 구조 |
+| [대시보드 가이드](docs/dashboard-guide.md) | 웹 대시보드 사용법 |
+| [CLI 레퍼런스](docs/cli-reference.md) | CLI 명령어 상세 설명 |
 
 ## CLI 명령어
 
