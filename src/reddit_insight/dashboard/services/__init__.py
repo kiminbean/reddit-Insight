@@ -30,6 +30,15 @@ from reddit_insight.dashboard.services.cluster_service import (
     get_cluster_service,
 )
 
+# 비교 분석 서비스
+from reddit_insight.dashboard.services.comparison_service import (
+    ComparisonService,
+    ComparisonView,
+    SubredditMetricsView,
+    get_comparison_service,
+    reset_comparison_service,
+)
+
 # 새 인사이트 서비스
 from reddit_insight.dashboard.services.insight_service import (
     InsightDetail,
@@ -99,6 +108,12 @@ __all__ = [
     "ClusterView",
     "ClusterKeywordView",
     "get_cluster_service",
+    # Comparison service
+    "ComparisonService",
+    "ComparisonView",
+    "SubredditMetricsView",
+    "get_comparison_service",
+    "reset_comparison_service",
     # Insight service
     "InsightService",
     "InsightView",
