@@ -71,6 +71,36 @@ class Settings(BaseSettings):
         description="데이터베이스 연결 URL",
     )
 
+    # LLM API
+    llm_provider: Literal["claude", "openai"] = Field(
+        default="claude",
+        description="LLM 제공자 (claude 또는 openai)",
+    )
+    anthropic_api_key: str | None = Field(
+        default=None,
+        description="Anthropic API 키 (Claude 사용 시 필수)",
+    )
+    openai_api_key: str | None = Field(
+        default=None,
+        description="OpenAI API 키 (OpenAI 사용 시 필수)",
+    )
+    llm_model: str | None = Field(
+        default=None,
+        description="LLM 모델 이름 (미지정 시 기본값 사용)",
+    )
+    llm_rate_limit_rpm: int = Field(
+        default=60,
+        description="LLM API 분당 요청 수 제한",
+    )
+    llm_rate_limit_tpm: int = Field(
+        default=100000,
+        description="LLM API 분당 토큰 수 제한",
+    )
+    llm_cache_ttl: int = Field(
+        default=86400,
+        description="LLM 응답 캐시 TTL (초, 기본 24시간)",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
