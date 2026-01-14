@@ -2,6 +2,7 @@
 
 from reddit_insight.dashboard.routers import (
     alerts,
+    api,
     clusters,
     comparison,
     competition,
@@ -9,6 +10,7 @@ from reddit_insight.dashboard.routers import (
     demands,
     insights,
     live,
+    llm,
     search,
     topics,
     trends,
@@ -16,6 +18,7 @@ from reddit_insight.dashboard.routers import (
 
 __all__ = [
     "alerts",
+    "api",
     "clusters",
     "comparison",
     "competition",
@@ -23,6 +26,7 @@ __all__ = [
     "demands",
     "insights",
     "live",
+    "llm",
     "search",
     "topics",
     "trends",
