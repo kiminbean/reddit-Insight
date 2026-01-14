@@ -158,11 +158,23 @@ class TestPredictionEndpoints:
     def test_get_prediction_partial(self, api_client: TestClient) -> None:
         """GET /dashboard/trends/predict-partial/{keyword} - 예측 HTML partial."""
         with patch(
-            "reddit_insight.dashboard.services.prediction_service.get_prediction_service"
+            "reddit_insight.dashboard.routers.trends.get_prediction_service"
         ) as mock_service:
-            mock_result = MagicMock()
-            mock_result.forecast = []
-            mock_result.confidence_level = 0.95
+            # PredictionView 데이터클래스를 사용하여 실제 객체 생성
+            from reddit_insight.dashboard.services.prediction_service import PredictionView
+
+            mock_result = PredictionView(
+                keyword="test",
+                historical_dates=["2024-01-01", "2024-01-02"],
+                historical_values=[10.0, 12.0],
+                forecast_dates=["2024-01-03", "2024-01-04"],
+                forecast_values=[14.0, 16.0],
+                confidence_lower=[12.0, 14.0],
+                confidence_upper=[16.0, 18.0],
+                model_name="TestModel",
+                metrics={"MAE": 1.0, "RMSE": 1.5, "MAPE": 5.0},
+                confidence_level=0.95,
+            )
             mock_service.return_value.predict_keyword_trend.return_value = mock_result
 
             response = api_client.get("/dashboard/trends/predict-partial/test")
@@ -252,7 +264,7 @@ class TestDemandsEndpoints:
 
     def test_get_demand_detail(self, api_client: TestClient) -> None:
         """GET /dashboard/demands/{demand_id} - 수요 상세 페이지."""
-        with patch("reddit_insight.dashboard.data_store.get_current_data") as mock:
+        with patch("reddit_insight.dashboard.routers.demands.get_current_data") as mock:
             mock_data = MagicMock()
             mock_data.demands = {
                 "top_opportunities": [
@@ -329,15 +341,24 @@ class TestInsightsEndpoints:
     def test_get_insight_detail_with_valid_id(self, api_client: TestClient) -> None:
         """GET /dashboard/insights/{id} - 유효한 ID로 상세 조회."""
         with patch(
-            "reddit_insight.dashboard.services.insight_service.get_insight_service"
-        ) as mock_service:
-            mock_insight = MagicMock()
-            mock_insight.id = "test"
-            mock_insight.title = "Test Insight"
-            mock_insight.__dict__ = {"id": "test", "title": "Test Insight"}
-            mock_service.return_value.get_insight_detail.return_value = mock_insight
+            "reddit_insight.dashboard.services.insight_service.get_current_data"
+        ) as mock_data:
+            # get_current_data가 인사이트가 있는 데이터를 반환하도록 mock
+            mock_data.return_value = MagicMock(
+                insights=[
+                    {
+                        "type": "opportunity",
+                        "title": "Test Insight",
+                        "description": "Test Description",
+                        "confidence": 0.85,
+                        "evidence": ["evidence1"],
+                        "related_entities": [],
+                        "related_demands": [],
+                    }
+                ]
+            )
 
-            response = api_client.get("/dashboard/insights/test")
+            response = api_client.get("/dashboard/insights/insight_000")
             assert response.status_code == 200
 
     def test_get_insight_detail_with_invalid_id(self, api_client: TestClient) -> None:
@@ -353,14 +374,20 @@ class TestInsightsEndpoints:
     def test_get_score_breakdown_chart(self, api_client: TestClient) -> None:
         """GET /dashboard/insights/chart/score-breakdown/{id} - 스코어 차트."""
         with patch(
-            "reddit_insight.dashboard.services.insight_service.get_insight_service"
-        ) as mock_service:
-            mock_service.return_value.get_insight_score_breakdown.return_value = {
-                "labels": ["A", "B", "C"],
-                "scores": [80, 70, 60],
-            }
+            "reddit_insight.dashboard.services.insight_service.get_current_data"
+        ) as mock_data:
+            # get_current_data가 인사이트가 있는 데이터를 반환하도록 mock
+            mock_data.return_value = MagicMock(
+                insights=[
+                    {
+                        "type": "opportunity",
+                        "title": "Test Insight",
+                        "confidence": 0.85,
+                    }
+                ]
+            )
 
-            response = api_client.get("/dashboard/insights/chart/score-breakdown/test")
+            response = api_client.get("/dashboard/insights/chart/score-breakdown/insight_000")
             assert response.status_code == 200
 
     def test_get_grade_distribution_chart(self, api_client: TestClient) -> None:
@@ -635,9 +662,11 @@ class TestReportEndpoints:
     def test_download_report_no_data(self, api_client: TestClient) -> None:
         """GET /dashboard/insights/report/download - 데이터 없을 때 404."""
         with patch(
-            "reddit_insight.dashboard.services.report_service.get_report_service"
-        ) as mock_service:
-            mock_service.return_value.generate_markdown_report.return_value = None
+            "reddit_insight.dashboard.services.report_service.get_current_data"
+        ) as mock_data:
+            # get_current_data가 None을 반환하면 generate_report가 None을 반환하고
+            # 결과적으로 generate_markdown_report도 None을 반환하여 404
+            mock_data.return_value = None
 
             response = api_client.get("/dashboard/insights/report/download")
             assert response.status_code == 404

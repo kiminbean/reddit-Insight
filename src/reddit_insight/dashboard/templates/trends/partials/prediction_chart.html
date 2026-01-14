@@ -94,7 +94,7 @@
 
     // 예측 데이터를 Chart.js 형식으로 준비
     const chartData = {
-        labels: {{ prediction.historical_dates + prediction.forecast_dates | tojson }},
+        labels: {{ (prediction.historical_dates + prediction.forecast_dates) | tojson }},
         datasets: [
             {
                 label: '{{ keyword }} (Historical)',
