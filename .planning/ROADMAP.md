@@ -48,7 +48,7 @@ None
 - [x] **Phase 26: LLM Infrastructure** - API 통합 설정, 프롬프트 엔지니어링
 - [x] **Phase 27: LLM Analysis Features** - 시맨틱 요약, AI 카테고리화
 - [x] **Phase 28: Multi-subreddit Comparison** - 크로스 서브레딧 벤치마킹
-- [ ] **Phase 29: Real-time Monitoring** - WebSocket/폴링, 라이브 대시보드
+- [x] **Phase 29: Real-time Monitoring** - WebSocket/폴링, 라이브 대시보드
 - [ ] **Phase 30: Alerts & Notifications** - 이메일/웹훅 알림, 임계값 트리거
 - [ ] **Phase 31: Final Polish & Testing** - E2E 테스트, 성능 최적화
 
@@ -362,7 +362,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 29-01: SubredditMonitor, SSE 스트림, 라이브 UI
+- [x] 29-01: SubredditMonitor, SSE 스트림, 라이브 UI
 
 #### Phase 30: Alerts & Notifications
 **Goal**: 이메일/웹훅 알림, 임계값 트리거 시스템
@@ -418,6 +418,6 @@ Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (
 | 26. LLM Infrastructure | v2.0 | 1/1 | Complete | 2026-01-14 |
 | 27. LLM Analysis Features | v2.0 | 1/1 | Complete | 2026-01-14 |
 | 28. Multi-subreddit Comparison | v2.0 | 1/1 | Complete | 2026-01-14 |
-| 29. Real-time Monitoring | v2.0 | 0/1 | Not started | - |
+| 29. Real-time Monitoring | v2.0 | 1/1 | Complete | 2026-01-14 |
 | 30. Alerts & Notifications | v2.0 | 0/1 | Not started | - |
 | 31. Final Polish & Testing | v2.0 | 0/? | Not started | - |

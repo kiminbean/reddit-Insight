@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-13)
 
 **Core value:** 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
-**Current focus:** Phase 27 - LLM Analysis Features (v2.0)
+**Current focus:** Phase 29 - Real-time Monitoring (v2.0)
 
 ## Current Position
 
-Phase: 27 of 31 (LLM Analysis Features)
-Plan: 27-01 COMPLETE
-Status: Phase complete, ready for Phase 28
-Last activity: 2026-01-14 — 27-01 complete (LLMAnalyzer, LLMService, LLM UI)
+Phase: 29 of 31 (Real-time Monitoring)
+Plan: 29-01 COMPLETE
+Status: Phase complete, ready for Phase 30
+Last activity: 2026-01-14 — 29-01 complete (SubredditMonitor, SSE stream, Live UI)
 
-Progress: ██████░░░░░░ 66% (8/12 v2.0 phases)
+Progress: ████████░░░░ 83% (10/12 v2.0 phases)
 
 ## Performance Metrics
 
@@ -40,7 +40,7 @@ Progress: ██████░░░░░░ 66% (8/12 v2.0 phases)
 | 11. Advanced Analytics | 4 | — | — |
 
 **Recent Trend:**
-- Last 5 plans: 23-01, 24-01, 25-01, 26-01, 27-01 (COMPLETE)
+- Last 5 plans: 25-01, 26-01, 27-01, 28-01, 29-01 (COMPLETE)
 - Trend: —
 
 ## Accumulated Context
@@ -101,7 +101,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: Phase 27-01 complete
+Stopped at: Phase 29-01 complete
 Resume file: None
 
 ### Roadmap Evolution
