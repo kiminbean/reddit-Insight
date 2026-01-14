@@ -180,7 +180,8 @@ class TestFullAnalysisFlow:
         self, e2e_client: TestClient, mock_analysis_data: dict[str, Any]
     ) -> None:
         """유효한 ID로 분석 상세 페이지에 접근한다."""
-        with patch("reddit_insight.dashboard.data_store.load_analysis_by_id") as mock_load:
+        # 라우터에서 import한 위치에서 패치해야 함
+        with patch("reddit_insight.dashboard.routers.dashboard.load_analysis_by_id") as mock_load:
             mock_data = MagicMock()
             mock_data.subreddit = mock_analysis_data["subreddit"]
             mock_data.keywords = mock_analysis_data["keywords"]
@@ -194,7 +195,7 @@ class TestFullAnalysisFlow:
 
     def test_analysis_detail_page_with_invalid_id_returns_404(self, e2e_client: TestClient) -> None:
         """잘못된 ID로 분석 상세 페이지 접근 시 404 반환."""
-        with patch("reddit_insight.dashboard.data_store.load_analysis_by_id") as mock_load:
+        with patch("reddit_insight.dashboard.routers.dashboard.load_analysis_by_id") as mock_load:
             mock_load.return_value = None
 
             response = e2e_client.get("/dashboard/analysis/9999")
@@ -212,7 +213,7 @@ class TestMLPredictionFlow:
     def test_prediction_endpoint_returns_chart_data(self, e2e_client: TestClient) -> None:
         """예측 엔드포인트가 차트 데이터를 반환한다."""
         with patch(
-            "reddit_insight.dashboard.services.prediction_service.get_prediction_service"
+            "reddit_insight.dashboard.routers.trends.get_prediction_service"
         ) as mock_service:
             mock_prediction = MagicMock()
             mock_prediction.to_chart_data.return_value = {
@@ -239,7 +240,7 @@ class TestMLPredictionFlow:
     def test_prediction_with_custom_parameters(self, e2e_client: TestClient) -> None:
         """커스텀 파라미터로 예측을 실행한다."""
         with patch(
-            "reddit_insight.dashboard.services.prediction_service.get_prediction_service"
+            "reddit_insight.dashboard.routers.trends.get_prediction_service"
         ) as mock_service:
             mock_prediction = MagicMock()
             mock_prediction.to_chart_data.return_value = {"labels": [], "datasets": []}
@@ -268,28 +269,36 @@ class TestTopicAnalysisFlow:
     def test_topic_analysis_endpoint_returns_data(self, e2e_client: TestClient) -> None:
         """토픽 분석 엔드포인트가 데이터를 반환한다."""
         with patch(
-            "reddit_insight.dashboard.services.topic_service.get_topic_service"
+            "reddit_insight.dashboard.routers.topics.get_topic_service"
         ) as mock_service:
             mock_result = MagicMock()
+            # to_chart_data()의 실제 반환 형식에 맞게 수정
             mock_result.to_chart_data.return_value = {
-                "topics": [
-                    {"id": 0, "label": "Topic 1", "keywords": ["word1", "word2"]},
-                    {"id": 1, "label": "Topic 2", "keywords": ["word3", "word4"]},
-                ],
-                "n_topics": 2,
-                "method": "lda",
+                "labels": ["Topic 0: word1", "Topic 1: word2"],
+                "datasets": [{"label": "Document Distribution", "data": [0.6, 0.4]}],
+                "metadata": {
+                    "n_topics": 2,
+                    "method": "lda",
+                    "overall_coherence": 0.5,
+                    "document_count": 100,
+                    "topics": [
+                        {"id": 0, "label": "word1", "keywords": [{"word": "word1", "weight": 0.5}]},
+                        {"id": 1, "label": "word2", "keywords": [{"word": "word2", "weight": 0.5}]},
+                    ],
+                },
             }
             mock_service.return_value.analyze_topics.return_value = mock_result
 
             response = e2e_client.get("/dashboard/topics/analyze?n_topics=5")
             assert response.status_code == 200
             data = response.json()
-            assert "topics" in data
+            assert "labels" in data
+            assert "metadata" in data
 
     def test_topic_distribution_endpoint(self, e2e_client: TestClient) -> None:
         """토픽 분포 엔드포인트가 파이 차트 데이터를 반환한다."""
         with patch(
-            "reddit_insight.dashboard.services.topic_service.get_topic_service"
+            "reddit_insight.dashboard.routers.topics.get_topic_service"
         ) as mock_service:
             mock_result = MagicMock()
             mock_result.topics = [
@@ -325,28 +334,36 @@ class TestClusterAnalysisFlow:
     def test_cluster_analysis_endpoint_returns_data(self, e2e_client: TestClient) -> None:
         """클러스터링 분석 엔드포인트가 데이터를 반환한다."""
         with patch(
-            "reddit_insight.dashboard.services.cluster_service.get_cluster_service"
+            "reddit_insight.dashboard.routers.clusters.get_cluster_service"
         ) as mock_service:
             mock_result = MagicMock()
+            # to_chart_data()의 실제 반환 형식에 맞게 수정
             mock_result.to_chart_data.return_value = {
-                "clusters": [
-                    {"id": 0, "label": "Cluster 1", "size": 30},
-                    {"id": 1, "label": "Cluster 2", "size": 25},
-                ],
-                "n_clusters": 2,
-                "method": "kmeans",
+                "labels": ["Cluster 0: API", "Cluster 1: Integration"],
+                "datasets": [{"label": "Document Count", "data": [30, 25]}],
+                "metadata": {
+                    "n_clusters": 2,
+                    "method": "kmeans",
+                    "silhouette_score": 0.5,
+                    "document_count": 55,
+                    "clusters": [
+                        {"id": 0, "label": "API", "size": 30, "keywords": []},
+                        {"id": 1, "label": "Integration", "size": 25, "keywords": []},
+                    ],
+                },
             }
             mock_service.return_value.cluster_documents.return_value = mock_result
 
             response = e2e_client.get("/dashboard/clusters/analyze?n_clusters=5")
             assert response.status_code == 200
             data = response.json()
-            assert "clusters" in data
+            assert "labels" in data
+            assert "metadata" in data
 
     def test_cluster_detail_page_with_valid_id(self, e2e_client: TestClient) -> None:
         """유효한 클러스터 ID로 상세 페이지에 접근한다."""
         with patch(
-            "reddit_insight.dashboard.services.cluster_service.get_cluster_service"
+            "reddit_insight.dashboard.routers.clusters.get_cluster_service"
         ) as mock_service:
             mock_cluster = MagicMock()
             mock_cluster.id = 0
@@ -364,7 +381,7 @@ class TestClusterAnalysisFlow:
     def test_cluster_detail_page_with_invalid_id(self, e2e_client: TestClient) -> None:
         """잘못된 클러스터 ID로 상세 페이지 접근 시 에러 표시."""
         with patch(
-            "reddit_insight.dashboard.services.cluster_service.get_cluster_service"
+            "reddit_insight.dashboard.routers.clusters.get_cluster_service"
         ) as mock_service:
             mock_service.return_value.get_cluster_by_id.return_value = None
             mock_service.return_value.get_cluster_documents.return_value = []
@@ -386,7 +403,7 @@ class TestAnomalyDetectionFlow:
     def test_anomaly_detection_endpoint_returns_data(self, e2e_client: TestClient) -> None:
         """이상 탐지 엔드포인트가 데이터를 반환한다."""
         with patch(
-            "reddit_insight.dashboard.services.anomaly_service.get_anomaly_service"
+            "reddit_insight.dashboard.routers.trends.get_anomaly_service"
         ) as mock_service:
             mock_result = MagicMock()
             mock_result.to_chart_data.return_value = {
@@ -430,28 +447,30 @@ class TestInsightsFlow:
     def test_insight_detail_page_with_valid_id(self, e2e_client: TestClient) -> None:
         """유효한 인사이트 ID로 상세 페이지에 접근한다."""
         with patch(
-            "reddit_insight.dashboard.services.insight_service.get_insight_service"
-        ) as mock_service:
-            mock_insight = MagicMock()
-            mock_insight.id = "test_insight"
-            mock_insight.title = "Test Insight"
-            mock_insight.description = "Test Description"
-            mock_insight.confidence = 0.8
-            mock_insight.__dict__ = {
-                "id": "test_insight",
-                "title": "Test Insight",
-                "description": "Test Description",
-                "confidence": 0.8,
-            }
-            mock_service.return_value.get_insight_detail.return_value = mock_insight
+            "reddit_insight.dashboard.services.insight_service.get_current_data"
+        ) as mock_data:
+            # get_current_data가 인사이트가 있는 데이터를 반환하도록 mock
+            mock_data.return_value = MagicMock(
+                insights=[
+                    {
+                        "type": "opportunity",
+                        "title": "Test Insight",
+                        "description": "Test Description",
+                        "confidence": 0.85,
+                        "evidence": ["evidence1"],
+                        "related_entities": [],
+                        "related_demands": [],
+                    }
+                ]
+            )
 
-            response = e2e_client.get("/dashboard/insights/test_insight")
+            response = e2e_client.get("/dashboard/insights/insight_000")
             assert response.status_code == 200
 
     def test_insight_detail_page_with_invalid_id_returns_404(self, e2e_client: TestClient) -> None:
         """잘못된 인사이트 ID로 상세 페이지 접근 시 404 반환."""
         with patch(
-            "reddit_insight.dashboard.services.insight_service.get_insight_service"
+            "reddit_insight.dashboard.routers.insights.get_insight_service"
         ) as mock_service:
             mock_service.return_value.get_insight_detail.return_value = None
 
@@ -484,7 +503,7 @@ class TestDemandsFlow:
         self, e2e_client: TestClient, mock_analysis_data: dict[str, Any]
     ) -> None:
         """유효한 수요 ID로 상세 페이지에 접근한다."""
-        with patch("reddit_insight.dashboard.data_store.get_current_data") as mock_get:
+        with patch("reddit_insight.dashboard.routers.demands.get_current_data") as mock_get:
             mock_data = MagicMock()
             mock_data.demands = mock_analysis_data["demands"]
             mock_get.return_value = mock_data
@@ -494,7 +513,7 @@ class TestDemandsFlow:
 
     def test_demand_detail_page_with_invalid_id_returns_404(self, e2e_client: TestClient) -> None:
         """잘못된 수요 ID로 상세 페이지 접근 시 404 반환."""
-        with patch("reddit_insight.dashboard.data_store.get_current_data") as mock_get:
+        with patch("reddit_insight.dashboard.routers.demands.get_current_data") as mock_get:
             mock_get.return_value = None
 
             response = e2e_client.get("/dashboard/demands/nonexistent")
@@ -531,9 +550,11 @@ class TestReportGenerationFlow:
     def test_report_download_without_data_returns_404(self, e2e_client: TestClient) -> None:
         """데이터가 없을 때 보고서 다운로드 시 404 반환."""
         with patch(
-            "reddit_insight.dashboard.services.report_service.get_report_service"
-        ) as mock_service:
-            mock_service.return_value.generate_markdown_report.return_value = None
+            "reddit_insight.dashboard.services.report_service.get_current_data"
+        ) as mock_data:
+            # get_current_data가 None을 반환하면 generate_report가 None을 반환하고
+            # 결과적으로 generate_markdown_report도 None을 반환하여 404
+            mock_data.return_value = None
 
             response = e2e_client.get("/dashboard/insights/report/download")
             assert response.status_code == 404
