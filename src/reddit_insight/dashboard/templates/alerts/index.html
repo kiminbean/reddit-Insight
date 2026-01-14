@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts{% endblock %}
+
+{% block page_title_display %}
+Alerts
+<span class="ml-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+    {{ stats.total_rules }} rules
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="px-4 sm:px-0 space-y-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">Total Rules</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total_rules }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">Active Rules</div>
+            <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ stats.enabled_rules }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">Alerts Sent</div>
+            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ stats.sent_count }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">Notifiers</div>
+            <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ notifiers|length }}</div>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Rules Panel (2/3 width) -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Create Rule Form -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Create Alert Rule</h3>
+                </div>
+                <div class="p-4">
+                    <form hx-post="/dashboard/alerts/rules"
+                          hx-target="#rules-list"
+                          hx-swap="afterbegin"
+                          hx-on::after-request="if(event.detail.successful) this.reset();">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Rule Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Rule Name
+                                </label>
+                                <input type="text"
+                                       id="name"
+                                       name="name"
+                                       required
+                                       placeholder="My Alert Rule"
+                                       class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            </div>
+
+                            <!-- Alert Type -->
+                            <div>
+                                <label for="alert_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Alert Type
+                                </label>
+                                <select id="alert_type"
+                                        name="alert_type"
+                                        required
+                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                    {% for type in alert_types %}
+                                    <option value="{{ type.value }}">{{ type.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Subreddit -->
+                            <div>
+                                <label for="subreddit" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Subreddit (optional)
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">r/</span>
+                                    <input type="text"
+                                           id="subreddit"
+                                           name="subreddit"
+                                           placeholder="python (leave empty for all)"
+                                           class="block w-full pl-8 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                </div>
+                            </div>
+
+                            <!-- Threshold -->
+                            <div>
+                                <label for="threshold" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Threshold
+                                </label>
+                                <input type="number"
+                                       id="threshold"
+                                       name="threshold"
+                                       required
+                                       step="0.1"
+                                       value="2.0"
+                                       class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            </div>
+
+                            <!-- Comparison -->
+                            <div>
+                                <label for="comparison" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Comparison
+                                </label>
+                                <select id="comparison"
+                                        name="comparison"
+                                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                                    <option value="gte">Greater than or equal (>=)</option>
+                                    <option value="gt">Greater than (>)</option>
+                                    <option value="lte">Less than or equal (<=)</option>
+                                    <option value="lt">Less than (<)</option>
+                                    <option value="eq">Equal (=)</option>
+                                </select>
+                            </div>
+
+                            <!-- Window Minutes -->
+                            <div>
+                                <label for="window_minutes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Time Window (minutes)
+                                </label>
+                                <input type="number"
+                                       id="window_minutes"
+                                       name="window_minutes"
+                                       value="60"
+                                       min="1"
+                                       class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            </div>
+
+                            <!-- Notifiers -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Notification Channels
+                                </label>
+                                <div class="flex flex-wrap gap-4">
+                                    {% for notifier_name in notifiers %}
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox"
+                                               name="notifiers"
+                                               value="{{ notifier_name }}"
+                                               {% if notifier_name == 'console' %}checked{% endif %}
+                                               class="rounded border-gray-300 text-primary-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700">
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300 capitalize">{{ notifier_name }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 flex justify-end">
+                            <button type="submit"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                Create Rule
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Rules List -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        Alert Rules
+                        <span class="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">({{ rules|length }})</span>
+                    </h3>
+                </div>
+                <div id="rules-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% if rules %}
+                        {% for rule in rules %}
+                        {% include "alerts/partials/rule_card.html" %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            </svg>
+                            <p class="mt-2 text-sm">No alert rules configured</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Create a rule to start receiving alerts</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (1/3 width) -->
+        <div class="space-y-6">
+            <!-- Test Alert -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Test Alert</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Send a test alert to verify your notification channels are working.
+                </p>
+                <form id="test-alert-form">
+                    <div class="mb-4">
+                        <label for="test-notifier" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Channel
+                        </label>
+                        <select id="test-notifier"
+                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            {% for notifier_name in notifiers %}
+                            <option value="{{ notifier_name }}">{{ notifier_name|capitalize }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button"
+                            onclick="sendTestAlert()"
+                            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                        </svg>
+                        Send Test
+                    </button>
+                </form>
+                <div id="test-result" class="mt-4 hidden"></div>
+            </div>
+
+            <!-- Alert History -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg">
+                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Alerts</h3>
+                    <button hx-get="/dashboard/alerts/history?limit=20"
+                            hx-target="#history-container"
+                            hx-swap="innerHTML"
+                            class="text-sm text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300">
+                        Refresh
+                    </button>
+                </div>
+                <div id="history-container" class="max-h-96 overflow-y-auto">
+                    {% include "alerts/partials/history_table.html" %}
+                </div>
+            </div>
+
+            <!-- Available Channels -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Available Channels</h3>
+                <div class="space-y-2">
+                    {% for notifier_name in notifiers %}
+                    <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-md">
+                        <div class="flex items-center">
+                            {% if notifier_name == 'email' %}
+                            <svg class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                            {% elif notifier_name == 'webhook' %}
+                            <svg class="h-5 w-5 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                            </svg>
+                            {% else %}
+                            <svg class="h-5 w-5 text-gray-500 mr-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            {% endif %}
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 capitalize">{{ notifier_name }}</span>
+                        </div>
+                        <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Active
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function sendTestAlert() {
+    const notifier = document.getElementById('test-notifier').value;
+    const resultDiv = document.getElementById('test-result');
+
+    resultDiv.className = 'mt-4 p-3 rounded-md text-sm';
+    resultDiv.innerHTML = '<span class="animate-pulse">Sending...</span>';
+    resultDiv.classList.remove('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('notifier', notifier);
+
+        const response = await fetch('/dashboard/alerts/test', {
+            method: 'POST',
+            body: formData,
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            resultDiv.className = 'mt-4 p-3 rounded-md text-sm bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+            resultDiv.innerHTML = '<span class="font-medium">Success!</span> ' + data.message;
+        } else {
+            resultDiv.className = 'mt-4 p-3 rounded-md text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+            resultDiv.innerHTML = '<span class="font-medium">Failed:</span> ' + data.message;
+        }
+    } catch (error) {
+        resultDiv.className = 'mt-4 p-3 rounded-md text-sm bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        resultDiv.innerHTML = '<span class="font-medium">Error:</span> ' + error.message;
+    }
+}
+</script>
+{% endblock %}

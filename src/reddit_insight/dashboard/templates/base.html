@@ -165,6 +165,13 @@
                     </svg>
                     Live
                 </a>
+                <a href="/dashboard/alerts"
+                   class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Alerts' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+                    <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                    </svg>
+                    Alerts
+                </a>
                 <hr class="my-2 border-gray-200 dark:border-gray-700">
                 <a href="/search"
                    class="flex items-center px-3 py-2.5 rounded-lg text-base font-medium transition-colors {% if page_title == 'Search' %}bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300{% else %}text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
@@ -241,6 +248,10 @@
                             <a href="/dashboard/live"
                                class="{% if page_title == 'Live' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
                                 Live
+                            </a>
+                            <a href="/dashboard/alerts"
+                               class="{% if page_title == 'Alerts' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
+                                Alerts
                             </a>
                             <a href="/search"
                                class="{% if page_title == 'Search' %}border-primary-500 text-gray-900 dark:text-white{% else %}border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-200{% endif %} inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors">
