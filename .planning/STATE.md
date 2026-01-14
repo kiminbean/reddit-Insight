@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-13)
 
 **Core value:** 관심사를 비즈니스 모델로 연결하는 실행 가능한 인사이트
-**Current focus:** Ready for next milestone
+**Current focus:** Phase 20 - Tech Debt Cleanup (v2.0)
 
 ## Current Position
 
-Phase: — (No active milestone)
-Plan: —
-Status: **v1.1 SHIPPED** — Awaiting next milestone
-Last activity: 2026-01-14 — v1.1 milestone archived
+Phase: 20 of 31 (Tech Debt Cleanup)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-01-14 — Milestone v2.0 created
 
-Progress: v1.0 + v1.1 COMPLETE (19 phases, 45 plans)
+Progress: ░░░░░░░░░░░░ 0% (0/12 v2.0 phases)
 
 ## Performance Metrics
 
@@ -101,7 +101,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-14
-Stopped at: v1.1 milestone archived, ready for next milestone
+Stopped at: Milestone v2.0 initialization
 Resume file: None
 
 ### Roadmap Evolution
@@ -110,6 +110,7 @@ Resume file: None
 - Milestone v1.1 created: Dashboard & ML Integration, 8 phases (Phase 12-19)
 - Phase 12-19 계획 작성 완료: 각 phase에 1개 plan 배정
 - **v1.1 SHIPPED** (2026-01-14): Archived to milestones/v1.1-ROADMAP.md
+- **Milestone v2.0 created** (2026-01-14): Full Platform, 12 phases (Phase 20-31)
 
 ## Shipped Milestones
 

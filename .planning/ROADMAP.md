@@ -4,10 +4,11 @@
 
 Reddit 데이터 수집부터 비즈니스 인사이트 도출까지의 전체 파이프라인을 구축한다. 먼저 데이터 수집 인프라(API + 스크래핑)를 구축하고, 분석 엔진(트렌드, 수요, 경쟁)을 순차적으로 개발한 후, 이를 비즈니스 모델로 연결하는 인사이트 레이어를 추가한다. 최종적으로 웹 대시보드와 리포트 기능으로 결과를 제공한다.
 
-## Completed Milestones
+## Milestones
 
 - ✅ [v1.0 MVP](milestones/v1.0-ROADMAP.md) (Phases 1-11) — SHIPPED 2026-01-14
 - ✅ [v1.1 Dashboard & ML Integration](milestones/v1.1-ROADMAP.md) (Phases 12-19) — SHIPPED 2026-01-14
+- 🚧 **v2.0 Full Platform** — Phases 20-31 (in progress)
 
 ## Domain Expertise
 
@@ -38,6 +39,18 @@ None
 - [x] **Phase 17: Text Clustering UI** - 클러스터링 결과 시각화
 - [x] **Phase 18: Dashboard Polish** - UI/UX 개선, 반응형 디자인
 - [x] **Phase 19: Integration Testing** - E2E 테스트, 성능 최적화
+- [ ] **Phase 20: Tech Debt Cleanup** - E2E 테스트 수정, 코드 리팩토링
+- [ ] **Phase 21: Documentation** - API 문서, 아키텍처 문서, 사용자 가이드
+- [ ] **Phase 22: Dashboard Performance** - 캐싱, 페이지네이션, 지연 로딩
+- [ ] **Phase 23: UX Improvements** - 내비게이션, 시각화, 접근성
+- [ ] **Phase 24: Report Export Enhancement** - PDF/Excel 내보내기, 새 템플릿
+- [ ] **Phase 25: Analysis Accuracy** - 키워드 추출 개선, 감성 분석 튜닝
+- [ ] **Phase 26: LLM Infrastructure** - API 통합 설정, 프롬프트 엔지니어링
+- [ ] **Phase 27: LLM Analysis Features** - 시맨틱 요약, AI 카테고리화
+- [ ] **Phase 28: Multi-subreddit Comparison** - 크로스 서브레딧 벤치마킹
+- [ ] **Phase 29: Real-time Monitoring** - WebSocket/폴링, 라이브 대시보드
+- [ ] **Phase 30: Alerts & Notifications** - 이메일/웹훅 알림, 임계값 트리거
+- [ ] **Phase 31: Final Polish & Testing** - E2E 테스트, 성능 최적화
 
 ## Phase Details
 
@@ -251,29 +264,160 @@ Plans:
 Plans:
 - [x] 19-01: Integration Testing & Performance Optimization
 
+---
+
+### 🚧 v2.0 Full Platform (In Progress)
+
+**Milestone Goal:** 프로덕션 레벨 완성 - LLM 기반 고급 분석, 실시간 모니터링, 멀티 서브레딧 비교
+
+#### Phase 20: Tech Debt Cleanup
+**Goal**: v1.1에서 발생한 기술 부채 해결 - E2E 테스트 수정, 코드 리팩토링
+**Depends on**: Phase 19 (v1.1 complete)
+**Research**: Unlikely (internal patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 20-01: TBD (run /gsd:plan-phase 20 to break down)
+
+#### Phase 21: Documentation
+**Goal**: API 문서, 아키텍처 문서, 사용자 가이드 작성
+**Depends on**: Phase 20
+**Research**: Unlikely (established patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 21-01: TBD
+
+#### Phase 22: Dashboard Performance
+**Goal**: 캐싱, 페이지네이션, 지연 로딩으로 대시보드 성능 최적화
+**Depends on**: Phase 21
+**Research**: Unlikely (internal patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 22-01: TBD
+
+#### Phase 23: UX Improvements
+**Goal**: 내비게이션, 시각화, 접근성 개선
+**Depends on**: Phase 22
+**Research**: Unlikely (internal patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 23-01: TBD
+
+#### Phase 24: Report Export Enhancement
+**Goal**: PDF/Excel 내보내기, 새 리포트 템플릿
+**Depends on**: Phase 23
+**Research**: Likely (PDF generation libraries)
+**Research topics**: Python PDF 생성 (reportlab, weasyprint), Excel 생성 (openpyxl)
+**Plans**: TBD
+
+Plans:
+- [ ] 24-01: TBD
+
+#### Phase 25: Analysis Accuracy
+**Goal**: 키워드 추출 개선, 감성 분석 튜닝
+**Depends on**: Phase 24
+**Research**: Likely (NLP improvements)
+**Research topics**: KeyBERT, 감성 분석 모델 fine-tuning
+**Plans**: TBD
+
+Plans:
+- [ ] 25-01: TBD
+
+#### Phase 26: LLM Infrastructure
+**Goal**: LLM API 통합 설정, 프롬프트 엔지니어링
+**Depends on**: Phase 25
+**Research**: Likely (external API)
+**Research topics**: Anthropic Claude API, OpenAI API, rate limiting, caching strategies
+**Plans**: TBD
+
+Plans:
+- [ ] 26-01: TBD
+
+#### Phase 27: LLM Analysis Features
+**Goal**: 시맨틱 요약, AI 카테고리화 기능 구현
+**Depends on**: Phase 26
+**Research**: Unlikely (uses Phase 26 infrastructure)
+**Plans**: TBD
+
+Plans:
+- [ ] 27-01: TBD
+
+#### Phase 28: Multi-subreddit Comparison
+**Goal**: 크로스 서브레딧 분석 및 벤치마킹
+**Depends on**: Phase 27
+**Research**: Unlikely (internal patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 28-01: TBD
+
+#### Phase 29: Real-time Monitoring
+**Goal**: WebSocket/폴링, 라이브 대시보드 구현
+**Depends on**: Phase 28
+**Research**: Likely (real-time architecture)
+**Research topics**: FastAPI WebSocket, Server-Sent Events, polling strategies
+**Plans**: TBD
+
+Plans:
+- [ ] 29-01: TBD
+
+#### Phase 30: Alerts & Notifications
+**Goal**: 이메일/웹훅 알림, 임계값 트리거 시스템
+**Depends on**: Phase 29
+**Research**: Likely (external services)
+**Research topics**: Email integration (SMTP, SendGrid), Webhook patterns
+**Plans**: TBD
+
+Plans:
+- [ ] 30-01: TBD
+
+#### Phase 31: Final Polish & Testing
+**Goal**: 최종 E2E 테스트, 성능 최적화, 문서 업데이트
+**Depends on**: Phase 30
+**Research**: Unlikely (established patterns)
+**Plans**: TBD
+
+Plans:
+- [ ] 31-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (v1.1)
+Phases execute in numeric order: 1 → ... → 11 (v1.0) → 12 → ... → 19 (v1.1) → 20 → ... → 31 (v2.0)
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Foundation | 2/2 | Complete | 2026-01-13 |
-| 2. Reddit API Integration | 3/3 | Complete | 2026-01-13 |
-| 3. Web Scraping Fallback | 3/3 | Complete | 2026-01-13 |
-| 4. Data Storage & Pipeline | 3/3 | Complete | 2026-01-13 |
-| 5. Trend Analysis Engine | 4/4 | Complete | 2026-01-13 |
-| 6. Demand Discovery | 3/3 | Complete | 2026-01-13 |
-| 7. Competitive Analysis | 3/3 | Complete | 2026-01-13 |
-| 8. Business Model Insights | 3/3 | Complete | 2026-01-13 |
-| 9. Web Dashboard | 5/5 | Complete | 2026-01-13 |
-| 10. Report Export & Polish | 4/4 | Complete | 2026-01-13 |
-| 11. Advanced Analytics | 4/4 | Complete | 2026-01-14 |
-| 12. Dashboard Data Integration | 1/1 | Complete | 2026-01-14 |
-| 13. Recent Analyses | 1/1 | Complete | 2026-01-14 |
-| 14. Trend Prediction UI | 1/1 | Complete | 2026-01-14 |
-| 15. Anomaly Detection UI | 1/1 | Complete | 2026-01-14 |
-| 16. Topic Modeling UI | 1/1 | Complete | 2026-01-14 |
-| 17. Text Clustering UI | 1/1 | Complete | 2026-01-14 |
-| 18. Dashboard Polish | 1/1 | Complete | 2026-01-14 |
-| 19. Integration Testing | 1/1 | Complete | 2026-01-14 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Foundation | v1.0 | 2/2 | Complete | 2026-01-13 |
+| 2. Reddit API Integration | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 3. Web Scraping Fallback | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 4. Data Storage & Pipeline | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 5. Trend Analysis Engine | v1.0 | 4/4 | Complete | 2026-01-13 |
+| 6. Demand Discovery | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 7. Competitive Analysis | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 8. Business Model Insights | v1.0 | 3/3 | Complete | 2026-01-13 |
+| 9. Web Dashboard | v1.0 | 5/5 | Complete | 2026-01-13 |
+| 10. Report Export & Polish | v1.0 | 4/4 | Complete | 2026-01-13 |
+| 11. Advanced Analytics | v1.0 | 4/4 | Complete | 2026-01-14 |
+| 12. Dashboard Data Integration | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 13. Recent Analyses | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 14. Trend Prediction UI | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 15. Anomaly Detection UI | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 16. Topic Modeling UI | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 17. Text Clustering UI | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 18. Dashboard Polish | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 19. Integration Testing | v1.1 | 1/1 | Complete | 2026-01-14 |
+| 20. Tech Debt Cleanup | v2.0 | 0/? | Not started | - |
+| 21. Documentation | v2.0 | 0/? | Not started | - |
+| 22. Dashboard Performance | v2.0 | 0/? | Not started | - |
+| 23. UX Improvements | v2.0 | 0/? | Not started | - |
+| 24. Report Export Enhancement | v2.0 | 0/? | Not started | - |
+| 25. Analysis Accuracy | v2.0 | 0/? | Not started | - |
+| 26. LLM Infrastructure | v2.0 | 0/? | Not started | - |
+| 27. LLM Analysis Features | v2.0 | 0/? | Not started | - |
+| 28. Multi-subreddit Comparison | v2.0 | 0/? | Not started | - |
+| 29. Real-time Monitoring | v2.0 | 0/? | Not started | - |
+| 30. Alerts & Notifications | v2.0 | 0/? | Not started | - |
+| 31. Final Polish & Testing | v2.0 | 0/? | Not started | - |
